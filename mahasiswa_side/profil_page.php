@@ -69,10 +69,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="d-flex ms-auto">
-        <a href="home_page.php" class="nav-link text-white">Beranda</a>
+        <a href="home_mhs.php" class="nav-link text-white">Beranda</a>
         <!-- Hapus class 'fw-bold' agar tidak tebal -->
         <a href="#" class="nav-link text-white text-decoration-underline">Profil</a>
-        <a href="landing_page.php" class="nav-link text-white">Logout</a>
+        <a href="../landing_page.php">Logout</a>      
       </div>
     </div>
   </nav>
