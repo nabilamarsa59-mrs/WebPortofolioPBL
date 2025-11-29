@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoliKarya - Portofolio PBL Polibatam</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #001F3F;
+            --accent-color: #00bcd4;
+            --accent-hover: #0097a7;
+            --light-color: #ffffff;
+            --text-light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: whitesmoke;
+            color: var(--text-light);
+            padding-top: 76px; /* Menghindari konten tertutup navbar */
+        }
+
+        /* --- Custom Navbar Styles --- */
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--light-color) !important;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+            margin-right: 15px;
+            transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+
+        .dropdown-menu {
+            background-color: var(--secondary-color);
+            border: none;
+        }
+
+        .dropdown-item {
+            color: var(--text-light);
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--accent-color);
+            color: var(--light-color);
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 5px 10px;
+        }
+
+        .search-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-light);
+            padding: 5px 10px;
+            width: 160px;
+            font-size: 0.9rem;
+        }
+
+        .search-input::placeholder {
+            color: #ddd;
+        }
+
+        .search-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-light);
+            transition: transform 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            background: url('bg-gedung.jpg') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--light-color);
+            position: relative;
+            margin-top: -76px; /* Mengompensasi padding body */
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 30, 100, 0.5);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content h1 {
+            font-weight: 700;
+            font-size: 3.5rem;
+        }
+
+        .hero-content span {
+            color: var(--accent-color);
+        }
+
+        /* --- Tentang Section --- */
+        .about {
+            background-color: whitesmoke;
+            color: #333;
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .about h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">WorkPiece</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#beranda">Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#tentang">Tentang</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Dropdown Profil -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Profil ▾
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="ProfilPage.php">Profil</a></li>
+                            <li><a class="dropdown-item" href="UploadProject.php">Proyek</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="LandingPage.php">Logout</a></li>
+                        </ul>
+                    </li>
+                    <!-- Search Bar -->
+                    <li class="nav-item ms-3">
+                        <form action="#" class="search-form">
+                            <input type="text" placeholder="Cari proyek atau nama..." class="search-input">
+                            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="beranda" class="hero">
+        <div class="hero-content">
+            <h1>Halo! Selamat datang di <span>WorkPiece</span></h1>
+            <p class="lead">Temukan proyek yang menarik!</p>
+        </div>
+    </section>
+
+    <!-- Tentang Section -->
+    <section id="tentang" class="about">
+        <div class="container">
+            <h2>Tentang</h2>
+            <p class="lead">Platform ini bertujuan untuk menjadi wadah utama bagi mahasiswa Polibatam dalam menampilkan karya dan proyek mereka, serta memberikan akses mudah bagi pengunjung untuk menjelajahi berbagai inovasi menarik.</p>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Kustom JS (jika diperlukan, untuk saat ini Bootstrap JS sudah menangani dropdown) -->
+    <script>
+        // Smooth scrolling untuk anchor link
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
