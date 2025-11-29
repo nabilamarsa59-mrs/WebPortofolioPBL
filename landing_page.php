@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorkPiece - Portofolio PBL Polibatam</title>
 
+    <!-- Google Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CDN -->
@@ -17,12 +19,15 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            color: #fff;
+            color: whitesmoke;
+            /* PADDING-TOP DIHAPUS DARI SINI */
             background-color: whitesmoke;
         }
 
+        /* --- Navbar --- */
         .navbar {
             background: rgba(0, 0, 60, 0.8) !important;
+            padding: 0.75rem 0;
             z-index: 1000;
         }
 
@@ -43,7 +48,10 @@
             color: #00ffff !important;
         }
 
-        .hero {
+        /* --- Hero Section --- */
+        #beranda {
+            /* TAMBAHKAN PADDING-TOP DI SINI UNTUK MENGATUR POSISI */
+            padding-top: 80px; 
             height: 100vh;
             background: url('bg-gedung.jpg') no-repeat center center/cover;
             position: relative;
@@ -116,7 +124,6 @@
 
         .feature-box i {
             color: #00bcd4;
-            /* Warna ikon */
         }
 
         .feature-box h4 {
@@ -133,10 +140,12 @@
 
         /* --- Responsif --- */
         @media (max-width: 768px) {
+            #beranda {
+                padding-top: 70px; /* Sedikit lebih kecil di mobile */
+            }
             .hero-content h1 {
                 font-size: 2.5rem;
             }
-
             .hero-content p {
                 font-size: 1.2rem;
             }
@@ -148,8 +157,8 @@
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">WorkPiece</a>
+        <div class="container">
+            <a class="navbar-brand ms-3" href="#">WorkPiece</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -187,7 +196,7 @@
                 proyek mereka, serta memberikan akses mudah bagi pengunjung untuk menjelajahi berbagai inovasi menarik.
             </p>
 
-            <div class="row g-4"> <!-- Bootstrap Grid, g-4 untuk gutter/spasi -->
+            <div class="row g-4">
                 <div class="col-md-4">
                     <div class="feature-box">
                         <i class="bi bi-lightbulb fs-1"></i>
@@ -217,7 +226,6 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // Kode JavaScript khusus Anda bisa ditulis di sini
-            // Contoh: console.log("Halaman telah dimuat");
         });
     </script>
 </body>
