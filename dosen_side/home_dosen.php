@@ -81,7 +81,7 @@
                     <li class="nav-item dropdown mx-2">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Profil</a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profil_page.php">Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="profil_dosen.php">Profil Saya</a></li>
                             <li><a class="dropdown-item" href="landing_page.php">Logout</a></li>
                         </ul>
                     </li>
