@@ -12,7 +12,6 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        /* ... (CSS Anda sebelumnya tetap sama) ... */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: whitesmoke;
@@ -68,7 +67,7 @@
 </head>
 
 <body>
-    <!-- Navbar (Tidak berubah) -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0,0,60,0.85)">
         <div class="container-fluid px-5">
             <a class="navbar-brand fw-bold" href="#">WorkPiece</a>
@@ -90,7 +89,7 @@
                         <form class="d-flex" role="search">
                             <input class="form-control form-control-sm me-2" type="search" id="searchInput"
                                 placeholder="Cari NIM atau Nama...">
-                            <button class="btn btn-outline-light btn-sm" type="submit">🔍</button>
+                            <button class="btn btn-outline-light btn-sm" type="submit">🔍︎</button>
                         </form>
                     </li>
                 </ul>
@@ -105,7 +104,7 @@
                 <div class="col-12">
                     <h2 class="mt-4 mb-3" style="color:#003366">Dashboard Penilaian Proyek Mahasiswa</h2>
 
-                    <!-- Filter Section (DIPERBARUI) -->
+                    <!-- Filter Section -->
                     <div class="filter-section">
                         <div class="row align-items-center">
                             <div class="col-12">
@@ -144,7 +143,7 @@
                         </div>
                     </div>
 
-                    <!-- Project Cards (DITAMBAHKAN DATA-*) -->
+                    <!-- Project Cards -->
                     <div class="row" id="projectList">
                         <!-- Project 1 -->
                         <div class="col-md-6 col-lg-4 project-item" data-status="belum-dinilai"
@@ -156,7 +155,6 @@
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">Aplikasi E-Commerce Berbasis Web</h5>
                                     <p class="card-text text-muted small">Oleh: Budi Santoso (4342101234)</p>
-                                    <!-- INI ADALAH BARIS YANG DITAMBAHKAN -->
                                     <p class="card-text small text-info mb-2">
                                         <i class="bi bi-building me-1"></i><span class="card-jurusan">Teknik
                                             Informatika</span> - <span class="card-prodi">D4 Rekayasa Perangkat
@@ -189,7 +187,8 @@
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">Sistem Monitoring IoT</h5>
                                     <p class="card-text text-muted small">Oleh: Siti Aminah (4342105678)</p>
-                                    <i class="bi bi-building me-1"></i><span class="card-jurusan">Teknik Informatika</span> - <span class="card-prodi">D4 Rekayasa Perangkat Lunak</span>
+                                    <i class="bi bi-building me-1"></i><span class="card-jurusan">Teknik
+                                        Informatika</span> - <span class="card-prodi">D4 Rekayasa Perangkat Lunak</span>
                                     </p>
                                     <p class="card-text">Sistem untuk memantau suhu dan kelembaban ruangan secara
                                         real-time menggunakan teknologi IoT.</p>
@@ -240,7 +239,7 @@
         </div>
     </div>
 
-    <!-- Modal untuk Penilaian (DITAMBAHKAN ELEMEN BARU) -->
+    <!-- Modal untuk Penilaian  -->
     <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

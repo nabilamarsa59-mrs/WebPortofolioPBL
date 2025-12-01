@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PoliKarya - Portofolio PBL Polibatam</title>
-  <!-- Bootstrap CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    /* Tambahkan styling footer biru tua */
     footer.custom-footer {
-      background-color: #002b5b; /* biru tua */
+      background-color: #002b5b;
       color: white;
     }
+
     footer.custom-footer a {
       color: white;
       text-decoration: none;
     }
+
     footer.custom-footer a:hover {
       text-decoration: underline;
     }
@@ -106,10 +106,7 @@
     </div>
   </footer>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Script Proyek -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const data = JSON.parse(localStorage.getItem("projectData"));
@@ -156,4 +153,5 @@
     }
   </script>
 </body>
+
 </html>

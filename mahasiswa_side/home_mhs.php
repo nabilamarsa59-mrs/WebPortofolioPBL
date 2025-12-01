@@ -37,8 +37,17 @@
     <!-- Tentang Section -->
     <section id="tentang" class="about">
         <h2>Tentang</h2>
-        <p>Platform ini bertujuan untuk menjadi wadah utama bagi mahasiswa Polibatam dalam menampilkan karya dan proyek
-            mereka, serta memberikan akses mudah bagi pengunjung untuk menjelajahi berbagai inovasi menarik.</p>
+        <p>Selamat datang di jendela kami! Website ini adalah bukti nyata perjalanan kami, para mahasiswa Politeknik
+            Negeri Batam, dalam menerapkan ilmu yang kami pelajari. Di sini, kami tidak hanya belajar di kelas, tetapi
+            juga langsung terjun, berkolaborasi, dan menciptakan solusi untuk tantangan nyata melalui Project-Based
+            Learning (PBL).
+
+            Setiap proyek yang Anda lihat adalah hasil dari kerja keras, ide-ide segar, dan semangat inovasi tim kami.
+            Ini adalah tempat kami menunjukkan bagaimana konsep-konsep teknis diubah menjadi aplikasi yang bermanfaat.
+
+            Kami bangga dapat berbagi karya-karya ini dan berharap Anda dapat melihat potensi serta dedikasi yang kami
+            miliki. Jelajahi, temukan, dan saksikan bagaimana kami di Politeknik Negeri Batam mempersiapkan diri untuk
+            masa depan.</p>
     </section>
     <script src="script_home.js"></script>
 </body>

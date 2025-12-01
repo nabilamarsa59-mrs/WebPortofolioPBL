@@ -18,43 +18,36 @@
 
     body {
       font-family: 'Poppins', sans-serif;
-      color: #333; /* Ubah warna teks default menjadi gelap untuk kontras */
+      color: #333;
       background-color: whitesmoke;
     }
 
     /* --- Navbar --- */
     .navbar {
       background-color: #002b5b !important;
-      /* Padding dikurangi dari 1rem menjadi 0.75rem agar tidak terlalu tinggi */
       padding: 0.75rem 0;
       z-index: 1000;
     }
 
-    /* Font size hanya untuk brand (logo) */
     .navbar-brand.ms-1 {
       font-size: 1.5rem;
       font-weight: bold;
       color: #fff !important;
     }
 
-    /* Font size untuk link navigasi lainnya */
     .navbar .nav-link {
       margin: 0 12px;
       font-size: 16px;
-      font-weight: normal; /* Memastikan tidak tebal */
+      font-weight: normal;
     }
 
-    /* Tambahkan style untuk gambar profil default */
     #previewFoto {
       background-color: #e9ecef;
     }
-    
-    /* TAMBAHKAN CSS INI */
-    /* Jarak untuk konten agar tidak tertutup navbar */
-    main {
-        padding-top: 80px; /* Anda bisa menyesuaikan nilai ini */
-    }
 
+    main {
+      padding-top: 80px;
+    }
   </style>
 </head>
 
@@ -70,9 +63,9 @@
       </button>
       <div class="d-flex ms-auto">
         <a href="home_mhs.php" class="nav-link text-white">Beranda</a>
-        <!-- Hapus class 'fw-bold' agar tidak tebal -->
+
         <a href="#" class="nav-link text-white text-decoration-underline">Profil</a>
-        <a href="../landing_page.php">Logout</a>      
+        <a href="../landing_page.php">Logout</a>
       </div>
     </div>
   </nav>
@@ -155,7 +148,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Tahun Lulus</label>
-            <!-- Type diubah dari "text" menjadi "date" -->
+
             <input type="date" id="tahunLulus" class="form-control">
           </div>
           <div class="mb-3">
@@ -197,7 +190,6 @@
     © 2025 PBL Polibatam | Tentang | Kontak | Kebijakan Privasi
   </footer>
 
-  <!-- Script -->
   <script src="script_profil.js"></script>
 
 </body>

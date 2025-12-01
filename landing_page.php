@@ -7,7 +7,8 @@
     <title>WorkPiece - Portofolio PBL Polibatam</title>
 
     <!-- Google Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CDN -->
@@ -20,7 +21,6 @@
         body {
             font-family: 'Poppins', sans-serif;
             color: whitesmoke;
-            /* PADDING-TOP DIHAPUS DARI SINI */
             background-color: whitesmoke;
         }
 
@@ -50,8 +50,7 @@
 
         /* --- Hero Section --- */
         #beranda {
-            /* TAMBAHKAN PADDING-TOP DI SINI UNTUK MENGATUR POSISI */
-            padding-top: 80px; 
+            padding-top: 80px;
             height: 100vh;
             background: url('bg-gedung.jpg') no-repeat center center/cover;
             position: relative;
@@ -141,11 +140,13 @@
         /* --- Responsif --- */
         @media (max-width: 768px) {
             #beranda {
-                padding-top: 70px; /* Sedikit lebih kecil di mobile */
+                padding-top: 70px;
             }
+
             .hero-content h1 {
                 font-size: 2.5rem;
             }
+
             .hero-content p {
                 font-size: 1.2rem;
             }
@@ -192,8 +193,18 @@
     <section id="tentang" class="about">
         <div class="container">
             <h2>Tentang WorkPiece</h2>
-            <p>Platform ini bertujuan untuk menjadi wadah utama bagi mahasiswa Polibatam dalam menampilkan karya dan
-                proyek mereka, serta memberikan akses mudah bagi pengunjung untuk menjelajahi berbagai inovasi menarik.
+            <p>Selamat datang di jendela kami! Website ini adalah bukti nyata perjalanan kami, para mahasiswa Politeknik
+                Negeri Batam, dalam menerapkan ilmu yang kami pelajari. Di sini, kami tidak hanya belajar di kelas,
+                tetapi juga langsung terjun, berkolaborasi, dan menciptakan solusi untuk tantangan nyata melalui
+                Project-Based Learning (PBL).
+
+                Setiap proyek yang Anda lihat adalah hasil dari kerja keras, ide-ide segar, dan semangat inovasi tim
+                kami. Ini adalah tempat kami menunjukkan bagaimana konsep-konsep teknis diubah menjadi aplikasi yang
+                bermanfaat.
+
+                Kami bangga dapat berbagi karya-karya ini dan berharap Anda dapat melihat potensi serta dedikasi yang
+                kami miliki. Jelajahi, temukan, dan saksikan bagaimana kami di Politeknik Negeri Batam mempersiapkan
+                diri untuk masa depan.
             </p>
 
             <div class="row g-4">
@@ -225,7 +236,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Kode JavaScript khusus Anda bisa ditulis di sini
+
         });
     </script>
 </body>
