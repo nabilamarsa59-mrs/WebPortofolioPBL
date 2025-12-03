@@ -1,9 +1,49 @@
+<?php
+// 1. KEAMANAN: Pastikan hanya user yang sudah login dan berperan sebagai 'mahasiswa' yang bisa akses halaman ini.
+require_once '../auth_check.php';
+if ($_SESSION['role'] !== 'mahasiswa') {
+    // Jika bukan mahasiswa, arahkan ke halaman login
+    header("Location: ../login.php");
+    exit();
+}
+
+// 2. KONEKSI & PENGAMBILAN DATA: Hubungkan ke database dan ambil data proyek milik mahasiswa ini.
+require_once '../koneksi.php';
+
+// Ambil ID user dari session
+ $user_id = $_SESSION['user_id'];
+ $nama_mahasiswa = isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Mahasiswa';
+
+// Query untuk mengambil semua project milik mahasiswa yang sedang login
+ $sql = "SELECT p.*, k.nama_kategori 
+        FROM projects p
+        JOIN kategori_proyek k ON p.id_kategori = k.id
+        WHERE p.id_mahasiswa = (SELECT id_mahasiswa FROM users WHERE id = ?)
+        ORDER BY p.tanggal DESC";
+
+ $projects = []; // Inisialisasi array di luar, agar selalu ada
+ $error_message = ''; // Variabel untuk menampung pesan error
+
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$user_id]);
+    $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Jangan hentikan skrip, simpan pesan error ke variabel
+    $error_message = "Terjadi kesalahan saat mengambil data: " . $e->getMessage();
+    // $projects sudah kosong dari awal, jadi tidak perlu diisi lagi
+}
+
+// Nanti di bagian HTML, Anda bisa cek: // 
+if ($error_message) { echo '<div class="alert alert-danger">' . $error_message . '</div>'; }
+if (empty($projects)) { echo '<p>Tidak ada proyek ditemukan.</p>'; }
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PoliKarya - Portofolio PBL Polibatam</title>
+    <title>WorkPiece - Dashboard Mahasiswa</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -27,8 +67,8 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: whitesmoke;
-            color: var(--text-light);
-            padding-top: 76px; /* Menghindari konten tertutup navbar */
+            color: #333; /* Ubah agar teks konten lebih mudah dibaca */
+            padding-top: 76px;
         }
 
         /* --- Custom Navbar Styles --- */
@@ -37,36 +77,17 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
+        .navbar-brand, .navbar-nav .nav-link, .dropdown-item {
             color: var(--light-color) !important;
         }
 
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            font-weight: 500;
-            margin-right: 15px;
-            transition: color 0.3s;
-        }
-
-        .navbar-nav .nav-link:hover {
+        .navbar-nav .nav-link:hover, .dropdown-item:hover {
             color: var(--accent-color) !important;
         }
 
         .dropdown-menu {
             background-color: var(--secondary-color);
             border: none;
-        }
-
-        .dropdown-item {
-            color: var(--text-light);
-            transition: background-color 0.3s;
-        }
-
-        .dropdown-item:hover {
-            background-color: var(--accent-color);
-            color: var(--light-color);
         }
 
         .search-form {
@@ -76,7 +97,7 @@
             border-radius: 20px;
             padding: 5px 10px;
         }
-
+        
         .search-input {
             border: none;
             outline: none;
@@ -87,73 +108,34 @@
             font-size: 0.9rem;
         }
 
-        .search-input::placeholder {
-            color: #ddd;
-        }
-
-        .search-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            color: var(--text-light);
-            transition: transform 0.2s;
-        }
-
-        .search-btn:hover {
-            transform: scale(1.1);
-        }
-
         /* --- Hero Section --- */
         .hero {
-            height: 100vh;
-            background: url('bg-gedung.jpg') no-repeat center center/cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            background: linear-gradient(rgba(0, 30, 100, 0.7), rgba(0, 30, 100, 0.7)), url('https://picsum.photos/seed/student-dashboard/1920/800.jpg') no-repeat center center/cover;
             color: var(--light-color);
-            position: relative;
-            margin-top: -76px; /* Mengompensasi padding body */
-        }
-
-        .hero::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 30, 100, 0.5);
-            z-index: 1;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero-content h1 {
-            font-weight: 700;
-            font-size: 3.5rem;
-        }
-
-        .hero-content span {
-            color: var(--accent-color);
-        }
-
-        /* --- Tentang Section --- */
-        .about {
-            background-color: whitesmoke;
-            color: #333;
+            padding: 100px 0;
             text-align: center;
-            padding: 60px 0;
         }
 
-        .about h2 {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 1rem;
+        /* --- Project Card Styles --- */
+        .project-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .btn-action {
+            border-radius: 20px;
         }
     </style>
 </head>
@@ -162,38 +144,29 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">WorkPiece</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="home_mahasiswa.php">WorkPiece</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#beranda">Beranda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#tentang">Tentang</a>
+                        <a class="nav-link active" href="home_mahasiswa.php">Dashboard</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <!-- Dropdown Profil -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Profil ▾
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <?= htmlspecialchars($nama_mahasiswa) ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="ProfilPage.php">Profil</a></li>
-                            <li><a class="dropdown-item" href="UploadProject.php">Proyek</a></li>
+                            <li><a class="dropdown-item" href="profil_mahasiswa.php">Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="tambah_project.php">Tambah Proyek Baru</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="LandingPage.php">Logout</a></li>
+                            <!-- 3. PERBAIKAN: Link logout harus mengarah ke file logout.php -->
+                            <li><a class="dropdown-item" href="../logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                         </ul>
-                    </li>
-                    <!-- Search Bar -->
-                    <li class="nav-item ms-3">
-                        <form action="#" class="search-form">
-                            <input type="text" placeholder="Cari proyek atau nama..." class="search-input">
-                            <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
-                        </form>
                     </li>
                 </ul>
             </div>
@@ -201,39 +174,53 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="beranda" class="hero">
-        <div class="hero-content">
-            <h1>Halo! Selamat datang di <span>WorkPiece</span></h1>
-            <p class="lead">Temukan proyek yang menarik!</p>
+    <section class="hero">
+        <div class="container">
+            <h1>Selamat datang, <span><?= htmlspecialchars($nama_mahasiswa); ?>!</span></h1>
+            <p class="lead">Kelola dan tampilkan karya terbaikmu di sini.</p>
+            <a href="tambah_project.php" class="btn btn-lg btn-light mt-3">
+                <i class="bi bi-plus-circle"></i> Tambah Proyek Baru
+            </a>
         </div>
     </section>
 
-    <!-- Tentang Section -->
-    <section id="tentang" class="about">
-        <div class="container">
-            <h2>Tentang</h2>
-            <p class="lead">Platform ini bertujuan untuk menjadi wadah utama bagi mahasiswa Polibatam dalam menampilkan karya dan proyek mereka, serta memberikan akses mudah bagi pengunjung untuk menjelajahi berbagai inovasi menarik.</p>
+    <!-- Main Content: Daftar Proyek -->
+    <section class="container my-5">
+        <h2 class="mb-4">Proyek Saya</h2>
+        
+        <div class="row">
+            <?php if (empty($projects)): ?>
+                <div class="col-12">
+                    <div class="alert alert-info text-center" role="alert">
+                        <i class="bi bi-info-circle"></i> Anda belum memiliki proyek. <a href="tambah_project.php">Tambahkan proyek pertama Anda!</a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <?php foreach ($projects as $project): ?>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card project-card">
+                            <img src="../uploads/<?= htmlspecialchars($project['gambar'] ?? 'default_project.jpg'); ?>" class="card-img-top" alt="Project Image">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title"><?= htmlspecialchars($project['judul']); ?></h5>
+                                <p class="card-text text-muted small">Kategori: <?= htmlspecialchars($project['nama_kategori']); ?></p>
+                                <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
+                                <div class="mt-auto d-flex justify-content-between">
+                                    <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary btn-action">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a href="proses_hapus_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </section>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Kustom JS (jika diperlukan, untuk saat ini Bootstrap JS sudah menangani dropdown) -->
-    <script>
-        // Smooth scrolling untuk anchor link
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>
