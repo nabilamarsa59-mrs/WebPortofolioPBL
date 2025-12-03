@@ -359,8 +359,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     identifierLabel.textContent = 'NIM';
                     identifierInput.placeholder = 'Masukkan NIM Anda';
                 } else { // Dosen
-                    identifierLabel.textContent = 'Username';
-                    identifierInput.placeholder = 'Masukkan username Anda';
+                    identifierLabel.textContent = 'Nidn';
+                    identifierInput.placeholder = 'Masukkan nidn Anda';
                 }
             }
 
