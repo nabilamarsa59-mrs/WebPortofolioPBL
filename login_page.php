@@ -1,84 +1,90 @@
 <?php
-// --- LOGIKA PHP (PROSES LOGIN) ---
-// Memulai sesi untuk menyimpan informasi login
+
+// 1. Memulai Sesi
+// Sesi diperlukan untuk menyimpan informasi login pengguna
+// agar bisa diakses di halaman-halaman lain.
 session_start();
 
-// Menyimpan pesan error
+// 2. Menghubungkan ke Database
+// Memanggil file koneksi.php yang berisi kode untuk terhubung ke MySQL.
+require_once 'koneksi.php';
+
+// 3. Inisialisasi Variabel Pesan Error
+// Variabel ini akan menampung pesan error jika login gagal.
 $error_message = '';
 
-// Cek apakah form telah disubmit dengan metode POST
+// 4. Cek Apakah Form Telah Dikirim (Metode POST)
+// Kode di dalam akan berjalan hanya jika pengguna menekan tombol "Masuk".
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // --- KONEKSI DATABASE ---
-// Ganti dengan detail koneksi database Anda
-    $db_host = 'localhost';
-    $db_user = 'root'; // username MySQL Anda
-    $db_pass = ''; // password MySQL Anda
-    $db_name = 'nama_database_anda'; // nama database Anda
-
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-
-    // Cek koneksi
-    if ($conn->connect_error) {
-        die("Koneksi gagal: " . $conn->connect_error);
-    }
-
-    // Ambil data dari form
+    // 5. Ambil Data dari Form
+    // Mengambil data yang dikirim melalui form dan membersihkannya dari karakter berbahaya.
     $user_type = $_POST['user_type'];
     $identifier = $_POST['identifier']; // Bisa NIM atau Username
     $password = $_POST['password'];
 
-    // Siapkan variabel untuk hasil
-    $is_valid = false;
-    $user_data = null;
-
-    if ($user_type == 'mahasiswa') {
-        // Query untuk mahasiswa (gunakan NIM)
-        $sql = "SELECT nim, nama_mhs, password FROM login_mhs WHERE nim = ?";
+    // 6. Validasi Input
+    // Pastikan tidak ada input yang kosong.
+    if (empty($user_type) || empty($identifier) || empty($password)) {
+        $error_message = "Semua field harus diisi.";
     } else {
-        // Query untuk dosen (gunakan username)
-        $sql = "SELECT username, nama_dsn, password FROM login_dsn WHERE username = ?";
-    }
+        // 7. Query Database Berdasarkan Tipe User
+        try {
+            // --- KASUS 1: JIKA YANG LOGIN ADALAH MAHASISWA ---
+            if ($user_type == 'mahasiswa') {
+                // Query untuk mengambil data mahasiswa dan user-nya berdasarkan NIM
+                // Kita JOIN tabel mahasiswa dan users untuk mendapatkan semua data yang dibutuhkan.
+                $sql = "SELECT u.id as user_id, u.password, u.role, m.nama_lengkap, m.nim
+                        FROM users u
+                        JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                        WHERE m.nim = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$identifier]);
+                $user = $stmt->fetch();
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $identifier);
-    $stmt->execute();
-    $result = $stmt->get_result();
+                // --- KASUS 2: JIKA YANG LOGIN ADALAH DOSEN ---
+            } elseif ($user_type == 'dosen') {
+                // Query untuk mengambil data dosen dan user-nya berdasarkan username
+                $sql = "SELECT u.id as user_id, u.password, u.role, d.nama_lengkap, d.nidn
+                        FROM users u
+                        JOIN dosen d ON u.id_dosen = d.id
+                        WHERE u.username = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$identifier]);
+                $user = $stmt->fetch();
+            }
 
-    if ($result->num_rows === 1) {
-        $user_data = $result->fetch_assoc();
+            // 8. Verifikasi User dan Password
+            // Periksa apakah user ditemukan dan passwordnya cocok.
+            if ($user && password_verify($password, $user['password'])) {
+                // Jika berhasil, simpan data ke sesi
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
 
-        // VERIFIKASI PASSWORD
-// Untuk keamanan, gunakan password_verify() jika password di-hash
-// Contoh: if (password_verify($password, $user_data['password'])) { ... }
-        if ($password === $user_data['password']) {
-            $is_valid = true;
+                // Arahkan ke halaman dashboard yang sesuai
+                if ($user['role'] == 'dosen') {
+                    header("Location: dosen_side/home_dosen.php");
+                } else {
+                    header("Location: mahasiswa_side/home_mhs.php");
+                }
+                exit(); // Hentikan skrip setelah redirect
+
+            } else {
+                // Jika user tidak ditemukan atau password salah
+                $error_message = "NIM/Username atau Kata Sandi salah.";
+            }
+
+        } catch (PDOException $e) {
+            // Jika terjadi error pada database
+            $error_message = "Terjadi kesalahan. Silakan coba lagi.";
+            // Untuk debugging, Anda bisa menampilkan error aslinya:
+            // $error_message = "Query error: " . $e->getMessage();
         }
-    }
-
-    $stmt->close();
-    $conn->close();
-
-    if ($is_valid) {
-        // Jika login berhasil, set sesi
-        $_SESSION['loggedin'] = true;
-        $_SESSION['user_type'] = $user_type;
-        $_SESSION['user_name'] = ($user_type == 'mahasiswa') ? $user_data['nama_mhs'] : $user_data['nama_dsn'];
-        $_SESSION['user_identifier'] = $identifier; // NIM atau Username
-
-        // Arahkan ke halaman dashboard yang sesuai
-        if ($user_type == 'mahasiswa') {
-            header("location: home_mahasiswa.php");
-        } else {
-            header("location: home_dosen.php");
-        }
-        exit;
-    } else {
-        // Jika login gagal
-        $error_message = "NIM/Username atau Kata Sandi salah!";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -113,10 +119,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            /* Gunakan file lokal untuk background */
             background: url('bg-gedung.jpg') no-repeat center center/cover;
             background-color: var(--primary-color);
-            /* Warna cadangan */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -224,7 +228,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         /* --- Alert Error --- */
-        .alert-danger {
+        .alert-danger-custom {
             background-color: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
@@ -251,21 +255,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .btn-login:hover {
             background-color: var(--secondary-color);
-        }
-
-        .register-link {
-            margin-top: 20px;
-            font-size: 0.9rem;
-        }
-
-        .register-link a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
         }
 
         /* --- Responsivitas --- */
@@ -298,7 +287,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <!-- Tampilkan pesan error jika ada -->
             <?php if (!empty($error_message)): ?>
-                <div class="alert-danger"><?php echo $error_message; ?></div>
+                <div class="alert-danger-custom">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <?php echo htmlspecialchars($error_message); ?>
+                </div>
             <?php endif; ?>
 
             <form action="login.php" method="post" id="loginForm">
