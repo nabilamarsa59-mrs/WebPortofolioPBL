@@ -174,7 +174,7 @@
                         <a class="nav-link" href="#tentang">Tentang</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="login_page.php">Login</a>
+                        <a class="nav-link" href="login.php">Login</a>
                     </li>
                 </ul>
             </div>
