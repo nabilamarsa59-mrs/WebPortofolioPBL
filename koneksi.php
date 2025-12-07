@@ -1,16 +1,14 @@
 <?php
-<<<<<<< HEAD
  $host = "localhost";
  $user = "root";
  $pass = "";
  $dbname = "db_portfolio";
-=======
+
 // Konfigurasi koneksi ke database
- $host = 'localhost';      // atau 127.0.0.1
- $dbname = 'db_portofolio'; // Nama database yang Anda buat
- $username = 'root';        // Username database MySQL Anda (default: root)
- $password = '';            // Password database MySQL Anda (default: kosong untuk XAMPP)
->>>>>>> c2fae3ab9e64d9fc249bc19b89dc7ed455feef29
+ $host = 'localhost';
+ $dbname = 'db_portofolio';
+ $username = 'root';
+ $password = '';            
 
 // Buat DSN (Data Source Name)
  $dsn = "mysql:host=$host;dbname=$dbname";
