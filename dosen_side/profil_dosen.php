@@ -1,3 +1,12 @@
+<?php
+// PERBAIKAN: Tambahkan session check di paling atas
+session_start();
+if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
+    header("location:../login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
