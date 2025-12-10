@@ -1,3 +1,36 @@
+<?php
+session_start();
+if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
+    header("location:../login.php");
+    exit();
+}
+
+require_once '../koneksi.php'; // Sambungkan ke database
+
+// --- KODE UNTUK MENGAMBIL DATA ---
+// Query untuk mengambil semua data proyek beserta data mahasiswa dan penilaiannya
+// Menggunakan LEFT JOIN karena proyek mungkin belum dinilai
+ $sql = "SELECT 
+            p.id_project, 
+            p.judul, 
+            p.deskripsi, 
+            p.kategori,
+            p.jurusan_prodi,
+            m.nama_mahasiswa,
+            m.nim,
+            pen.nilai,
+            pen.komentar
+        FROM projects p
+        JOIN mahasiswa m ON p.id_mahasiswa = m.id_mahasiswa
+        LEFT JOIN penilaian pen ON p.id_project = pen.id_project
+        ORDER BY p.created_at DESC";
+
+ $stmt = $pdo->prepare($sql);
+ $stmt->execute();
+ $projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
+// --- AKHIR KODE PENGGAMBIL DATA ---
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -16,10 +49,9 @@
             font-family: 'Poppins', sans-serif;
             color: #333;
             background-color: whitesmoke;
-            padding-top: 100px; /* Disesuaikan dengan profil page */
+            padding-top: 100px;
         }
 
-        /* Navbar styling yang sama dengan profil page */
         .navbar {
             background: rgba(0, 0, 60, 0.8) !important;
             padding: 0.75rem 0;
@@ -47,7 +79,6 @@
             text-decoration: underline;
         }
 
-        /* Search form styling yang disesuaikan */
         .search-container {
             position: relative;
             margin-left: 25px;
@@ -127,7 +158,6 @@
             color: #666;
         }
 
-        /* Styling untuk konten utama */
         .content-wrapper {
             min-height: 100vh;
         }
@@ -170,14 +200,16 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(0,0,0,.1);
+            border: 3px solid rgba(0, 0, 0, .1);
             border-radius: 50%;
             border-top-color: #003366;
             animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .filter-active {
@@ -185,35 +217,33 @@
             color: white;
         }
 
-        /* Responsif improvements */
         @media (max-width: 768px) {
             .search-container {
                 margin: 10px 0;
                 width: 100%;
             }
-            
+
             .search-form input {
                 width: 100%;
             }
-            
+
             .search-form input:focus {
                 width: 100%;
             }
-            
+
             .filter-section .d-flex {
                 flex-direction: column;
             }
-            
+
             .filter-section .form-select {
                 width: 100% !important;
                 margin-bottom: 10px;
             }
         }
 
-        /* Toast notification */
         .toast-container {
             position: fixed;
-            top: 110px; /* Disesuaikan dengan navbar yang lebih tinggi */
+            top: 110px;
             right: 20px;
             z-index: 1050;
         }
@@ -222,17 +252,22 @@
             min-width: 250px;
         }
 
-        /* Animasi untuk kartu yang muncul */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .project-item {
             animation: fadeIn 0.5s ease-out;
         }
 
-        /* Loading overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -264,7 +299,7 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Navbar yang sama dengan profil page -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">WorkPiece</a>
@@ -279,15 +314,18 @@
                         <a class="nav-link" href="profil_dosen.php">Profil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="dashboard_dosen.php">Beranda</a>
+                        <!-- PERBAIKAN: Link ke dashboard yang benar -->
+                        <a class="nav-link active" href="home_dosen.php">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="landing_page.php">Logout</a>
+                        <!-- PERBAIKAN: Link logout yang benar -->
+                        <a class="nav-link" href="../logout.php">Logout</a>
                     </li>
                     <li class="nav-item">
                         <div class="search-container">
                             <form class="search-form" role="search" id="searchForm">
-                                <input type="search" id="searchInput" placeholder="Cari NIM atau Nama..." autocomplete="off">
+                                <input type="search" id="searchInput" placeholder="Cari NIM atau Nama..."
+                                    autocomplete="off">
                                 <button type="submit">
                                     <i class="bi bi-search"></i>
                                 </button>
@@ -318,21 +356,33 @@
                                         <option value="belum-dinilai">Belum Dinilai</option>
                                         <option value="sudah-dinilai">Sudah Dinilai</option>
                                     </select>
-                                    <!-- Gabungan Jurusan dan Prodi -->
-                                    <select class="form-select form-select-sm" id="jurusanProdiFilter" style="width: auto;">
+                                    <select class="form-select form-select-sm" id="jurusanProdiFilter"
+                                        style="width: auto;">
                                         <option value="all">Semua Jurusan dan Prodi</option>
-                                        <option value="Teknik Informatika - D4 Rekayasa Perangkat Lunak">Teknik Informatika - D4 Rekayasa Perangkat Lunak</option>
-                                        <option value="Teknik Informatika - D4 Teknologi Rekayasa Multimedia">Teknik Informatika - D4 Teknologi Rekayasa Multimedia</option>
-                                        <option value="Teknik Informatika - D4 Teknologi Game">Teknik Informatika - D4 Teknologi Game</option>
-                                        <option value="Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)">Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)</option>
-                                        <option value="Teknik Elektro - D4 Teknik Elektronika">Teknik Elektro - D4 Teknik Elektronika</option>
-                                        <option value="Teknik Elektro - D4 Teknik Tenaga Listrik">Teknik Elektro - D4 Teknik Tenaga Listrik</option>
-                                        <option value="Teknik Mesin - D4 Teknologi Rekayasa Manufaktur">Teknik Mesin - D4 Teknologi Rekayasa Manufaktur</option>
-                                        <option value="Teknik Mesin - D4 Teknik Mesin Produksi dan Perawatan">Teknik Mesin - D4 Teknik Mesin Produksi dan Perawatan</option>
-                                        <option value="Teknik Mesin - D4 Desain Manufaktur">Teknik Mesin - D4 Desain Manufaktur</option>
-                                        <option value="Manajemen dan Bisnis - D4 Logistik Bisnis">Manajemen dan Bisnis - D4 Logistik Bisnis</option>
-                                        <option value="Manajemen dan Bisnis - D4 Akuntansi Keuangan">Manajemen dan Bisnis - D4 Akuntansi Keuangan</option>
-                                        <option value="Manajemen dan Bisnis - D4 Manajemen Pemasaran">Manajemen dan Bisnis - D4 Manajemen Pemasaran</option>
+                                        <option value="Teknik Informatika - D4 Rekayasa Perangkat Lunak">Teknik
+                                            Informatika - D4 Rekayasa Perangkat Lunak</option>
+                                        <option value="Teknik Informatika - D4 Teknologi Rekayasa Multimedia">Teknik
+                                            Informatika - D4 Teknologi Rekayasa Multimedia</option>
+                                        <option value="Teknik Informatika - D4 Teknologi Game">Teknik Informatika - D4
+                                            Teknologi Game</option>
+                                        <option value="Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)">
+                                            Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)</option>
+                                        <option value="Teknik Elektro - D4 Teknik Elektronika">Teknik Elektro - D4
+                                            Teknik Elektronika</option>
+                                        <option value="Teknik Elektro - D4 Teknik Tenaga Listrik">Teknik Elektro - D4
+                                            Teknik Tenaga Listrik</option>
+                                        <option value="Teknik Mesin - D4 Teknologi Rekayasa Manufaktur">Teknik Mesin -
+                                            D4 Teknologi Rekayasa Manufaktur</option>
+                                        <option value="Teknik Mesin - D4 Teknik Mesin Produksi dan Perawatan">Teknik
+                                            Mesin - D4 Teknik Mesin Produksi dan Perawatan</option>
+                                        <option value="Teknik Mesin - D4 Desain Manufaktur">Teknik Mesin - D4 Desain
+                                            Manufaktur</option>
+                                        <option value="Manajemen dan Bisnis - D4 Logistik Bisnis">Manajemen dan Bisnis -
+                                            D4 Logistik Bisnis</option>
+                                        <option value="Manajemen dan Bisnis - D4 Akuntansi Keuangan">Manajemen dan
+                                            Bisnis - D4 Akuntansi Keuangan</option>
+                                        <option value="Manajemen dan Bisnis - D4 Manajemen Pemasaran">Manajemen dan
+                                            Bisnis - D4 Manajemen Pemasaran</option>
                                     </select>
                                     <select class="form-select form-select-sm" id="kategoriFilter" style="width: auto;">
                                         <option value="all">Semua Kategori</option>
@@ -349,193 +399,65 @@
                                 </div>
                             </div>
                             <div class="col-12 mt-2">
-                                <span class="text-muted">Menampilkan <span id="projectCount">6</span> proyek</span>
+                                <span class="text-muted">Menampilkan <span id="projectCount"><?= count($projects) ?></span> proyek</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Project Cards -->
                     <div class="row" id="projectList">
-                        <!-- Project 1 -->
-                        <div class="col-md-6 col-lg-4 project-item" data-status="belum-dinilai"
-                            data-jurusan-prodi="Teknik Informatika - D4 Rekayasa Perangkat Lunak"
-                            data-kategori="Aplikasi Web" data-nim="4342101234" data-student-name="Budi Santoso">
-                            <div class="card project-card h-100">
-                                <img src="https://picsum.photos/seed/project1/400/200.jpg" class="card-img-top"
-                                    alt="Project Image">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Aplikasi E-Commerce Berbasis Web</h5>
-                                    <p class="card-text text-muted small">Oleh: Budi Santoso (4342101234)</p>
-                                    <p class="card-text small text-info mb-2">
-                                        <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi">Teknik
-                                            Informatika - D4 Rekayasa Perangkat Lunak</span>
-                                    </p>
-                                    <p class="card-text">Pengembangan aplikasi penjualan online dengan fitur keranjang
-                                        belanja dan pembayaran.</p>
-                                    <div class="mt-auto">
-                                        <span class="badge bg-warning status-badge">Belum Dinilai</span>
-                                        <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
-                                            data-bs-target="#gradeModal" data-id="1"
-                                            data-title="Aplikasi E-Commerce Berbasis Web" data-student="Budi Santoso"
-                                            data-nim="4342101234" data-jurusan-prodi="Teknik Informatika - D4 Rekayasa Perangkat Lunak"
-                                            data-kategori="Aplikasi Web"
-                                            data-description="Pengembangan aplikasi penjualan online dengan fitur keranjang belanja dan pembayaran.">
-                                            <i class="bi bi-eye"></i> Lihat & Nilai
-                                        </button>
+                        <?php if (empty($projects)): ?>
+                            <div class="col-12">
+                                <p class="text-center mt-4">Belum ada proyek mahasiswa yang diajukan.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($projects as $project): ?>
+                                <div class="col-md-6 col-lg-4 project-item" 
+                                     data-status="<?= $project['nilai'] ? 'sudah-dinilai' : 'belum-dinilai' ?>"
+                                     data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
+                                     data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
+                                     data-nim="<?= htmlspecialchars($project['nim']) ?>"
+                                     data-student-name="<?= htmlspecialchars($project['nama_mahasiswa']) ?>">
+                                    <div class="card project-card h-100">
+                                        <img src="https://picsum.photos/seed/<?= $project['id_project'] ?>/400/200.jpg" class="card-img-top" alt="Project Image">
+                                        <div class="card-body d-flex flex-column">
+                                            <!-- PERHATIKAN PENGGUNAAN htmlspecialchars() DI BAWAH INI -->
+                                            <h5 class="card-title"><?= htmlspecialchars($project['judul']) ?></h5>
+                                            <p class="card-text text-muted small">Oleh: <?= htmlspecialchars($project['nama_mahasiswa']) ?> (<?= htmlspecialchars($project['nim']) ?>)</p>
+                                            <p class="card-text small text-info mb-2">
+                                                <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi"><?= htmlspecialchars($project['jurusan_prodi']) ?></span>
+                                            </p>
+                                            <p class="card-text"><?= htmlspecialchars($project['deskripsi']) ?></p>
+                                            <div class="mt-auto">
+                                                <?php if ($project['nilai']): ?>
+                                                    <span class="badge bg-success status-badge">Sudah Dinilai (<?= htmlspecialchars($project['nilai']) ?>)</span>
+                                                    <button class="btn btn-secondary btn-sm float-end" data-bs-toggle="modal"
+                                                        data-bs-target="#gradeModal" data-id="<?= $project['id_project'] ?>"
+                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_mahasiswa']) ?>"
+                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
+                                                        data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
+                                                        data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
+                                                        data-status="sudah-dinilai">
+                                                        <i class="bi bi-eye"></i> Lihat Detail
+                                                    </button>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning status-badge">Belum Dinilai</span>
+                                                    <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
+                                                        data-bs-target="#gradeModal" data-id="<?= $project['id_project'] ?>"
+                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_mahasiswa']) ?>"
+                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
+                                                        data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
+                                                        data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
+                                                        data-status="belum-dinilai">
+                                                        <i class="bi bi-eye"></i> Lihat & Nilai
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Project 2 -->
-                        <div class="col-md-6 col-lg-4 project-item" data-status="sudah-dinilai"
-                            data-jurusan-prodi="Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)"
-                            data-kategori="IoT" data-nim="4342105678" data-student-name="Siti Aminah">
-                            <div class="card project-card h-100">
-                                <img src="https://picsum.photos/seed/project2/400/200.jpg" class="card-img-top"
-                                    alt="Project Image">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Sistem Monitoring IoT</h5>
-                                    <p class="card-text text-muted small">Oleh: Siti Aminah (4342105678)</p>
-                                    <p class="card-text small text-info mb-2">
-                                        <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi">Teknik
-                                            Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)</span>
-                                    </p>
-                                    <p class="card-text">Sistem untuk memantau suhu dan kelembaban ruangan secara
-                                        real-time menggunakan teknologi IoT.</p>
-                                    <div class="mt-auto">
-                                        <span class="badge bg-success status-badge">Sudah Dinilai (A)</span>
-                                        <button class="btn btn-secondary btn-sm float-end" data-bs-toggle="modal"
-                                            data-bs-target="#gradeModal" data-id="2" data-title="Sistem Monitoring IoT"
-                                            data-student="Siti Aminah" data-nim="4342105678"
-                                            data-jurusan-prodi="Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)"
-                                            data-kategori="IoT"
-                                            data-description="Sistem untuk memantau suhu dan kelembaban ruangan secara real-time menggunakan teknologi IoT.">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Project 3 -->
-                        <div class="col-md-6 col-lg-4 project-item" data-status="belum-dinilai"
-                            data-jurusan-prodi="Teknik Mesin - D4 Teknologi Rekayasa Manufaktur"
-                            data-kategori="Desain & Manufaktur" data-nim="4342109876" data-student-name="Ahmad Fauzi">
-                            <div class="card project-card h-100">
-                                <img src="https://picsum.photos/seed/project3/400/200.jpg" class="card-img-top"
-                                    alt="Project Image">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Desain dan Prototipe Mesin Pengemas</h5>
-                                    <p class="card-text text-muted small">Oleh: Ahmad Fauzi (4342109876)</p>
-                                    <p class="card-text small text-info mb-2">
-                                        <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi">Teknik
-                                            Mesin - D4 Teknologi Rekayasa Manufaktur</span>
-                                    </p>
-                                    <p class="card-text">Perancangan dan pembuatan prototipe mesin pengemas otomatis untuk produk makanan kecil.</p>
-                                    <div class="mt-auto">
-                                        <span class="badge bg-warning status-badge">Belum Dinilai</span>
-                                        <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
-                                            data-bs-target="#gradeModal" data-id="3"
-                                            data-title="Desain dan Prototipe Mesin Pengemas" data-student="Ahmad Fauzi"
-                                            data-nim="4342109876" data-jurusan-prodi="Teknik Mesin - D4 Teknologi Rekayasa Manufaktur"
-                                            data-kategori="Desain & Manufaktur"
-                                            data-description="Perancangan dan pembuatan prototipe mesin pengemas otomatis untuk produk makanan kecil.">
-                                            <i class="bi bi-eye"></i> Lihat & Nilai
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Project 4 -->
-                        <div class="col-md-6 col-lg-4 project-item" data-status="sudah-dinilai"
-                            data-jurusan-prodi="Manajemen dan Bisnis - D4 Logistik Bisnis"
-                            data-kategori="Sistem Informasi" data-nim="4342105432" data-student-name="Rina Wijaya">
-                            <div class="card project-card h-100">
-                                <img src="https://picsum.photos/seed/project4/400/200.jpg" class="card-img-top"
-                                    alt="Project Image">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Sistem Informasi Logistik Terintegrasi</h5>
-                                    <p class="card-text text-muted small">Oleh: Rina Wijaya (4342105432)</p>
-                                    <p class="card-text small text-info mb-2">
-                                        <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi">Manajemen dan Bisnis - D4 Logistik Bisnis</span>
-                                    </p>
-                                    <p class="card-text">Pengembangan sistem informasi untuk mengelola rantai pasok dari supplier hingga pelanggan akhir.</p>
-                                    <div class="mt-auto">
-                                        <span class="badge bg-success status-badge">Sudah Dinilai (B+)</span>
-                                        <button class="btn btn-secondary btn-sm float-end" data-bs-toggle="modal"
-                                            data-bs-target="#gradeModal" data-id="4" data-title="Sistem Informasi Logistik Terintegrasi"
-                                            data-student="Rina Wijaya" data-nim="4342105432"
-                                            data-jurusan-prodi="Manajemen dan Bisnis - D4 Logistik Bisnis"
-                                            data-kategori="Sistem Informasi"
-                                            data-description="Pengembangan sistem informasi untuk mengelola rantai pasok dari supplier hingga pelanggan akhir.">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Project 5 -->
-                        <div class="col-md-6 col-lg-4 project-item" data-status="belum-dinilai"
-                            data-jurusan-prodi="Teknik Informatika - D4 Teknologi Rekayasa Multimedia"
-                            data-kategori="Game" data-nim="4342108765" data-student-name="Dedi Prasetyo">
-                            <div class="card project-card h-100">
-                                <img src="https://picsum.photos/seed/project5/400/200.jpg" class="card-img-top"
-                                    alt="Project Image">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Game Edukasi Budaya Indonesia</h5>
-                                    <p class="card-text text-muted small">Oleh: Dedi Prasetyo (4342108765)</p>
-                                    <p class="card-text small text-info mb-2">
-                                        <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi">Teknik
-                                            Informatika - D4 Teknologi Rekayasa Multimedia</span>
-                                    </p>
-                                    <p class="card-text">Pengembangan game mobile edukatif untuk mengenalkan keberagaman budaya Indonesia kepada anak-anak.</p>
-                                    <div class="mt-auto">
-                                        <span class="badge bg-warning status-badge">Belum Dinilai</span>
-                                        <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
-                                            data-bs-target="#gradeModal" data-id="5"
-                                            data-title="Game Edukasi Budaya Indonesia" data-student="Dedi Prasetyo"
-                                            data-nim="4342108765" data-jurusan-prodi="Teknik Informatika - D4 Teknologi Rekayasa Multimedia"
-                                            data-kategori="Game"
-                                            data-description="Pengembangan game mobile edukatif untuk mengenalkan keberagaman budaya Indonesia kepada anak-anak.">
-                                            <i class="bi bi-eye"></i> Lihat & Nilai
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Project 6 -->
-                        <div class="col-md-6 col-lg-4 project-item" data-status="belum-dinilai"
-                            data-jurusan-prodi="Teknik Elektro - D4 Teknik Elektronika"
-                            data-kategori="IoT" data-nim="4342102345" data-student-name="Eko Susilo">
-                            <div class="card project-card h-100">
-                                <img src="https://picsum.photos/seed/project6/400/200.jpg" class="card-img-top"
-                                    alt="Project Image">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Smart Home Security System</h5>
-                                    <p class="card-text text-muted small">Oleh: Eko Susilo (4342102345)</p>
-                                    <p class="card-text small text-info mb-2">
-                                        <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi">Teknik
-                                            Elektro - D4 Teknik Elektronika</span>
-                                    </p>
-                                    <p class="card-text">Sistem keamanan rumah pintar dengan sensor gerak, kamera pengawas, dan notifikasi real-time ke smartphone.</p>
-                                    <div class="mt-auto">
-                                        <span class="badge bg-warning status-badge">Belum Dinilai</span>
-                                        <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
-                                            data-bs-target="#gradeModal" data-id="6"
-                                            data-title="Smart Home Security System" data-student="Eko Susilo"
-                                            data-nim="4342102345" data-jurusan-prodi="Teknik Elektro - D4 Teknik Elektronika"
-                                            data-kategori="IoT"
-                                            data-description="Sistem keamanan rumah pintar dengan sensor gerak, kamera pengawas, dan notifikasi real-time ke smartphone.">
-                                            <i class="bi bi-eye"></i> Lihat & Nilai
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -601,6 +523,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <!-- PERBAIKAN: Sesuaikan ID tombol dengan JavaScript -->
                     <button type="button" class="btn btn-success" id="saveGradeBtn"><i class="bi bi-check-circle"></i>
                         Simpan Penilaian</button>
                 </div>
@@ -613,14 +536,14 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Fungsi untuk menampilkan toast notifikasi
             function showToast(message, type = 'success') {
                 const toastContainer = document.querySelector('.toast-container');
                 const toastId = 'toast-' + Date.now();
-                
+
                 const toastHtml = `
                     <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
@@ -631,12 +554,12 @@
                         </div>
                     </div>
                 `;
-                
+
                 toastContainer.insertAdjacentHTML('beforeend', toastHtml);
                 const toastElement = document.getElementById(toastId);
                 const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
                 toast.show();
-                
+
                 // Hapus elemen toast setelah disembunyikan
                 toastElement.addEventListener('hidden.bs.toast', () => {
                     toastElement.remove();
@@ -664,35 +587,35 @@
                 const statusFilter = document.getElementById('statusFilter').value;
                 const jurusanProdiFilter = document.getElementById('jurusanProdiFilter').value;
                 const kategoriFilter = document.getElementById('kategoriFilter').value;
-                
+
                 const projectItems = document.querySelectorAll('.project-item');
-                
+
                 projectItems.forEach(item => {
                     const status = item.dataset.status;
                     const jurusanProdi = item.dataset.jurusanProdi;
                     const kategori = item.dataset.kategori;
-                    
+
                     let showItem = true;
-                    
+
                     if (statusFilter !== 'all' && status !== statusFilter) {
                         showItem = false;
                     }
-                    
+
                     if (jurusanProdiFilter !== 'all' && jurusanProdi !== jurusanProdiFilter) {
                         showItem = false;
                     }
-                    
+
                     if (kategoriFilter !== 'all' && kategori !== kategoriFilter) {
                         showItem = false;
                     }
-                    
+
                     if (showItem) {
                         item.classList.remove('d-none');
                     } else {
                         item.classList.add('d-none');
                     }
                 });
-                
+
                 updateProjectCount();
             }
 
@@ -702,11 +625,11 @@
             document.getElementById('kategoriFilter').addEventListener('change', applyFilters);
 
             // Event listener untuk reset filter
-            document.getElementById('resetFilters').addEventListener('click', function() {
+            document.getElementById('resetFilters').addEventListener('click', function () {
                 document.getElementById('statusFilter').value = 'all';
                 document.getElementById('jurusanProdiFilter').value = 'all';
                 document.getElementById('kategoriFilter').value = 'all';
-                
+
                 applyFilters();
                 showToast('Filter telah direset');
             });
@@ -715,7 +638,7 @@
             function searchProjects(query) {
                 const projectItems = document.querySelectorAll('.project-item');
                 const searchResults = document.getElementById('searchResults');
-                
+
                 if (query.trim() === '') {
                     searchResults.style.display = 'none';
                     projectItems.forEach(item => {
@@ -724,90 +647,90 @@
                     updateProjectCount();
                     return;
                 }
-                
+
                 searchResults.innerHTML = '';
                 let hasResults = false;
-                
+
                 projectItems.forEach(item => {
                     const nim = item.dataset.nim;
                     const studentName = item.dataset.studentName.toLowerCase();
                     const title = item.querySelector('.card-title').textContent.toLowerCase();
-                    
+
                     if (nim.includes(query) || studentName.includes(query.toLowerCase()) || title.includes(query.toLowerCase())) {
                         item.classList.remove('d-none');
-                        
+
                         // Add to search results
                         const resultItem = document.createElement('div');
                         resultItem.className = 'search-result-item';
-                        
+
                         // Highlight matching text
                         let highlightedName = item.dataset.studentName;
                         let highlightedNim = nim;
-                        
+
                         if (studentName.includes(query.toLowerCase())) {
                             const regex = new RegExp(`(${query})`, 'gi');
                             highlightedName = highlightedName.replace(regex, '<span class="highlight">$1</span>');
                         }
-                        
+
                         if (nim.includes(query)) {
                             const regex = new RegExp(`(${query})`, 'gi');
                             highlightedNim = highlightedNim.replace(regex, '<span class="highlight">$1</span>');
                         }
-                        
+
                         resultItem.innerHTML = `
                             <div><strong>${highlightedName}</strong> (${highlightedNim})</div>
                             <div class="small text-muted">${item.querySelector('.card-title').textContent}</div>
                         `;
-                        
-                        resultItem.addEventListener('click', function() {
+
+                        resultItem.addEventListener('click', function () {
                             // Scroll to the project card
                             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            
+
                             // Highlight the card temporarily
                             const card = item.querySelector('.project-card');
                             card.style.transition = 'box-shadow 0.3s';
                             card.style.boxShadow = '0 0 15px rgba(0, 51, 102, 0.5)';
-                            
+
                             setTimeout(() => {
                                 card.style.boxShadow = '';
                             }, 2000);
-                            
+
                             // Hide search results
                             searchResults.style.display = 'none';
                         });
-                        
+
                         searchResults.appendChild(resultItem);
                         hasResults = true;
                     } else {
                         item.classList.add('d-none');
                     }
                 });
-                
+
                 if (hasResults) {
                     searchResults.style.display = 'block';
                 } else {
                     searchResults.innerHTML = '<div class="no-results">Tidak ada hasil yang ditemukan</div>';
                     searchResults.style.display = 'block';
                 }
-                
+
                 updateProjectCount();
             }
 
             // Event listener untuk form pencarian
-            document.getElementById('searchForm').addEventListener('submit', function(e) {
+            document.getElementById('searchForm').addEventListener('submit', function (e) {
                 e.preventDefault();
                 const query = document.getElementById('searchInput').value;
                 searchProjects(query);
             });
 
             // Event listener untuk input pencarian (real-time search)
-            document.getElementById('searchInput').addEventListener('input', function() {
+            document.getElementById('searchInput').addEventListener('input', function () {
                 const query = this.value;
                 searchProjects(query);
             });
 
             // Sembunyikan hasil pencarian saat klik di luar
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const searchContainer = document.querySelector('.search-container');
                 if (!searchContainer.contains(e.target)) {
                     document.getElementById('searchResults').style.display = 'none';
@@ -815,10 +738,11 @@
             });
 
             // Event listener untuk modal penilaian
-            document.getElementById('gradeModal').addEventListener('show.bs.modal', function(event) {
+            document.getElementById('gradeModal').addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
-                
+
                 // Ambil data dari atribut button
+                const id = button.getAttribute('data-id');
                 const title = button.getAttribute('data-title');
                 const student = button.getAttribute('data-student');
                 const nim = button.getAttribute('data-nim');
@@ -826,7 +750,10 @@
                 const kategori = button.getAttribute('data-kategori');
                 const description = button.getAttribute('data-description');
                 const status = button.getAttribute('data-status');
-                
+
+                // Simpan id_project ke atribut data modal
+                document.getElementById('gradeModal').setAttribute('data-project-id', id);
+
                 // Isi modal dengan data
                 document.getElementById('modalProjectTitle').textContent = title;
                 document.getElementById('modalStudentName').textContent = student;
@@ -834,11 +761,11 @@
                 document.getElementById('modalJurusanProdi').textContent = jurusanProdi;
                 document.getElementById('modalProjectKategori').textContent = kategori;
                 document.getElementById('modalProjectDescription').textContent = description;
-                
+
                 // Set status badge
                 const statusBadge = document.getElementById('modalProjectStatus');
                 statusBadge.className = 'badge';
-                
+
                 if (status === 'sudah-dinilai') {
                     statusBadge.classList.add('bg-success');
                     statusBadge.textContent = 'Sudah Dinilai';
@@ -846,60 +773,72 @@
                     statusBadge.classList.add('bg-warning');
                     statusBadge.textContent = 'Belum Dinilai';
                 }
-                
+
                 // Reset form
                 document.getElementById('gradeForm').reset();
             });
 
             // Event listener untuk tombol simpan penilaian
-            document.getElementById('saveGradeBtn').addEventListener('click', function() {
+            document.getElementById('saveGradeBtn').addEventListener('click', function () { // PERBAIKAN: ID yang benar
                 const grade = document.getElementById('gradeSelect').value;
                 const comment = document.getElementById('commentText').value;
-                
+
+                // Ambil id_project dari atribut data pada modal
+                const projectId = document.getElementById('gradeModal').getAttribute('data-project-id');
+
                 if (!grade) {
                     showToast('Silakan pilih nilai terlebih dahulu', 'danger');
                     return;
                 }
-                
-                // Simulasi penyimpanan data
-                showLoading();
-                
-                setTimeout(() => {
-                    hideLoading();
-                    
-                    // Tutup modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
-                    modal.hide();
-                    
-                    // Tampilkan notifikasi sukses
-                    showToast('Penilaian berhasil disimpan!');
-                    
-                    // Update status badge di kartu proyek (dalam aplikasi nyata, ini akan dilakukan via AJAX)
-                    // Ini hanya simulasi
-                    const modalProjectTitle = document.getElementById('modalProjectTitle').textContent;
-                    const projectCards = document.querySelectorAll('.project-card');
-                    
-                    projectCards.forEach(card => {
-                        if (card.querySelector('.card-title').textContent === modalProjectTitle) {
-                            const badge = card.querySelector('.status-badge');
-                            badge.textContent = `Sudah Dinilai (${grade})`;
-                            badge.className = 'badge bg-success status-badge';
-                            
-                            // Update data attribute
-                            const projectItem = card.closest('.project-item');
-                            projectItem.dataset.status = 'sudah-dinilai';
-                            
-                            // Update tombol
-                            const button = card.querySelector('.btn');
-                            button.className = 'btn btn-secondary btn-sm float-end';
-                            button.innerHTML = '<i class="bi bi-eye"></i> Lihat Detail';
-                        }
-                    });
-                }, 1000);
-            });
 
-            // Inisialisasi
-            updateProjectCount();
+                if (!projectId) {
+                    showToast('Terjadi kesalahan: ID Proyek tidak ditemukan.', 'danger');
+                    return;
+                }
+
+                // Tampilkan loading saat proses pengiriman data
+                showLoading();
+
+                // Gunakan fetch untuk mengirim data ke proses_penilaian.php
+                fetch('proses_penilaian.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'id_project': projectId,
+                        'nilai': grade,
+                        'komentar': comment
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading(); // Sembunyikan loading setelah mendapat respons
+
+                        if (data.success) {
+                            // Tutup modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
+                            modal.hide();
+
+                            // Tampilkan notifikasi sukses
+                            showToast(data.message, 'success');
+
+                            // Reload halaman setelah 1.5 detik untuk melihat perubahan
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+
+                        } else {
+                            // Tampilkan notifikasi error dari server
+                            showToast(data.message, 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading(); // Sembunyikan loading jika terjadi error
+                        console.error('Error:', error);
+                        showToast('Terjadi kesalahan saat menyimpan penilaian', 'danger');
+                    });
+            });
         });
     </script>
 </body>
