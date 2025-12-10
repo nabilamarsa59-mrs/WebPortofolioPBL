@@ -7,7 +7,7 @@ session_start();
 require_once 'koneksi.php';
 
 // 3. Inisialisasi Variabel Pesan Error
- $error_message = '';
+$error_message = '';
 
 // 4. Cek Apakah Form Telah Dikirim (Metode POST)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -25,10 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
             $user = null; // Inisialisasi variabel user
 
-            // --- KASUS 1: JIKA YANG LOGIN ADALAH MAHASISWA ---
+            // --- KASUS 1: JIKA YANG LOGIN ADALAH MAHASISWA (pakai NIM) ---
             if ($user_type == 'mahasiswa') {
-                // Query untuk mengambil data mahasiswa berdasarkan NIM
-                $sql = "SELECT u.id as user_id, u.password, u.role, m.nim
+                // Query untuk mengambil data mahasiswa dengan JOIN ke tabel mahasiswa
+                $sql = "SELECT u.id as user_id, u.password, u.role, m.id as mahasiswa_id, m.nim
                         FROM users u
                         JOIN mahasiswa m ON u.id_mahasiswa = m.id
                         WHERE m.nim = ? AND u.role = 'mahasiswa'";
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->execute([$identifier]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // --- KASUS 2: JIKA YANG LOGIN ADALAH DOSEN ---
+                // --- KASUS 2: JIKA YANG LOGIN ADALAH DOSEN (pakai Username) ---
             } elseif ($user_type == 'dosen') {
                 // Query untuk mengambil data dosen berdasarkan username
                 $sql = "SELECT u.id as user_id, u.password, u.role, u.id_dosen
@@ -48,18 +48,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // 8. Verifikasi User dan Password
-            // Periksa apakah user ditemukan dan passwordnya cocok
-            // PERBAIKAN: Gunakan password_verify() untuk keamanan
             if ($user && password_verify($password, $user['password'])) {
                 // Jika berhasil, simpan data ke sesi
                 $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['role'] = $user['role'];
-                $_SESSION['status'] = "login"; // Tambahkan status untuk memudahkan pengecekan
+                $_SESSION['level'] = $user['role']; // Gunakan 'level' untuk konsistensi
+                $_SESSION['status'] = "login";
 
                 // Simpan identifier yang spesifik untuk setiap role
                 if ($user['role'] == 'dosen') {
                     $_SESSION['id_dosen'] = $user['id_dosen'];
-                } else {
+                } else { // Mahasiswa
+                    $_SESSION['id_mahasiswa'] = $user['mahasiswa_id'];
                     $_SESSION['nim'] = $user['nim'];
                 }
 
@@ -79,6 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } catch (PDOException $e) {
             // Jika terjadi error pada database
             $error_message = "Terjadi kesalahan. Silakan coba lagi.";
+            // Untuk debugging, tampilkan error-nya. Hapus di production!
+            // $error_message = "Terjadi kesalahan: " . $e->getMessage();
         }
     }
 }
@@ -86,20 +87,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - WorkPiece</title>
-
     <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
     <style>
         :root {
             --primary-color: #003366;
@@ -111,7 +110,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             --font-family: 'Poppins', sans-serif;
         }
 
-        /* --- Styling Dasar --- */
         body {
             font-family: var(--font-family);
             margin: 0;
@@ -125,7 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             position: relative;
         }
 
-        /* Overlay gelap untuk kontras teks */
         body::before {
             content: "";
             position: absolute;
@@ -137,7 +134,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             z-index: 1;
         }
 
-        /* --- Kotak Login Utama --- */
         .login-wrapper {
             position: relative;
             z-index: 2;
@@ -167,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin-bottom: 30px;
         }
 
-        /* --- Pemilih Tipe User --- */
+        /* --- Pemilih Tipe User (DIKEMBALIKAN) --- */
         .user-type-selector {
             display: flex;
             background-color: #f0f0f0;
@@ -225,7 +221,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             outline: none;
         }
 
-        /* --- Alert Error --- */
         .alert-danger-custom {
             background-color: #f8d7da;
             border-color: #f5c6cb;
@@ -236,7 +231,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-align: center;
         }
 
-        /* --- Tombol --- */
         .btn-login {
             width: 100%;
             background-color: var(--primary-color);
@@ -254,30 +248,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn-login:hover {
             background-color: var(--secondary-color);
         }
-
-        /* --- Responsivitas --- */
-        @media (max-width: 576px) {
-            .login-container {
-                padding: 30px 25px;
-            }
-
-            .logo {
-                font-size: 1.9rem;
-            }
-
-            .user-type-option i {
-                font-size: 1rem;
-            }
-
-            .user-type-option span {
-                font-size: 0.9rem;
-            }
-        }
     </style>
 </head>
 
 <body>
-
     <div class="login-wrapper">
         <div class="login-container">
             <div class="logo">WorkPiece</div>
@@ -294,7 +268,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Input tersembunyi untuk menyimpan tipe user -->
                 <input type="hidden" name="user_type" id="user_type_input" value="mahasiswa">
 
-                <!-- Pilihan Tipe User -->
+                <!-- Pilihan Tipe User (DIKEMBALIKAN) -->
                 <div class="user-type-selector">
                     <div class="user-type-option active" data-type="mahasiswa">
                         <i class="bi bi-mortarboard-fill"></i>
@@ -328,6 +302,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- JavaScript untuk mengubah form (DIKEMBALIKAN) -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const userTypeOptions = document.querySelectorAll('.user-type-option');
