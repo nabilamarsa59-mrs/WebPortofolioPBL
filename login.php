@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Jika terjadi error pada database
             $error_message = "Terjadi kesalahan. Silakan coba lagi.";
             // Untuk debugging, tampilkan error-nya. Hapus di production!
-            // $error_message = "Terjadi kesalahan: " . $e->getMessage();
+            $error_message = "Terjadi kesalahan: " . $e->getMessage();
         }
     }
 }
