@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($user_type == 'mahasiswa') {
                 // Query untuk mengambil data mahasiswa berdasarkan NIM
                 $sql = "SELECT u.id as user_id, u.password, u.role, m.nim
-                        FROM users u 
+                        FROM users u
                         JOIN mahasiswa m ON u.id_mahasiswa = m.id
                         WHERE m.nim = ? AND u.role = 'mahasiswa'";
                 $stmt = $pdo->prepare($sql);
@@ -52,6 +52,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Jika berhasil, simpan data ke sesi
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['role'] = $user['role'];
+
+                // --- TAMBAHKAN DUA BARIS INI ---
+                $_SESSION['status'] = "login";
+                $_SESSION['level'] = $user['role'];
 
                 // Simpan identifier yang spesifik untuk setiap role
                 if ($user['role'] == 'dosen') {
