@@ -2,16 +2,17 @@
 session_start();
 require_once 'koneksi.php';
 
-if (!isset($_SESSION['dosen_id'])) {
+// PERBAIKAN: Sesuaikan nama variabel session
+if (!isset($_SESSION['id_dosen'])) {
     echo json_encode(['success' => false, 'message' => 'Anda belum login']);
     exit();
 }
 
- $dosen_id = $_SESSION['dosen_id'];
+// PERBAIKAN: Sesuaikan nama variabel session
+ $dosen_id = $_SESSION['id_dosen'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_profil'])) {
-    $file = $_FILES['foto_profil'];
-    
+
     // Validasi file
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
     if (!in_array($file['type'], $allowed_types)) {

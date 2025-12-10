@@ -2,15 +2,17 @@
 session_start();
 require_once 'koneksi.php';
 
-if (!isset($_SESSION['dosen_id'])) {
+// PERBAIKAN: Sesuaikan nama variabel session
+if (!isset($_SESSION['id_dosen'])) {
     echo json_encode(['success' => false, 'message' => 'Anda belum login']);
     exit();
 }
 
- $dosen_id = $_SESSION['dosen_id'];
+// PERBAIKAN: Sesuaikan nama variabel session
+ $dosen_id = $_SESSION['id_dosen'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama_lengkap = $_POST['nama_lengkap'];
+     $nama_lengkap = $_POST['nama_lengkap'];
     $email = $_POST['email'];
     $jabatan = $_POST['jabatan'];
     $bio = $_POST['bio'];
