@@ -10,20 +10,20 @@ require_once '../koneksi.php'; // Sambungkan ke database
 // --- KODE UNTUK MENGAMBIL DATA ---
 // Query untuk mengambil semua data proyek beserta data mahasiswa dan penilaiannya
 // Menggunakan LEFT JOIN karena proyek mungkin belum dinilai
- $sql = "SELECT 
-            p.id_project, 
-            p.judul, 
-            p.deskripsi, 
-            p.kategori,
-            p.jurusan_prodi,
-            m.nama_mahasiswa,
-            m.nim,
-            pen.nilai,
-            pen.komentar
-        FROM projects p
-        JOIN mahasiswa m ON p.id_mahasiswa = m.id_mahasiswa
-        LEFT JOIN penilaian pen ON p.id_project = pen.id_project
-        ORDER BY p.created_at DESC";
+ $sql = "SELECT
+           p.id,
+           p.judul,
+           p.deskripsi,
+           p.kategori,
+           p.jurusan_prodi,
+           m.nama_mahasiswa,
+           m.nim,
+           pen.nilai,
+           pen.komentar
+       FROM projects p
+       JOIN mahasiswa m ON p.id_mahasiswa = m.id_mahasiswa
+       LEFT JOIN penilaian pen ON p.id = pen.id_project  
+       ORDER BY p.created_at DESC";
 
  $stmt = $pdo->prepare($sql);
  $stmt->execute();
@@ -412,7 +412,7 @@ require_once '../koneksi.php'; // Sambungkan ke database
                             </div>
                         <?php else: ?>
                             <?php foreach ($projects as $project): ?>
-                                <div class="col-md-6 col-lg-4 project-item" 
+                                <div class="col-md-6 col-lg-4 project-item"
                                      data-status="<?= $project['nilai'] ? 'sudah-dinilai' : 'belum-dinilai' ?>"
                                      data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
                                      data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
