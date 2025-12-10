@@ -1,25 +1,22 @@
 <?php
-// Konfigurasi koneksi ke database
- $host = 'localhost';      // atau 127.0.0.1
- $dbname = 'db_portofolio'; // Nama database yang Anda buat
- $username = 'root';        // Username database MySQL Anda (default: root)
- $password = '';            // Password database MySQL Anda (default: kosong untuk XAMPP)
+// --- KONFIGURASI DATABASE ---
+ $host = 'localhost';
+ $username = 'root';     // Username MySQL kamu
+ $password = '';         // Password MySQL kamu
+ $dbname = 'db_portofolio'; // Nama database kamu (yang di foto)
 
-// Buat DSN (Data Source Name)
- $dsn = "mysql:host=$host;dbname=$dbname";
-
-// Opsi PDO
+// Opsi PDO biar lebih aman
  $options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Menampilkan error exception
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Fetch mode default menjadi associative array
-    PDO::ATTR_EMULATE_PREPARES   => false,                  // Menggunakan prepared statement asli
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
 // Mencoba membuat koneksi
 try {
-    $pdo = new PDO($dsn, $username, $password, $options);
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password, $options);
 } catch (\PDOException $e) {
-    // Jika koneksi gagal, tampilkan pesan error dan hentikan skrip
-    throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    // Jika koneksi gagal, tampilkan pesan error
+    die("Koneksi database gagal: " . $e->getMessage());
 }
 ?>
