@@ -49,10 +49,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // 8. Verifikasi User dan Password
             // Periksa apakah user ditemukan dan passwordnya cocok
-            if ($user && $password === $user['password']) {
+            // PERBAIKAN: Gunakan password_verify() untuk keamanan
+            if ($user && password_verify($password, $user['password'])) {
                 // Jika berhasil, simpan data ke sesi
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['role'] = $user['role'];
+                $_SESSION['status'] = "login"; // Tambahkan status untuk memudahkan pengecekan
 
                 // Simpan identifier yang spesifik untuk setiap role
                 if ($user['role'] == 'dosen') {
