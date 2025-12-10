@@ -1,9 +1,19 @@
 <?php
+// --- 1. CEK KEAMANAN ---
+// Pastikan hanya user mahasiswa yang sudah login yang bisa akses halaman ini.
 session_start();
 require_once '../koneksi.php';
-require_once '../auth_check.php'; // Pakai satpam pintar kita
 
-// Ambil data mahasiswa yang sedang login
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
+    header("Location: ../login.php");
+    exit();
+}
+
+// --- 2. INISIALISASI VARIABEL PESAN ---
+ $update_message = '';
+ $update_error = '';
+
+// --- 3. AMBIL DATA MAHASISWA YANG SEDANG LOGIN ---
 try {
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.email, m.nim, m.jurusan, m.foto_profil
                       FROM mahasiswa m
@@ -16,44 +26,55 @@ try {
         die("Data mahasiswa tidak ditemukan.");
     }
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    die("Error saat mengambil data: " . $e->getMessage());
 }
 
-// Proses update profil
- $update_message = '';
+// --- 4. PROSES UPDATE PROFIL ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = $_POST['nama'];
     $email = $_POST['email'];
     $nim = $_POST['nim'];
     $jurusan = $_POST['jurusan'];
 
-    // Proses upload foto profil
-    $nama_foto = $mahasiswa['foto_profil']; // Default ke foto lama
+    // LANGKAH KRUSIAL: Default-kan nama foto ke foto yang sudah ada di database.
+    // Ini memastikan jika tidak ada foto baru yang diupload, foto lama tidak akan hilang.
+    $nama_foto = $mahasiswa['foto_profil'];
+
+    // Proses upload foto profil HANYA JIKA ADA FILE BARU yang diunggah.
     if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_ERR_OK) {
         $file_tmp = $_FILES['foto_profil']['tmp_name'];
         $file_name = $_FILES['foto_profil']['name'];
         $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        $new_file_name = 'profil_' . $mahasiswa['nim'] . '.' . $file_ext;
+        $new_file_name = 'profil_' . $mahasiswa['nim'] . '_' . uniqid() . '.' . $file_ext;
         $upload_path = '../uploads/' . $new_file_name;
 
         if (move_uploaded_file($file_tmp, $upload_path)) {
+            // Jika upload berhasil, hapus foto lama (jika ada dan bukan default)
+            if (!empty($mahasiswa['foto_profil']) && $mahasiswa['foto_profil'] !== 'default-avatar.png' && file_exists('../uploads/' . $mahasiswa['foto_profil'])) {
+                unlink('../uploads/' . $mahasiswa['foto_profil']);
+            }
+            // Gunakan nama file baru
             $nama_foto = $new_file_name;
+        } else {
+            $update_error = "Gagal mengupload foto. Periksa folder 'uploads' dan izinnya.";
         }
     }
 
-    // Update database
-    try {
-        $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
-        $stmt_update = $pdo->prepare($sql_update);
-        $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
-        $update_message = "Profil berhasil diperbarui!";
+    // Update database hanya jika tidak ada error upload
+    if (empty($update_error)) {
+        try {
+            $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
+            $stmt_update = $pdo->prepare($sql_update);
+            $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
+            $update_message = "Profil berhasil diperbarui!";
 
-        // Refresh data mahasiswa
-        $stmt->execute([$_SESSION['user_id']]);
-        $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Refresh data mahasiswa untuk menampilkan perubahan
+            $stmt->execute([$_SESSION['user_id']]);
+            $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    } catch (PDOException $e) {
-        $update_message = "Gagal memperbarui profil: " . $e->getMessage();
+        } catch (PDOException $e) {
+            $update_error = "Gagal memperbarui profil: " . $e->getMessage();
+        }
     }
 }
 ?>
@@ -68,77 +89,146 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: whitesmoke; padding-top: 80px; }
-        .navbar { background-color: #002b5b !important; }
-        .navbar a { color: #fff !important; text-decoration: none; margin-left: 15px; }
-        .navbar a:hover { text-decoration: underline; }
-        #previewFoto { width: 150px; height: 150px; object-fit: cover; cursor: pointer; }
-        .card { box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: whitesmoke;
+            padding-top: 80px;
+        }
+        .navbar {
+            background: rgba(0, 0, 60, 0.8) !important;
+        }
+        .navbar a {
+            color: #fff !important;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        /* --- Gaya Kartu Profil --- */
+        .profile-card {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            border: none;
+        }
+        .profile-img-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+        }
+        #previewFoto {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .change-photo-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .change-photo-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body class="bg-light">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="home_mhs.php">WorkPiece</a>
-            <div class="d-flex ms-auto">
-                <a href="home_mhs.php" class="nav-link">Beranda</a>
-                <a href="#" class="nav-link text-decoration-underline">Profil</a>
-                <a href="../logout.php" class="nav-link">Logout</a>
+            <a class="navbar-brand ms-3" href="home_mhs.php">WorkPiece</a>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="home_mhs.php">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link active text-decoration-underline" href="#">Profil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../logout.php">Logout</a></li>
+                </ul>
             </div>
         </div>
     </nav>
 
     <!-- Main Container -->
     <main class="container my-5">
+        <!-- Tampilkan Pesan Sukses atau Error -->
         <?php if ($update_message): ?>
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <?= $update_message ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i> <?= $update_message ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
 
-        <div class="row g-4">
+        <?php if ($update_error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i> <?= $update_error ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <div class="row g-4 align-items-md-center">
             <!-- KIRI: Foto Profil -->
-            <section class="col-md-4">
-                <div class="card text-center shadow-sm p-4">
-                    <h5 class="mb-3">Foto Profil</h5>
-                    <img id="previewFoto" src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.png') ?>"
-                         alt="Foto Profil" class="rounded-circle mx-auto d-block border">
-                    <div class="mt-3">
-                        <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" hidden>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('uploadFoto').click()">Ganti Foto</button>
+            <section class="col-md-4 text-center">
+                <div class="profile-card card shadow-sm p-4">
+                    <h5 class="mb-4">Foto Profil</h5>
+                    <div class="profile-img-container">
+                        <img id="previewFoto" src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.png') ?>" alt="Foto Profil">
+                        <label for="uploadFoto" class="change-photo-btn">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
                     </div>
+                    <!-- TEKS TAMBAHAN UNTUK KEJELASAN -->
+                    <p class="mt-3 text-muted small">Foto opsional. Klik ikon kamera untuk mengganti.</p>
                 </div>
             </section>
 
             <!-- KANAN: Form Profil -->
             <section class="col-md-8">
-                <div class="card shadow-sm p-4">
-                    <h4 class="text-primary border-bottom pb-2 mb-3">Informasi Profil</h4>
+                <div class="profile-card card shadow-sm p-4">
+                    <h4 class="text-primary border-bottom pb-3 mb-4">Informasi Profil</h4>
                     <form action="profil_page.php" method="post" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="nama" class="form-label">Nama Lengkap</label>
-                            <input type="text" name="nama" id="nama" class="form-control" value="<?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>" required>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="nama" class="form-label">Nama Lengkap</label>
+                                <input type="text" name="nama" id="nama" class="form-control" value="<?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nim" class="form-label">NIM</label>
+                                <input type="text" name="nim" id="nim" class="form-control" value="<?= htmlspecialchars($mahasiswa['nim']) ?>" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($mahasiswa['email']) ?>" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="jurusan" class="form-label">Jurusan</label>
+                                <select name="jurusan" id="jurusan" class="form-select" required>
+                                    <option value="Teknik Informatika" <?= $mahasiswa['jurusan'] == 'Teknik Informatika' ? 'selected' : '' ?>>Teknik Informatika</option>
+                                    <option value="Teknik Elektro" <?= $mahasiswa['jurusan'] == 'Teknik Elektro' ? 'selected' : '' ?>>Teknik Elektro</option>
+                                    <option value="Teknik Mesin" <?= $mahasiswa['jurusan'] == 'Teknik Mesin' ? 'selected' : '' ?>>Teknik Mesin</option>
+                                    <option value="Manajemen dan Bisnis" <?= $mahasiswa['jurusan'] == 'Manajemen dan Bisnis' ? 'selected' : '' ?>>Manajemen dan Bisnis</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="nim" class="form-label">NIM</label>
-                            <input type="text" name="nim" id="nim" class="form-control" value="<?= htmlspecialchars($mahasiswa['nim']) ?>" required>
+                        <!-- Input file disembunyikan -->
+                        <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" hidden>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Simpan Perubahan
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($mahasiswa['email']) ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="jurusan" class="form-label">Jurusan</label>
-                            <select name="jurusan" id="jurusan" class="form-select" required>
-                                <option value="Teknik Informatika" <?= $mahasiswa['jurusan'] == 'Teknik Informatika' ? 'selected' : '' ?>>Teknik Informatika</option>
-                                <option value="Teknik Elektro" <?= $mahasiswa['jurusan'] == 'Teknik Elektro' ? 'selected' : '' ?>>Teknik Elektro</option>
-                                <option value="Teknik Mesin" <?= $mahasiswa['jurusan'] == 'Teknik Mesin' ? 'selected' : '' ?>>Teknik Mesin</option>
-                                <option value="Manajemen dan Bisnis" <?= $mahasiswa['jurusan'] == 'Manajemen dan Bisnis' ? 'selected' : '' ?>>Manajemen dan Bisnis</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">Simpan Perubahan</button>
                     </form>
                 </div>
             </section>
