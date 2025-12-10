@@ -16,14 +16,14 @@ require_once '../koneksi.php'; // Sambungkan ke database
            p.deskripsi,
            p.kategori,
            p.jurusan_prodi,
-           m.nama_mahasiswa,
+           m.nama_lengkap,      -- PERBAIKAN: sebelumnya 'nama_mahasiswa'
            m.nim,
            pen.nilai,
            pen.komentar
-       FROM projects p
-       JOIN mahasiswa m ON p.id_mahasiswa = m.id_mahasiswa
-       LEFT JOIN penilaian pen ON p.id = pen.id_project  
-       ORDER BY p.created_at DESC";
+        FROM projects p
+        JOIN mahasiswa m ON p.id_mahasiswa = m.id  -- PERBAIKAN: sebelumnya 'm.id_mahasiswa'
+        LEFT JOIN penilaian pen ON p.id = pen.id_project
+        ORDER BY p.created_at DESC";
 
  $stmt = $pdo->prepare($sql);
  $stmt->execute();

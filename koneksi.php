@@ -1,9 +1,9 @@
 <?php
 // --- KONFIGURASI DATABASE ---
  $host = 'localhost';
- $username = 'root';     // Username MySQL kamu
- $password = '';         // Password MySQL kamu
- $dbname = 'db_portofolio'; // Nama database kamu (yang di foto)
+ $username = 'root';     // Username MySQL
+ $password = '';         // Password MySQL
+ $dbname = 'db_portofolio'; // Nama database 
 
 // Opsi PDO biar lebih aman
  $options = [
