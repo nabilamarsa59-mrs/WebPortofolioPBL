@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,39 +13,84 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <style>
-        :root {
-            --navy-blue: #1e3a5f;
-            --navy-dark: #2d4a6f;
-        }
-
         body {
-            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            background-color: whitesmoke;
+            padding-top: 100px;
         }
 
-        .navbar-custom {
-            background-color: var(--navy-blue);
+        .navbar {
+            background: rgba(0, 0, 60, 0.8) !important;
+            padding: 0.75rem 0;
+            z-index: 1000;
         }
 
-        .text-navy {
-            color: var(--navy-blue);
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff !important;
         }
 
-        .bg-navy {
-            background-color: var(--navy-blue);
+        .navbar-nav .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            margin-left: 25px;
+            transition: color 0.3s;
         }
 
-        .border-navy {
-            border-color: var(--navy-blue) !important;
+        .navbar-nav .nav-link:hover {
+            color: #00ffff !important;
         }
 
-        .profile-avatar {
-            width: 128px;
-            height: 128px;
-            background-color: var(--navy-blue);
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- PERUBAHAN & TAMBAHAN CSS --- */
+        .profile-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1rem;
+        }
+
+        /* Style untuk placeholder ikon dan gambar */
+        .profile-avatar,
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            object-fit: cover; /* Hanya untuk <img> */
+        }
+
+        /* Style khusus untuk placeholder ikon */
+        .profile-avatar {
+            background: rgba(0, 0, 60, 0.8) !important;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        
+        #change-photo-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        /* --- AKHIR PERUBAHAN CSS --- */
+
+        .text-navy {
+            color: #00003c !important;
         }
 
         .stat-number {
@@ -71,13 +117,32 @@
         }
     </style>
 </head>
+
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-custom navbar-dark">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">WorkPiece - Profil Dosen</span>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">WorkPiece</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#profil">Profil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="home_dosen.html">Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php">Logout</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
+
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -87,10 +152,23 @@
                 <!-- Profile Card -->
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
-                        <div class="profile-avatar mx-auto mb-3">
-                            <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+                        <!-- --- PERUBAHAN HTML --- -->
+                        <!-- Container untuk avatar (ikon atau gambar) -->
+                        <div class="profile-container">
+                            <!-- Default: Ikon Profil -->
+                            <div id="avatar-placeholder" class="profile-avatar">
+                                <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="change-photo-btn">
+                                <i class="bi bi-camera-fill text-white"></i>
+                            </button>
                         </div>
-                        <h5 class="text-navy mb-2">Dr. Budi Santoso, M.Kom</h5>
+                        <!-- Input file disembunyikan -->
+                        <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                        <!-- --- AKHIR PERUBAHAN HTML --- -->
+
+                        <h5 class="text-navy mb-2 mt-3">Dr. Budi Santoso, M.Kom</h5>
                         <p class="text-muted small mb-1">NIP: 198501012010121001</p>
                         <p class="text-muted small mb-4">Lektor Kepala</p>
 
@@ -174,5 +252,47 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- --- TAMBAHAN JAVASCRIPT (DIPERBARUI) --- -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mendapatkan elemen-elemen yang dibutuhkan
+            const changePhotoBtn = document.getElementById('change-photo-btn');
+            const profilePicInput = document.getElementById('profile-pic-input');
+            const avatarPlaceholder = document.getElementById('avatar-placeholder');
+            const profileContainer = document.querySelector('.profile-container');
+
+            // Event listener untuk tombol "Ganti Foto"
+            changePhotoBtn.addEventListener('click', () => {
+                profilePicInput.click();
+            });
+
+            // Event listener untuk input file
+            profilePicInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        // 1. Buat elemen <img> baru
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.alt = 'Profile Picture';
+                        newImg.className = 'profile-avatar-img'; // Tambahkan class untuk styling
+
+                        // 2. Ganti placeholder (div yang berisi ikon) dengan gambar baru
+                        avatarPlaceholder.replaceWith(newImg);
+                    };
+
+                    reader.readAsDataURL(file);
+                } else if (file) {
+                    alert('Silakan pilih file gambar yang valid.');
+                }
+            });
+        });
+    </script>
+    <!-- --- AKHIR TAMBAHAN JAVASCRIPT --- -->
 </body>
+
 </html>
