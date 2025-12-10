@@ -2,13 +2,14 @@
 session_start();
 require_once 'koneksi.php';
 
-// Pastikan dosen sudah login
-if (!isset($_SESSION['dosen_id'])) {
-    header("Location: login.php");
+// PERBAIKAN: Sesuaikan nama variabel session
+if (!isset($_SESSION['id_dosen'])) {
+    echo json_encode(['success' => false, 'message' => 'Anda belum login']);
     exit();
 }
 
- $dosen_id = $_SESSION['dosen_id'];
+// PERBAIKAN: Sesuaikan nama variabel session
+ $dosen_id = $_SESSION['id_dosen'];
 
 try {
     // Ambil data dosen
