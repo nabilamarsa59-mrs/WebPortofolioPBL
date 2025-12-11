@@ -30,24 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_file_name = uniqid('project_', true) . '.' . $file_ext;
         $upload_path = '../uploads/' . $new_file_name;
 
-        // --- TAMBAHAN DEBUGGING ---
-        // 1. Cek apakah folder benar-benar ada
-        if (!is_dir('../uploads')) {
-            die("<strong style='color:red;'>ERROR:</strong> Folder 'uploads' tidak ditemukan! Pastikan kamu buat folder ini di dalam 'WebPortofolioPBL'.");
-        }
-
-        // 2. Cek apakah folder bisa ditulis
-        if (!is_writable('../uploads')) {
-            die("<strong style='color:red;'>ERROR:</strong> Folder 'uploads' tidak bisa ditulis! Silakan ubah permission folder menjadi 755 atau 777.");
-        }
-
-        // 3. Coba pindahkan file dan tampilkan error jika gagal
         if (move_uploaded_file($file_tmp, $upload_path)) {
             $nama_file = $new_file_name;
-        } else {
-            die("<strong style='color:red;'>ERROR:</strong> Gagal memindahkan file dari temporary ke folder 'uploads'. Periksa lagi ukuran file dan pengaturan server.");
         }
-        // --- AKHIR TAMBAHAN DEBUGGING ---
     }
     // Simpan ke database (QUERY LEBIH SEDERHANA)
     $sql = "INSERT INTO projects (id_mahasiswa, judul, deskripsi, kategori, tanggal, gambar, link_demo) VALUES (?, ?, ?, ?, ?, ?, ?)";
