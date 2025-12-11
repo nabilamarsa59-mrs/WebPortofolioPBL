@@ -8,9 +8,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     exit();
 }
 
-// --- 2. AMBIL DATA MAHASISWA (CARA LEBIH SEDERHANA DAN PASTI) ---
+// --- 2. AMBIL DATA MAHASISWA (QUERY LEBIH SEDERHANA) ---
 try {
-    // Satu query langsung untuk ambil data mahasiswa berdasarkan session user_id
+    // Query yang lebih langsung dan aman untuk mengambil data mahasiswa
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.email, m.nim, m.jurusan, m.foto_profil
                           FROM users u
                           JOIN mahasiswa m ON u.id_mahasiswa = m.id
@@ -26,39 +26,57 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
-// --- 3. PROSES UPDATE PROFIL (TIDAK PERLU DIUBAH) ---
+// --- 3. PROSES UPDATE PROFIL ---
  $update_message = '';
  $update_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // ... (Kode proses update di bawah ini tidak perlu diubah, biarkan seperti yang semula) ...
     $nama = $_POST['nama'];
     $email = $_POST['email'];
     $nim = $_POST['nim'];
     $jurusan = $_POST['jurusan'];
+
+    // Default-kan nama foto ke foto yang sudah ada di database
     $nama_foto = $mahasiswa['foto_profil'];
 
+    // Proses upload foto profil HANYA JIKA ADA FILE BARU
     if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_ERR_OK) {
-        // ... (kode upload foto biarkan seperti yang semula) ...
-        // ... pastikan di bagian akhir ada variabel $nama_foto ...
+        $file_tmp = $_FILES['foto_profil']['tmp_name'];
+        $file_name = $_FILES['foto_profil']['name'];
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $new_file_name = 'profil_' . $mahasiswa['nim'] . '_' . uniqid() . '.' . $file_ext;
+        $upload_path = '../uploads/' . $new_file_name;
+
+        if (move_uploaded_file($file_tmp, $upload_path)) {
+            // Jika berhasil, hapus foto lama (jika ada dan bukan default)
+            if (!empty($mahasiswa['foto_profil']) && $mahasiswa['foto_profil'] !== 'default-avatar.jpg' && file_exists('../uploads/' . $mahasiswa['foto_profil'])) {
+                unlink('../uploads/' . $mahasiswa['foto_profil']);
+            }
+            // Gunakan nama file baru
+            $nama_foto = $new_file_name;
+        } else {
+            $update_error = "Gagal mengupload foto. Periksa folder 'uploads' dan izinnya.";
+        }
     }
 
-    try {
-        $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
-        $stmt_update = $pdo->prepare($sql_update);
-        $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
-        $update_message = "Profil berhasil diperbarui!";
+    // Update database hanya jika tidak ada error upload
+    if (empty($update_error)) {
+        try {
+            $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
+            $stmt_update = $pdo->prepare($sql_update);
+            $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
+            $update_message = "Profil berhasil diperbarui!";
 
-        // Refresh data mahasiswa
-        $stmt->execute([$_SESSION['user_id']]);
-        $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Refresh data mahasiswa untuk menampilkan perubahan
+            $stmt->execute([$_SESSION['user_id']]);
+            $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    } catch (PDOException $e) {
-        $update_error = "Gagal memperbarui profil: " . $e->getMessage();
+        } catch (PDOException $e) {
+            $update_error = "Gagal memperbarui profil: " . $e->getMessage();
+        }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -69,6 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons (GUNAKAN VERSI LEBIH STABIL) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -86,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .navbar a:hover {
             text-decoration: underline;
         }
-        /* --- Gaya Kartu Profil --- */
         .profile-card {
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-radius: 15px;
@@ -164,12 +183,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
-                        <img id="previewFoto" src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.png') ?>" alt="Foto Profil">
+                        <!-- PERBAIKAN PENTING: Ganti .png menjadi .jpg -->
+                        <img id="previewFoto" src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.jpg') ?>" alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
                         </label>
                     </div>
-                    <!-- TEKS TAMBAHAN UNTUK KEJELASAN -->
                     <p class="mt-3 text-muted small">Foto opsional. Klik ikon kamera untuk mengganti.</p>
                 </div>
             </section>
@@ -202,7 +221,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
                         </div>
-                        <!-- Input file disembunyikan -->
                         <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" hidden>
 
                         <div class="d-grid mt-4">
