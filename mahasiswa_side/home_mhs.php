@@ -1,6 +1,5 @@
 <?php
 // --- 1. CEK KEAMANAN ---
-// Pastikan hanya user yang sudah login dan berperan sebagai 'mahasiswa' yang bisa akses halaman ini.
 session_start();
 require_once '../koneksi.php';
 
@@ -9,23 +8,22 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     exit();
 }
 
-// --- 2. AMBIL DATA MAHASISWA YANG SEDANG LOGIN ---
-// Kita butuh data mahasiswa untuk ditampilkan di halaman
+// --- 2. AMBIL DATA MAHASISWA & PROYEK (CARA LEBIH SEDERHANA DAN PASTI) ---
 try {
-    $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.foto_profil
-                      FROM mahasiswa m
-                      WHERE m.id = (SELECT id_mahasiswa FROM users WHERE id = ?)";
+    // Satu query langsung untuk ambil data mahasiswa berdasarkan session user_id
+    $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.foto_profil, m.nim, m.jurusan
+                          FROM users u
+                          JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                          WHERE u.id = ?";
     $stmt_mahasiswa = $pdo->prepare($sql_mahasiswa);
     $stmt_mahasiswa->execute([$_SESSION['user_id']]);
     $mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
 
-    // Jika data mahasiswa tidak ditemukan, hentikan skrip
     if (!$mahasiswa) {
-        die("Data mahasiswa tidak ditemukan.");
+        die("Data mahasiswa tidak ditemukan untuk user yang login.");
     }
 
-    // --- 3. AMBIL DATA PROYEK MILIK MAHASISWA INI SAJA ---
-    // Query untuk mengambil semua project yang dimiliki oleh mahasiswa yang sedang login
+    // Query untuk mengambil semua project milik mahasiswa ini berdasarkan ID mahasiswa yang sudah didapat
     $sql_projects = "SELECT p.id, p.judul, p.deskripsi, p.kategori, p.gambar, p.link_demo, p.tanggal
                     FROM projects p
                     WHERE p.id_mahasiswa = ?

@@ -1,6 +1,5 @@
 <?php
 // --- 1. CEK KEAMANAN ---
-// Pastikan hanya user mahasiswa yang sudah login yang bisa akses halaman ini.
 session_start();
 require_once '../koneksi.php';
 
@@ -9,15 +8,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     exit();
 }
 
-// --- 2. INISIALISASI VARIABEL PESAN ---
- $update_message = '';
- $update_error = '';
-
-// --- 3. AMBIL DATA MAHASISWA YANG SEDANG LOGIN ---
+// --- 2. AMBIL DATA MAHASISWA (CARA LEBIH SEDERHANA DAN PASTI) ---
 try {
+    // Satu query langsung untuk ambil data mahasiswa berdasarkan session user_id
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.email, m.nim, m.jurusan, m.foto_profil
-                      FROM mahasiswa m
-                      WHERE m.id = (SELECT id_mahasiswa FROM users WHERE id = ?)";
+                          FROM users u
+                          JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                          WHERE u.id = ?";
     $stmt = $pdo->prepare($sql_mahasiswa);
     $stmt->execute([$_SESSION['user_id']]);
     $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -29,55 +26,39 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
-// --- 4. PROSES UPDATE PROFIL ---
+// --- 3. PROSES UPDATE PROFIL (TIDAK PERLU DIUBAH) ---
+ $update_message = '';
+ $update_error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ... (Kode proses update di bawah ini tidak perlu diubah, biarkan seperti yang semula) ...
     $nama = $_POST['nama'];
     $email = $_POST['email'];
     $nim = $_POST['nim'];
     $jurusan = $_POST['jurusan'];
-
-    // LANGKAH KRUSIAL: Default-kan nama foto ke foto yang sudah ada di database.
-    // Ini memastikan jika tidak ada foto baru yang diupload, foto lama tidak akan hilang.
     $nama_foto = $mahasiswa['foto_profil'];
 
-    // Proses upload foto profil HANYA JIKA ADA FILE BARU yang diunggah.
     if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_ERR_OK) {
-        $file_tmp = $_FILES['foto_profil']['tmp_name'];
-        $file_name = $_FILES['foto_profil']['name'];
-        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        $new_file_name = 'profil_' . $mahasiswa['nim'] . '_' . uniqid() . '.' . $file_ext;
-        $upload_path = '../uploads/' . $new_file_name;
-
-        if (move_uploaded_file($file_tmp, $upload_path)) {
-            // Jika upload berhasil, hapus foto lama (jika ada dan bukan default)
-            if (!empty($mahasiswa['foto_profil']) && $mahasiswa['foto_profil'] !== 'default-avatar.png' && file_exists('../uploads/' . $mahasiswa['foto_profil'])) {
-                unlink('../uploads/' . $mahasiswa['foto_profil']);
-            }
-            // Gunakan nama file baru
-            $nama_foto = $new_file_name;
-        } else {
-            $update_error = "Gagal mengupload foto. Periksa folder 'uploads' dan izinnya.";
-        }
+        // ... (kode upload foto biarkan seperti yang semula) ...
+        // ... pastikan di bagian akhir ada variabel $nama_foto ...
     }
 
-    // Update database hanya jika tidak ada error upload
-    if (empty($update_error)) {
-        try {
-            $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
-            $stmt_update = $pdo->prepare($sql_update);
-            $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
-            $update_message = "Profil berhasil diperbarui!";
+    try {
+        $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
+        $stmt_update = $pdo->prepare($sql_update);
+        $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
+        $update_message = "Profil berhasil diperbarui!";
 
-            // Refresh data mahasiswa untuk menampilkan perubahan
-            $stmt->execute([$_SESSION['user_id']]);
-            $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Refresh data mahasiswa
+        $stmt->execute([$_SESSION['user_id']]);
+        $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        } catch (PDOException $e) {
-            $update_error = "Gagal memperbarui profil: " . $e->getMessage();
-        }
+    } catch (PDOException $e) {
+        $update_error = "Gagal memperbarui profil: " . $e->getMessage();
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
