@@ -15,15 +15,18 @@ require_once '../koneksi.php'; // Sambungkan ke database
            p.judul,
            p.deskripsi,
            p.kategori,
-           p.jurusan_prodi,
-           m.nama_lengkap,      -- PERBAIKAN: sebelumnya 'nama_mahasiswa'
+           p.tanggal,
+           p.gambar,
+           p.link_demo,
+           m.nama_lengkap,      -- DIAMBIL DARI TABEL MAHASISWA
            m.nim,
+           m.jurusan,           -- DIAMBIL DARI TABEL MAHASISWA
            pen.nilai,
            pen.komentar
         FROM projects p
-        JOIN mahasiswa m ON p.id_mahasiswa = m.id  -- PERBAIKAN: sebelumnya 'm.id_mahasiswa'
+        JOIN mahasiswa m ON p.id_mahasiswa = m.id
         LEFT JOIN penilaian pen ON p.id = pen.id_project
-        ORDER BY p.created_at DESC";
+        ORDER BY p.tanggal DESC";
 
  $stmt = $pdo->prepare($sql);
  $stmt->execute();
@@ -314,11 +317,9 @@ require_once '../koneksi.php'; // Sambungkan ke database
                         <a class="nav-link" href="profil_dosen.php">Profil</a>
                     </li>
                     <li class="nav-item">
-                        <!-- PERBAIKAN: Link ke dashboard yang benar -->
                         <a class="nav-link active" href="home_dosen.php">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <!-- PERBAIKAN: Link logout yang benar -->
                         <a class="nav-link" href="../logout.php">Logout</a>
                     </li>
                     <li class="nav-item">
@@ -359,30 +360,10 @@ require_once '../koneksi.php'; // Sambungkan ke database
                                     <select class="form-select form-select-sm" id="jurusanProdiFilter"
                                         style="width: auto;">
                                         <option value="all">Semua Jurusan dan Prodi</option>
-                                        <option value="Teknik Informatika - D4 Rekayasa Perangkat Lunak">Teknik
-                                            Informatika - D4 Rekayasa Perangkat Lunak</option>
-                                        <option value="Teknik Informatika - D4 Teknologi Rekayasa Multimedia">Teknik
-                                            Informatika - D4 Teknologi Rekayasa Multimedia</option>
-                                        <option value="Teknik Informatika - D4 Teknologi Game">Teknik Informatika - D4
-                                            Teknologi Game</option>
-                                        <option value="Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)">
-                                            Teknik Elektro - D4 Teknologi Rekayasa Internet of Things (IoT)</option>
-                                        <option value="Teknik Elektro - D4 Teknik Elektronika">Teknik Elektro - D4
-                                            Teknik Elektronika</option>
-                                        <option value="Teknik Elektro - D4 Teknik Tenaga Listrik">Teknik Elektro - D4
-                                            Teknik Tenaga Listrik</option>
-                                        <option value="Teknik Mesin - D4 Teknologi Rekayasa Manufaktur">Teknik Mesin -
-                                            D4 Teknologi Rekayasa Manufaktur</option>
-                                        <option value="Teknik Mesin - D4 Teknik Mesin Produksi dan Perawatan">Teknik
-                                            Mesin - D4 Teknik Mesin Produksi dan Perawatan</option>
-                                        <option value="Teknik Mesin - D4 Desain Manufaktur">Teknik Mesin - D4 Desain
-                                            Manufaktur</option>
-                                        <option value="Manajemen dan Bisnis - D4 Logistik Bisnis">Manajemen dan Bisnis -
-                                            D4 Logistik Bisnis</option>
-                                        <option value="Manajemen dan Bisnis - D4 Akuntansi Keuangan">Manajemen dan
-                                            Bisnis - D4 Akuntansi Keuangan</option>
-                                        <option value="Manajemen dan Bisnis - D4 Manajemen Pemasaran">Manajemen dan
-                                            Bisnis - D4 Manajemen Pemasaran</option>
+                                        <option value="Teknik Informatika">Teknik Informatika</option>
+                                        <option value="Teknik Elektro">Teknik Elektro</option>
+                                        <option value="Teknik Mesin">Teknik Mesin</option>
+                                        <option value="Manajemen dan Bisnis">Manajemen dan Bisnis</option>
                                     </select>
                                     <select class="form-select form-select-sm" id="kategoriFilter" style="width: auto;">
                                         <option value="all">Semua Kategori</option>
@@ -414,27 +395,27 @@ require_once '../koneksi.php'; // Sambungkan ke database
                             <?php foreach ($projects as $project): ?>
                                 <div class="col-md-6 col-lg-4 project-item"
                                      data-status="<?= $project['nilai'] ? 'sudah-dinilai' : 'belum-dinilai' ?>"
-                                     data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
+                                     data-jurusan-prodi="<?= htmlspecialchars($project['jurusan']) ?>"
                                      data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
                                      data-nim="<?= htmlspecialchars($project['nim']) ?>"
-                                     data-student-name="<?= htmlspecialchars($project['nama_mahasiswa']) ?>">
+                                     data-student-name="<?= htmlspecialchars($project['nama_lengkap']) ?>">
                                     <div class="card project-card h-100">
-                                        <img src="https://picsum.photos/seed/<?= $project['id_project'] ?>/400/200.jpg" class="card-img-top" alt="Project Image">
+                                        <img src="../uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>" class="card-img-top" alt="Project Image">
                                         <div class="card-body d-flex flex-column">
                                             <!-- PERHATIKAN PENGGUNAAN htmlspecialchars() DI BAWAH INI -->
                                             <h5 class="card-title"><?= htmlspecialchars($project['judul']) ?></h5>
-                                            <p class="card-text text-muted small">Oleh: <?= htmlspecialchars($project['nama_mahasiswa']) ?> (<?= htmlspecialchars($project['nim']) ?>)</p>
+                                            <p class="card-text text-muted small">Oleh: <?= htmlspecialchars($project['nama_lengkap']) ?> (<?= htmlspecialchars($project['nim']) ?>)</p>
                                             <p class="card-text small text-info mb-2">
-                                                <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi"><?= htmlspecialchars($project['jurusan_prodi']) ?></span>
+                                                <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi"><?= htmlspecialchars($project['jurusan']) ?></span>
                                             </p>
-                                            <p class="card-text"><?= htmlspecialchars($project['deskripsi']) ?></p>
+                                            <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
                                             <div class="mt-auto">
                                                 <?php if ($project['nilai']): ?>
                                                     <span class="badge bg-success status-badge">Sudah Dinilai (<?= htmlspecialchars($project['nilai']) ?>)</span>
                                                     <button class="btn btn-secondary btn-sm float-end" data-bs-toggle="modal"
-                                                        data-bs-target="#gradeModal" data-id="<?= $project['id_project'] ?>"
-                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_mahasiswa']) ?>"
-                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
+                                                        data-bs-target="#gradeModal" data-id="<?= $project['id'] ?>"
+                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_lengkap']) ?>"
+                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                                                         data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
                                                         data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
                                                         data-status="sudah-dinilai">
@@ -443,9 +424,9 @@ require_once '../koneksi.php'; // Sambungkan ke database
                                                 <?php else: ?>
                                                     <span class="badge bg-warning status-badge">Belum Dinilai</span>
                                                     <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
-                                                        data-bs-target="#gradeModal" data-id="<?= $project['id_project'] ?>"
-                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_mahasiswa']) ?>"
-                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan-prodi="<?= htmlspecialchars($project['jurusan_prodi']) ?>"
+                                                        data-bs-target="#gradeModal" data-id="<?= $project['id'] ?>"
+                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_lengkap']) ?>"
+                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                                                         data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
                                                         data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
                                                         data-status="belum-dinilai">
@@ -483,7 +464,7 @@ require_once '../koneksi.php'; // Sambungkan ke database
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <p><strong>Jurusan dan Prodi:</strong> <span id="modalJurusanProdi">-</span></p>
+                            <p><strong>Jurusan:</strong> <span id="modalJurusanProdi">-</span></p>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -523,7 +504,6 @@ require_once '../koneksi.php'; // Sambungkan ke database
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <!-- PERBAIKAN: Sesuaikan ID tombol dengan JavaScript -->
                     <button type="button" class="btn btn-success" id="saveGradeBtn"><i class="bi bi-check-circle"></i>
                         Simpan Penilaian</button>
                 </div>
@@ -746,7 +726,7 @@ require_once '../koneksi.php'; // Sambungkan ke database
                 const title = button.getAttribute('data-title');
                 const student = button.getAttribute('data-student');
                 const nim = button.getAttribute('data-nim');
-                const jurusanProdi = button.getAttribute('data-jurusan-prodi');
+                const jurusan = button.getAttribute('data-jurusan');
                 const kategori = button.getAttribute('data-kategori');
                 const description = button.getAttribute('data-description');
                 const status = button.getAttribute('data-status');
@@ -758,7 +738,7 @@ require_once '../koneksi.php'; // Sambungkan ke database
                 document.getElementById('modalProjectTitle').textContent = title;
                 document.getElementById('modalStudentName').textContent = student;
                 document.getElementById('modalStudentNim').textContent = nim;
-                document.getElementById('modalJurusanProdi').textContent = jurusanProdi;
+                document.getElementById('modalJurusanProdi').textContent = jurusan;
                 document.getElementById('modalProjectKategori').textContent = kategori;
                 document.getElementById('modalProjectDescription').textContent = description;
 
@@ -779,7 +759,7 @@ require_once '../koneksi.php'; // Sambungkan ke database
             });
 
             // Event listener untuk tombol simpan penilaian
-            document.getElementById('saveGradeBtn').addEventListener('click', function () { // PERBAIKAN: ID yang benar
+            document.getElementById('saveGradeBtn').addEventListener('click', function () {
                 const grade = document.getElementById('gradeSelect').value;
                 const comment = document.getElementById('commentText').value;
 
