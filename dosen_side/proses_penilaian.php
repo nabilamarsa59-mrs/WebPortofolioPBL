@@ -18,29 +18,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nilai = $_POST['nilai'];
     $komentar = $_POST['komentar'];
 
-    // PERBAIKAN: Ambil id_dosen dari session
-    $id_dosen = $_SESSION['id_dosen'];
-
-    // Cek apakah penilaian untuk proyek ini sudah ada
-    $checkSql = "SELECT id FROM penilaian WHERE id_project = ?";
-    $checkStmt = $pdo->prepare($checkSql);
-    $checkStmt->execute([$id_project]);
-    $existingGrade = $checkStmt->fetch();
+    // Validasi input sederhana
+    if (empty($id_project) || empty($nilai)) {
+        echo json_encode(['success' => false, 'message' => 'ID Proyek dan Nilai tidak boleh kosong.']);
+        exit();
+    }
 
     try {
+        // Cek apakah penilaian untuk proyek ini sudah ada
+        $checkSql = "SELECT id FROM penilaian WHERE id_project = ?";
+        $checkStmt = $pdo->prepare($checkSql);
+        $checkStmt->execute([$id_project]);
+        $existingGrade = $checkStmt->fetch();
+
         if ($existingGrade) {
-            // Jika sudah ada, lakukan UPDATE (id_dosen tidak perlu diubah)
+            // Jika sudah ada, lakukan UPDATE
             $sql = "UPDATE penilaian SET nilai = ?, komentar = ? WHERE id_project = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$nilai, $komentar, $id_project]);
         } else {
-            // Jika belum ada, lakukan INSERT dengan id_dosen
-            $sql = "INSERT INTO penilaian (id_project, id_dosen, nilai, komentar) VALUES (?, ?, ?, ?)";
+            // Jika belum ada, lakukan INSERT
+            $sql = "INSERT INTO penilaian (id_project, nilai, komentar) VALUES (?, ?, ?)";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$id_project, $id_dosen, $nilai, $komentar]);
+            $stmt->execute([$id_project, $nilai, $komentar]);
         }
-        
+
         echo json_encode(['success' => true, 'message' => 'Penilaian berhasil disimpan.']);
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
