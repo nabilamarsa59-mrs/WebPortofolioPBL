@@ -10,7 +10,7 @@ require_once '../koneksi.php'; // Sambungkan ke database
 // --- KODE UNTUK MENGAMBIL DATA ---
 // Query untuk mengambil semua data proyek beserta data mahasiswa dan penilaiannya
 // Menggunakan LEFT JOIN karena proyek mungkin belum dinilai
- $sql = "SELECT
+$sql = "SELECT
            p.id,
            p.judul,
            p.deskripsi,
@@ -28,9 +28,9 @@ require_once '../koneksi.php'; // Sambungkan ke database
         LEFT JOIN penilaian pen ON p.id = pen.id_project
         ORDER BY p.tanggal DESC";
 
- $stmt = $pdo->prepare($sql);
- $stmt->execute();
- $projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
 // --- AKHIR KODE PENGGAMBIL DATA ---
 ?>
 
@@ -380,7 +380,8 @@ require_once '../koneksi.php'; // Sambungkan ke database
                                 </div>
                             </div>
                             <div class="col-12 mt-2">
-                                <span class="text-muted">Menampilkan <span id="projectCount"><?= count($projects) ?></span> proyek</span>
+                                <span class="text-muted">Menampilkan <span
+                                        id="projectCount"><?= count($projects) ?></span> proyek</span>
                             </div>
                         </div>
                     </div>
@@ -394,28 +395,38 @@ require_once '../koneksi.php'; // Sambungkan ke database
                         <?php else: ?>
                             <?php foreach ($projects as $project): ?>
                                 <div class="col-md-6 col-lg-4 project-item"
-                                     data-status="<?= $project['nilai'] ? 'sudah-dinilai' : 'belum-dinilai' ?>"
-                                     data-jurusan-prodi="<?= htmlspecialchars($project['jurusan']) ?>"
-                                     data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
-                                     data-nim="<?= htmlspecialchars($project['nim']) ?>"
-                                     data-student-name="<?= htmlspecialchars($project['nama_lengkap']) ?>">
+                                    data-status="<?= $project['nilai'] ? 'sudah-dinilai' : 'belum-dinilai' ?>"
+                                    data-jurusan-prodi="<?= htmlspecialchars($project['jurusan']) ?>"
+                                    data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
+                                    data-nim="<?= htmlspecialchars($project['nim']) ?>"
+                                    data-student-name="<?= htmlspecialchars($project['nama_lengkap']) ?>">
                                     <div class="card project-card h-100">
-                                        <img src="../uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>" class="card-img-top" alt="Project Image">
+                                        <img src="../uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>"
+                                            class="card-img-top" alt="Project Image">
                                         <div class="card-body d-flex flex-column">
                                             <!-- PERHATIKAN PENGGUNAAN htmlspecialchars() DI BAWAH INI -->
                                             <h5 class="card-title"><?= htmlspecialchars($project['judul']) ?></h5>
-                                            <p class="card-text text-muted small">Oleh: <?= htmlspecialchars($project['nama_lengkap']) ?> (<?= htmlspecialchars($project['nim']) ?>)</p>
-                                            <p class="card-text small text-info mb-2">
-                                                <i class="bi bi-building me-1"></i><span class="card-jurusan-prodi"><?= htmlspecialchars($project['jurusan']) ?></span>
+                                            <p class="card-text text-muted small">Oleh:
+                                                <?= htmlspecialchars($project['nama_lengkap']) ?>
+                                                (<?= htmlspecialchars($project['nim']) ?>)
                                             </p>
-                                            <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
+                                            <p class="card-text small text-info mb-2">
+                                                <i class="bi bi-building me-1"></i><span
+                                                    class="card-jurusan-prodi"><?= htmlspecialchars($project['jurusan']) ?></span>
+                                            </p>
+                                            <p class="card-text">
+                                                <?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?>
+                                            </p>
                                             <div class="mt-auto">
                                                 <?php if ($project['nilai']): ?>
-                                                    <span class="badge bg-success status-badge">Sudah Dinilai (<?= htmlspecialchars($project['nilai']) ?>)</span>
+                                                    <span class="badge bg-success status-badge">Sudah Dinilai
+                                                        (<?= htmlspecialchars($project['nilai']) ?>)</span>
                                                     <button class="btn btn-secondary btn-sm float-end" data-bs-toggle="modal"
                                                         data-bs-target="#gradeModal" data-id="<?= $project['id'] ?>"
-                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_lengkap']) ?>"
-                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
+                                                        data-title="<?= htmlspecialchars($project['judul']) ?>"
+                                                        data-student="<?= htmlspecialchars($project['nama_lengkap']) ?>"
+                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>"
+                                                        data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                                                         data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
                                                         data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
                                                         data-status="sudah-dinilai">
@@ -425,8 +436,10 @@ require_once '../koneksi.php'; // Sambungkan ke database
                                                     <span class="badge bg-warning status-badge">Belum Dinilai</span>
                                                     <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal"
                                                         data-bs-target="#gradeModal" data-id="<?= $project['id'] ?>"
-                                                        data-title="<?= htmlspecialchars($project['judul']) ?>" data-student="<?= htmlspecialchars($project['nama_lengkap']) ?>"
-                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>" data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
+                                                        data-title="<?= htmlspecialchars($project['judul']) ?>"
+                                                        data-student="<?= htmlspecialchars($project['nama_lengkap']) ?>"
+                                                        data-nim="<?= htmlspecialchars($project['nim']) ?>"
+                                                        data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                                                         data-kategori="<?= htmlspecialchars($project['kategori']) ?>"
                                                         data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
                                                         data-status="belum-dinilai">
@@ -731,6 +744,22 @@ require_once '../koneksi.php'; // Sambungkan ke database
                 const description = button.getAttribute('data-description');
                 const status = button.getAttribute('data-status');
 
+                // PERBAIKAN: Ambil nilai dan komentar yang sudah ada jika ada
+                const projectItem = document.querySelector(`.project-item[data-nim="${nim}"] [data-id="${id}"]`);
+                let existingGrade = null;
+                let existingComment = null;
+
+                if (projectItem && projectItem.parentElement) {
+                    const badge = projectItem.parentElement.querySelector('.status-badge');
+                    if (badge && badge.textContent.includes('Sudah Dinilai')) {
+                        // Ekstrak nilai dari teks badge
+                        const match = badge.textContent.match(/Sudah Dinilai\s*\(([^)]+)\)/);
+                        if (match) {
+                            existingGrade = match[1];
+                        }
+                    }
+                }
+
                 // Simpan id_project ke atribut data modal
                 document.getElementById('gradeModal').setAttribute('data-project-id', id);
 
@@ -749,19 +778,27 @@ require_once '../koneksi.php'; // Sambungkan ke database
                 if (status === 'sudah-dinilai') {
                     statusBadge.classList.add('bg-success');
                     statusBadge.textContent = 'Sudah Dinilai';
+
+                    // PERBAIKAN: Isi form dengan nilai dan komentar yang sudah ada
+                    if (existingGrade) {
+                        document.getElementById('gradeSelect').value = existingGrade;
+                    }
+                    // Untuk komentar, mungkin perlu fetch data tambahan
                 } else {
                     statusBadge.classList.add('bg-warning');
                     statusBadge.textContent = 'Belum Dinilai';
                 }
 
-                // Reset form
-                document.getElementById('gradeForm').reset();
+                // Reset form jika belum dinilai
+                if (status !== 'sudah-dinilai') {
+                    document.getElementById('gradeForm').reset();
+                }
             });
 
-            // Event listener untuk tombol simpan penilaian
+            // PERBAIKAN: Event listener untuk tombol simpan penilaian
             document.getElementById('saveGradeBtn').addEventListener('click', function () {
                 const grade = document.getElementById('gradeSelect').value;
-                const comment = document.getElementById('commentText').value;
+                const comment = document.getElementById('commentText').value.trim();
 
                 // Ambil id_project dari atribut data pada modal
                 const projectId = document.getElementById('gradeModal').getAttribute('data-project-id');
@@ -779,29 +816,43 @@ require_once '../koneksi.php'; // Sambungkan ke database
                 // Tampilkan loading saat proses pengiriman data
                 showLoading();
 
-                // Gunakan fetch untuk mengirim data ke proses_penilaian.php
+                // PERBAIKAN: Gunakan FormData atau URLSearchParams dengan benar
+                const formData = new URLSearchParams();
+                formData.append('id_project', projectId);
+                formData.append('nilai', grade);
+                formData.append('komentar', comment);
+
+                // PERBAIKAN: Tambahkan error handling yang lebih baik
                 fetch('proses_penilaian.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: new URLSearchParams({
-                        'id_project': projectId,
-                        'nilai': grade,
-                        'komentar': comment
-                    })
+                    body: formData
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        // PERBAIKAN: Cek status response HTTP
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         hideLoading(); // Sembunyikan loading setelah mendapat respons
 
                         if (data.success) {
                             // Tutup modal
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
-                            modal.hide();
+                            const modalElement = document.getElementById('gradeModal');
+                            const modal = bootstrap.Modal.getInstance(modalElement);
+                            if (modal) {
+                                modal.hide();
+                            }
 
                             // Tampilkan notifikasi sukses
-                            showToast(data.message, 'success');
+                            showToast(data.message || 'Penilaian berhasil disimpan', 'success');
+
+                            // PERBAIKAN: Update UI tanpa reload jika memungkinkan
+                            updateProjectStatus(projectId, grade, comment);
 
                             // Reload halaman setelah 1.5 detik untuk melihat perubahan
                             setTimeout(() => {
@@ -810,15 +861,51 @@ require_once '../koneksi.php'; // Sambungkan ke database
 
                         } else {
                             // Tampilkan notifikasi error dari server
-                            showToast(data.message, 'danger');
+                            showToast(data.message || 'Gagal menyimpan penilaian', 'danger');
                         }
                     })
                     .catch(error => {
                         hideLoading(); // Sembunyikan loading jika terjadi error
                         console.error('Error:', error);
-                        showToast('Terjadi kesalahan saat menyimpan penilaian', 'danger');
+                        showToast('Terjadi kesalahan saat menyimpan penilaian. Periksa koneksi internet Anda.', 'danger');
                     });
             });
+
+            // PERBAIKAN: Fungsi untuk update status proyek di UI
+            function updateProjectStatus(projectId, grade, comment) {
+                // Cari semua elemen dengan data-id yang sesuai
+                const buttons = document.querySelectorAll(`button[data-id="${projectId}"]`);
+
+                buttons.forEach(button => {
+                    const projectItem = button.closest('.project-item');
+                    if (projectItem) {
+                        // Update data-status
+                        projectItem.setAttribute('data-status', 'sudah-dinilai');
+
+                        // Update badge
+                        const badge = projectItem.querySelector('.status-badge');
+                        if (badge) {
+                            badge.className = 'badge bg-success status-badge';
+                            badge.textContent = `Sudah Dinilai (${grade})`;
+                        }
+
+                        // Update button
+                        button.className = 'btn btn-secondary btn-sm float-end';
+                        button.innerHTML = '<i class="bi bi-eye"></i> Lihat Detail';
+                        button.setAttribute('data-status', 'sudah-dinilai');
+
+                        // Update modal jika terbuka
+                        const modal = document.getElementById('gradeModal');
+                        if (modal && modal.classList.contains('show')) {
+                            const statusBadge = document.getElementById('modalProjectStatus');
+                            if (statusBadge) {
+                                statusBadge.className = 'badge bg-success';
+                                statusBadge.textContent = 'Sudah Dinilai';
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>
