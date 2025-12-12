@@ -1,10 +1,12 @@
 <?php
-// PERBAIKAN: Tambahkan session check di paling atas
 session_start();
 if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
     header("location:../login.php");
     exit();
 }
+
+// Tentukan ID dosen dari session yang benar
+$dosen_id = isset($_SESSION['id_dosen']) ? $_SESSION['id_dosen'] : (isset($_SESSION['id']) ? $_SESSION['id'] : null);
 ?>
 
 <!DOCTYPE html>
@@ -17,9 +19,10 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -112,12 +115,12 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 
         .stat-number {
             font-size: 1.5rem;
-            color: var(--navy-blue);
+            color: #00003c;
             font-weight: 600;
         }
 
         .activity-item {
-            border-left: 4px solid var(--navy-blue);
+            border-left: 4px solid #00003c;
             background-color: #f8f9fa;
             padding: 1rem;
             margin-bottom: 0.75rem;
@@ -215,13 +218,13 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#profil">Profil</a>
+                        <a class="nav-link active" href="profil_dosen.php">Profil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="home_dosen.html">Beranda</a>
+                        <a class="nav-link" href="home_dosen.php">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Logout</a>
+                        <a class="nav-link" href="../logout.php">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -250,14 +253,14 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                         <!-- Input file disembunyikan -->
                         <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
 
-                        <h5 class="text-navy mb-2 mt-3">Dr. Budi Santoso, M.Kom</h5>
-                        <p class="text-muted small mb-1">NIDN: 198501012010121001</p>
-                        <p class="text-muted small mb-4">Lektor Kepala</p>
+                        <h5 id="nama-lengkap" class="text-navy mb-2 mt-3">Loading...</h5>
+                        <p id="nidn" class="text-muted small mb-1">Loading...</p>
+                        <p id="jabatan" class="text-muted small mb-4">Loading...</p>
 
                         <div class="border-top pt-3">
                             <div class="profile-info d-flex align-items-center mb-2 small">
                                 <i class="bi bi-envelope text-navy me-2"></i>
-                                <span class="text-muted">budi.santoso@univ.ac.id</span>
+                                <span id="email" class="text-muted">Loading...</span>
                             </div>
                         </div>
                     </div>
@@ -273,7 +276,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                                 <i class="bi bi-file-earmark-check text-navy me-2"></i>
                                 <span class="small text-muted">Portofolio Dinilai</span>
                             </div>
-                            <span class="stat-number">156</span>
+                            <span id="stat-portofolio" class="stat-number">0</span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center pt-3">
@@ -281,7 +284,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                                 <i class="bi bi-chat-square-text text-navy me-2"></i>
                                 <span class="small text-muted">Total Komentar</span>
                             </div>
-                            <span class="stat-number">342</span>
+                            <span id="stat-komentar" class="stat-number">0</span>
                         </div>
                     </div>
                 </div>
@@ -297,29 +300,11 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                         </h6>
 
                         <div id="activity-list">
-                            <div class="activity-item">
-                                <p class="small text-dark">Memberikan nilai A untuk portofolio Ahmad Rizki</p>
-                                <p class="activity-time">2 jam yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Berkomentar pada portofolio Siti Nurhaliza</p>
-                                <p class="activity-time">5 jam yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Memberikan nilai B+ untuk portofolio Budi Prasetyo</p>
-                                <p class="activity-time">1 hari yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Berkomentar pada portofolio Dewi Lestari</p>
-                                <p class="activity-time">1 hari yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Memberikan nilai A- untuk portofolio Andi Wijaya</p>
-                                <p class="activity-time">2 hari yang lalu</p>
+                            <!-- Aktivitas akan diisi via JavaScript -->
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -339,14 +324,19 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         document.addEventListener('DOMContentLoaded', function () {
             // Ambil data dosen dari server
             fetch('get_dosen.php')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         // Update profil dosen
-                        document.querySelector('.text-navy').textContent = data.data.nama_lengkap;
-                        document.querySelector('.text-muted.mb-1').textContent = 'NIDN: ' + data.data.nidn;
-                        document.querySelector('.text-muted.mb-4').textContent = data.data.jabatan;
-                        document.querySelector('.profile-info .text-muted').textContent = data.data.email;
+                        document.getElementById('nama-lengkap').textContent = data.data.nama_lengkap || 'Tidak ada data';
+                        document.getElementById('nidn').textContent = 'NIDN: ' + (data.data.nidn || 'Tidak ada data');
+                        document.getElementById('jabatan').textContent = data.data.jabatan || 'Tidak ada data';
+                        document.getElementById('email').textContent = data.data.email || 'Tidak ada data';
 
                         // Load foto profil jika ada
                         if (data.data.foto_profil) {
@@ -354,17 +344,32 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                             img.src = data.data.foto_profil;
                             img.alt = 'Profile Picture';
                             img.className = 'profile-avatar-img';
+                            img.onerror = function() {
+                                // Jika gambar gagal dimuat, tampilkan placeholder
+                                this.style.display = 'none';
+                                document.getElementById('avatar-placeholder').style.display = 'flex';
+                            };
                             document.getElementById('avatar-placeholder').replaceWith(img);
                         }
+
+                        // Update statistik jika ada di data
+                        if (data.data.stat_portofolio) {
+                            document.getElementById('stat-portofolio').textContent = data.data.stat_portofolio;
+                        }
+                        if (data.data.stat_komentar) {
+                            document.getElementById('stat-komentar').textContent = data.data.stat_komentar;
+                        }
+
+                        // Load aktivitas
+                        loadAktivitas();
                     } else {
                         console.error('Error:', data.message);
-                        // Tampilkan pesan error di UI jika perlu
-                        showToast(data.message, 'danger');
+                        showToast(data.message || 'Terjadi kesalahan saat memuat data', 'danger');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Terjadi kesalahan saat memuat data', 'danger');
+                    console.error('Fetch Error:', error);
+                    showToast('Terjadi kesalahan saat memuat data. Coba refresh halaman.', 'danger');
                 });
 
             // Mendapatkan elemen-elemen yang dibutuhkan
@@ -398,20 +403,26 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                             if (data.success) {
                                 // Update foto profil
                                 const newImg = document.createElement('img');
-                                newImg.src = data.path;
+                                newImg.src = data.path + '?t=' + new Date().getTime(); // Tambahkan timestamp untuk cache busting
                                 newImg.alt = 'Profile Picture';
                                 newImg.className = 'profile-avatar-img';
+                                newImg.onerror = function() {
+                                    showToast('Gagal memuat foto profil baru', 'danger');
+                                };
 
                                 const currentImg = document.querySelector('.profile-avatar-img');
                                 if (currentImg) {
                                     currentImg.replaceWith(newImg);
                                 } else {
-                                    document.getElementById('avatar-placeholder').replaceWith(newImg);
+                                    const placeholder = document.getElementById('avatar-placeholder');
+                                    if (placeholder) {
+                                        placeholder.replaceWith(newImg);
+                                    }
                                 }
 
                                 showToast('Foto profil berhasil diperbarui!', 'success');
                             } else {
-                                showToast(data.message, 'danger');
+                                showToast(data.message || 'Gagal mengupload foto', 'danger');
                             }
                         })
                         .catch(error => {
@@ -420,9 +431,34 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                             showToast('Terjadi kesalahan saat mengupload foto', 'danger');
                         });
                 } else if (file) {
-                    showToast('Silakan pilih file gambar yang valid.', 'danger');
+                    showToast('Silakan pilih file gambar yang valid (JPEG, PNG, GIF).', 'danger');
                 }
             });
+
+            // Fungsi untuk load aktivitas
+            function loadAktivitas() {
+                fetch('get_aktivitas.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.data.length > 0) {
+                            const activityList = document.getElementById('activity-list');
+                            activityList.innerHTML = '';
+                            
+                            data.data.forEach(activity => {
+                                const activityItem = document.createElement('div');
+                                activityItem.className = 'activity-item';
+                                activityItem.innerHTML = `
+                                    <p class="small text-dark">${activity.deskripsi}</p>
+                                    <p class="activity-time">${activity.waktu}</p>
+                                `;
+                                activityList.appendChild(activityItem);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading activities:', error);
+                    });
+            }
 
             // Fungsi untuk menampilkan loading overlay
             function showLoading() {
