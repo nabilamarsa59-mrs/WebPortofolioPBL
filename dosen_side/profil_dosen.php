@@ -325,15 +325,27 @@ $dosen_id = isset($_SESSION['id_dosen']) ? $_SESSION['id_dosen'] : (isset($_SESS
             // Ambil data dosen dari server
             fetch('get_dosen.php')
                 .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
+
+                    // Cek content type
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new TypeError("Response bukan JSON");
+                    }
+
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Data received:', data);
+
                     if (data.success) {
                         // Update profil dosen
-                        document.getElementById('nama-lengkap').textContent = data.data.nama_lengkap || 'Tidak ada data';
+                        document.getElementById('nama-lengkap').textContent = data.data.nama_lengkap || 'Nama tidak tersedia';
                         document.getElementById('nidn').textContent = 'NIDN: ' + (data.data.nidn || 'Tidak ada data');
                         document.getElementById('jabatan').textContent = data.data.jabatan || 'Tidak ada data';
                         document.getElementById('email').textContent = data.data.email || 'Tidak ada data';
@@ -344,32 +356,60 @@ $dosen_id = isset($_SESSION['id_dosen']) ? $_SESSION['id_dosen'] : (isset($_SESS
                             img.src = data.data.foto_profil;
                             img.alt = 'Profile Picture';
                             img.className = 'profile-avatar-img';
-                            img.onerror = function() {
+                            img.onerror = function () {
                                 // Jika gambar gagal dimuat, tampilkan placeholder
+                                console.error('Gambar gagal dimuat:', this.src);
                                 this.style.display = 'none';
-                                document.getElementById('avatar-placeholder').style.display = 'flex';
+                                const placeholder = document.getElementById('avatar-placeholder');
+                                if (placeholder) {
+                                    placeholder.style.display = 'flex';
+                                }
                             };
-                            document.getElementById('avatar-placeholder').replaceWith(img);
+                            const placeholder = document.getElementById('avatar-placeholder');
+                            if (placeholder) {
+                                placeholder.replaceWith(img);
+                            }
                         }
 
-                        // Update statistik jika ada di data
-                        if (data.data.stat_portofolio) {
-                            document.getElementById('stat-portofolio').textContent = data.data.stat_portofolio;
-                        }
-                        if (data.data.stat_komentar) {
-                            document.getElementById('stat-komentar').textContent = data.data.stat_komentar;
-                        }
+                        // Update statistik
+                        document.getElementById('stat-portofolio').textContent = data.data.stat_portofolio || 0;
+                        document.getElementById('stat-komentar').textContent = data.data.stat_komentar || 0;
 
                         // Load aktivitas
                         loadAktivitas();
                     } else {
-                        console.error('Error:', data.message);
+                        console.error('Server error:', data.message);
+                        // Tampilkan pesan error di UI
                         showToast(data.message || 'Terjadi kesalahan saat memuat data', 'danger');
+
+                        // Set default values
+                        document.getElementById('nama-lengkap').textContent = 'Data tidak tersedia';
+                        document.getElementById('nidn').textContent = 'NIDN: -';
+                        document.getElementById('jabatan').textContent = '-';
+                        document.getElementById('email').textContent = '-';
                     }
                 })
                 .catch(error => {
                     console.error('Fetch Error:', error);
-                    showToast('Terjadi kesalahan saat memuat data. Coba refresh halaman.', 'danger');
+
+                    // Tampilkan pesan error yang lebih spesifik
+                    let errorMessage = 'Terjadi kesalahan saat memuat data. ';
+
+                    if (error.name === 'TypeError' && error.message.includes('JSON')) {
+                        errorMessage += 'Format data tidak valid.';
+                    } else if (error.message.includes('HTTP')) {
+                        errorMessage += 'Server tidak merespons.';
+                    } else {
+                        errorMessage += 'Coba refresh halaman.';
+                    }
+
+                    showToast(errorMessage, 'danger');
+
+                    // Set default values
+                    document.getElementById('nama-lengkap').textContent = 'Error memuat data';
+                    document.getElementById('nidn').textContent = 'NIDN: Error';
+                    document.getElementById('jabatan').textContent = 'Error';
+                    document.getElementById('email').textContent = 'Error';
                 });
 
             // Mendapatkan elemen-elemen yang dibutuhkan
@@ -378,72 +418,78 @@ $dosen_id = isset($_SESSION['id_dosen']) ? $_SESSION['id_dosen'] : (isset($_SESS
             const loadingOverlay = document.getElementById('loadingOverlay');
 
             // Event listener untuk tombol "Ganti Foto"
-            changePhotoBtn.addEventListener('click', () => {
-                profilePicInput.click();
-            });
+            if (changePhotoBtn) {
+                changePhotoBtn.addEventListener('click', () => {
+                    profilePicInput.click();
+                });
+            }
 
             // Event listener untuk input file
-            profilePicInput.addEventListener('change', function (event) {
-                const file = event.target.files[0];
+            if (profilePicInput) {
+                profilePicInput.addEventListener('change', function (event) {
+                    const file = event.target.files[0];
 
-                if (file && file.type.startsWith('image/')) {
-                    showLoading();
+                    if (file && file.type.startsWith('image/')) {
+                        showLoading();
 
-                    const formData = new FormData();
-                    formData.append('foto_profil', file);
+                        const formData = new FormData();
+                        formData.append('foto_profil', file);
 
-                    fetch('upload_foto.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            hideLoading();
-
-                            if (data.success) {
-                                // Update foto profil
-                                const newImg = document.createElement('img');
-                                newImg.src = data.path + '?t=' + new Date().getTime(); // Tambahkan timestamp untuk cache busting
-                                newImg.alt = 'Profile Picture';
-                                newImg.className = 'profile-avatar-img';
-                                newImg.onerror = function() {
-                                    showToast('Gagal memuat foto profil baru', 'danger');
-                                };
-
-                                const currentImg = document.querySelector('.profile-avatar-img');
-                                if (currentImg) {
-                                    currentImg.replaceWith(newImg);
-                                } else {
-                                    const placeholder = document.getElementById('avatar-placeholder');
-                                    if (placeholder) {
-                                        placeholder.replaceWith(newImg);
-                                    }
-                                }
-
-                                showToast('Foto profil berhasil diperbarui!', 'success');
-                            } else {
-                                showToast(data.message || 'Gagal mengupload foto', 'danger');
-                            }
+                        fetch('upload_foto.php', {
+                            method: 'POST',
+                            body: formData
                         })
-                        .catch(error => {
-                            hideLoading();
-                            console.error('Error:', error);
-                            showToast('Terjadi kesalahan saat mengupload foto', 'danger');
-                        });
-                } else if (file) {
-                    showToast('Silakan pilih file gambar yang valid (JPEG, PNG, GIF).', 'danger');
-                }
-            });
+                            .then(response => response.json())
+                            .then(data => {
+                                hideLoading();
+
+                                if (data.success) {
+                                    // Update foto profil
+                                    const newImg = document.createElement('img');
+                                    newImg.src = data.path + '?t=' + new Date().getTime(); // Tambahkan timestamp untuk cache busting
+                                    newImg.alt = 'Profile Picture';
+                                    newImg.className = 'profile-avatar-img';
+                                    newImg.onerror = function () {
+                                        showToast('Gagal memuat foto profil baru', 'danger');
+                                    };
+
+                                    const currentImg = document.querySelector('.profile-avatar-img');
+                                    if (currentImg) {
+                                        currentImg.replaceWith(newImg);
+                                    } else {
+                                        const placeholder = document.getElementById('avatar-placeholder');
+                                        if (placeholder) {
+                                            placeholder.replaceWith(newImg);
+                                        }
+                                    }
+
+                                    showToast('Foto profil berhasil diperbarui!', 'success');
+                                } else {
+                                    showToast(data.message || 'Gagal mengupload foto', 'danger');
+                                }
+                            })
+                            .catch(error => {
+                                hideLoading();
+                                console.error('Error:', error);
+                                showToast('Terjadi kesalahan saat mengupload foto', 'danger');
+                            });
+                    } else if (file) {
+                        showToast('Silakan pilih file gambar yang valid (JPEG, PNG, GIF).', 'danger');
+                    }
+                });
+            }
 
             // Fungsi untuk load aktivitas
             function loadAktivitas() {
                 fetch('get_aktivitas.php')
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success && data.data.length > 0) {
-                            const activityList = document.getElementById('activity-list');
+                        const activityList = document.getElementById('activity-list');
+                        if (!activityList) return;
+
+                        if (data.success && data.data && data.data.length > 0) {
                             activityList.innerHTML = '';
-                            
+
                             data.data.forEach(activity => {
                                 const activityItem = document.createElement('div');
                                 activityItem.className = 'activity-item';
@@ -453,26 +499,52 @@ $dosen_id = isset($_SESSION['id_dosen']) ? $_SESSION['id_dosen'] : (isset($_SESS
                                 `;
                                 activityList.appendChild(activityItem);
                             });
+                        } else {
+                            // Tampilkan pesan jika tidak ada aktivitas
+                            activityList.innerHTML = `
+                                <div class="text-center p-3">
+                                    <p class="text-muted">Belum ada aktivitas terbaru</p>
+                                </div>
+                            `;
                         }
                     })
                     .catch(error => {
                         console.error('Error loading activities:', error);
+                        const activityList = document.getElementById('activity-list');
+                        if (activityList) {
+                            activityList.innerHTML = `
+                                <div class="text-center p-3">
+                                    <p class="text-danger">Gagal memuat aktivitas</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadAktivitas()">
+                                        Coba lagi
+                                    </button>
+                                </div>
+                            `;
+                        }
                     });
             }
 
             // Fungsi untuk menampilkan loading overlay
             function showLoading() {
-                document.getElementById('loadingOverlay').style.display = 'flex';
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                }
             }
 
             // Fungsi untuk menyembunyikan loading overlay
             function hideLoading() {
-                document.getElementById('loadingOverlay').style.display = 'none';
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
             }
 
             // Fungsi untuk menampilkan toast notifikasi
             function showToast(message, type = 'success') {
                 const toastContainer = document.querySelector('.toast-container');
+                if (!toastContainer) return;
+
                 const toastId = 'toast-' + Date.now();
 
                 const toastHtml = `
