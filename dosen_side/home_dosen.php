@@ -35,7 +35,7 @@ $projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id"> <!--kdlqwdkqwdk-->
 
 <head>
     <meta charset="UTF-8">
