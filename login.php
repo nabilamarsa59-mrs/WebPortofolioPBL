@@ -279,7 +279,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body>
-
     <div class="login-wrapper">
         <div class="login-container">
             <div class="logo">WorkPiece</div>
@@ -362,11 +361,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     updateFormState(selectedType);
                 });
             });
-
             // Set state awal saat halaman dimuat
             updateFormState('mahasiswa');
         });
     </script>
 </body>
-
 </html>
