@@ -1,12 +1,7 @@
 <?php
+// PERBAIKAN: Tambahkan session check di paling atas
 session_start();
 if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
-    header("location:../login.php");
-    exit();
-}
-
-// Ambil id_dosen dari session
-if (!isset($_SESSION['id_dosen'])) {
     header("location:../login.php");
     exit();
 }
@@ -78,6 +73,7 @@ if (!isset($_SESSION['id_dosen'])) {
             border: 4px solid #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             object-fit: cover;
+            /* Hanya untuk <img> */
         }
 
         /* Style khusus untuk placeholder ikon */
@@ -108,18 +104,20 @@ if (!isset($_SESSION['id_dosen'])) {
             background-color: #0066cc;
         }
 
+        /* --- AKHIR PERUBAHAN CSS --- */
+
         .text-navy {
             color: #00003c !important;
         }
 
         .stat-number {
             font-size: 1.5rem;
-            color: #00003c;
+            color: var(--navy-blue);
             font-weight: 600;
         }
 
         .activity-item {
-            border-left: 4px solid #00003c;
+            border-left: 4px solid var(--navy-blue);
             background-color: #f8f9fa;
             padding: 1rem;
             margin-bottom: 0.75rem;
@@ -181,11 +179,13 @@ if (!isset($_SESSION['id_dosen'])) {
             0% {
                 transform: rotate(0deg);
             }
+
             100% {
                 transform: rotate(360deg);
             }
         }
 
+        /* Profile info styling */
         .profile-info {
             transition: all 0.2s ease;
         }
@@ -215,13 +215,13 @@ if (!isset($_SESSION['id_dosen'])) {
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="profil_dosen.php">Profil</a>
+                        <a class="nav-link active" href="#profil">Profil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="home_dosen.php">Beranda</a>
+                        <a class="nav-link" href="home_dosen.html">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../logout.php">Logout</a>
+                        <a class="nav-link" href="logout.php">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -236,26 +236,28 @@ if (!isset($_SESSION['id_dosen'])) {
                 <!-- Profile Card -->
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
-                        <!-- Container untuk avatar -->
+                        <!-- Container untuk avatar (ikon atau gambar) -->
                         <div class="profile-container">
                             <!-- Default: Ikon Profil -->
                             <div id="avatar-placeholder" class="profile-avatar">
                                 <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
                             </div>
+
                             <button class="btn btn-primary" id="change-photo-btn" title="Ganti Foto Profil">
                                 <i class="bi bi-camera-fill text-white"></i>
                             </button>
                         </div>
+                        <!-- Input file disembunyikan -->
                         <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
 
-                        <h5 class="text-navy mb-2 mt-3" id="dosen-nama">Dr. Budi Santoso, M.Kom</h5>
-                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: 198501012010121001</p>
-                        <p class="text-muted small mb-4" id="dosen-jabatan">Lektor Kepala</p>
+                        <h5 class="text-navy mb-2 mt-3">Dr. Budi Santoso, M.Kom</h5>
+                        <p class="text-muted small mb-1">NIDN: 198501012010121001</p>
+                        <p class="text-muted small mb-4">Lektor Kepala</p>
 
                         <div class="border-top pt-3">
                             <div class="profile-info d-flex align-items-center mb-2 small">
                                 <i class="bi bi-envelope text-navy me-2"></i>
-                                <span class="text-muted" id="dosen-email">budi.santoso@univ.ac.id</span>
+                                <span class="text-muted">budi.santoso@univ.ac.id</span>
                             </div>
                         </div>
                     </div>
@@ -265,19 +267,21 @@ if (!isset($_SESSION['id_dosen'])) {
                 <div class="card shadow-sm mt-4">
                     <div class="card-body">
                         <h6 class="text-navy mb-3">Statistik Aktivitas</h6>
+
                         <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-file-earmark-check text-navy me-2"></i>
                                 <span class="small text-muted">Portofolio Dinilai</span>
                             </div>
-                            <span class="stat-number" id="stat-portofolio">0</span>
+                            <span class="stat-number">156</span>
                         </div>
+
                         <div class="d-flex justify-content-between align-items-center pt-3">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-chat-square-text text-navy me-2"></i>
                                 <span class="small text-muted">Total Komentar</span>
                             </div>
-                            <span class="stat-number" id="stat-komentar">0</span>
+                            <span class="stat-number">342</span>
                         </div>
                     </div>
                 </div>
@@ -291,8 +295,32 @@ if (!isset($_SESSION['id_dosen'])) {
                             <i class="bi bi-clock-history me-2"></i>
                             Aktivitas Terakhir
                         </h6>
+
                         <div id="activity-list">
-                            <!-- Aktivitas akan diisi oleh JavaScript -->
+                            <div class="activity-item">
+                                <p class="small text-dark">Memberikan nilai A untuk portofolio Ahmad Rizki</p>
+                                <p class="activity-time">2 jam yang lalu</p>
+                            </div>
+
+                            <div class="activity-item">
+                                <p class="small text-dark">Berkomentar pada portofolio Siti Nurhaliza</p>
+                                <p class="activity-time">5 jam yang lalu</p>
+                            </div>
+
+                            <div class="activity-item">
+                                <p class="small text-dark">Memberikan nilai B+ untuk portofolio Budi Prasetyo</p>
+                                <p class="activity-time">1 hari yang lalu</p>
+                            </div>
+
+                            <div class="activity-item">
+                                <p class="small text-dark">Berkomentar pada portofolio Dewi Lestari</p>
+                                <p class="activity-time">1 hari yang lalu</p>
+                            </div>
+
+                            <div class="activity-item">
+                                <p class="small text-dark">Memberikan nilai A- untuk portofolio Andi Wijaya</p>
+                                <p class="activity-time">2 hari yang lalu</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -311,31 +339,26 @@ if (!isset($_SESSION['id_dosen'])) {
         document.addEventListener('DOMContentLoaded', function () {
             // Ambil data dosen dari server
             fetch('get_dosen.php')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         // Update profil dosen
-                        document.getElementById('dosen-nama').textContent = data.data.nama_lengkap || 'Nama tidak tersedia';
-                        document.getElementById('dosen-nidn').textContent = 'NIDN: ' + (data.data.nidn || 'Tidak ada NIDN');
-                        document.getElementById('dosen-jabatan').textContent = data.data.jabatan || 'Jabatan tidak tersedia';
-                        document.getElementById('dosen-email').textContent = data.data.email || 'Email tidak tersedia';
+                        document.querySelector('.text-navy').textContent = data.data.nama_lengkap;
+                        document.querySelector('.text-muted.mb-1').textContent = 'NIDN: ' + data.data.nidn;
+                        document.querySelector('.text-muted.mb-4').textContent = data.data.jabatan;
+                        document.querySelector('.profile-info .text-muted').textContent = data.data.email;
 
                         // Load foto profil jika ada
                         if (data.data.foto_profil) {
                             const img = document.createElement('img');
-                            img.src = '../' + data.data.foto_profil; // Tambahkan ../
+                            img.src = data.data.foto_profil;
                             img.alt = 'Profile Picture';
                             img.className = 'profile-avatar-img';
-                            img.id = 'profile-img';
                             document.getElementById('avatar-placeholder').replaceWith(img);
                         }
                     } else {
                         console.error('Error:', data.message);
+                        // Tampilkan pesan error di UI jika perlu
                         showToast(data.message, 'danger');
                     }
                 })
@@ -344,21 +367,21 @@ if (!isset($_SESSION['id_dosen'])) {
                     showToast('Terjadi kesalahan saat memuat data', 'danger');
                 });
 
+            // Mendapatkan elemen-elemen yang dibutuhkan
+            const changePhotoBtn = document.getElementById('change-photo-btn');
+            const profilePicInput = document.getElementById('profile-pic-input');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
             // Event listener untuk tombol "Ganti Foto"
-            document.getElementById('change-photo-btn').addEventListener('click', () => {
-                document.getElementById('profile-pic-input').click();
+            changePhotoBtn.addEventListener('click', () => {
+                profilePicInput.click();
             });
 
             // Event listener untuk input file
-            document.getElementById('profile-pic-input').addEventListener('change', function (event) {
+            profilePicInput.addEventListener('change', function (event) {
                 const file = event.target.files[0];
 
                 if (file && file.type.startsWith('image/')) {
-                    if (file.size > 5 * 1024 * 1024) { // 5MB
-                        showToast('Ukuran file terlalu besar (max 5MB)', 'danger');
-                        return;
-                    }
-
                     showLoading();
 
                     const formData = new FormData();
@@ -368,44 +391,36 @@ if (!isset($_SESSION['id_dosen'])) {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        hideLoading();
+                        .then(response => response.json())
+                        .then(data => {
+                            hideLoading();
 
-                        if (data.success) {
-                            // Update foto profil
-                            const newImg = document.createElement('img');
-                            newImg.src = '../' + data.path; // Tambahkan ../
-                            newImg.alt = 'Profile Picture';
-                            newImg.className = 'profile-avatar-img';
-                            newImg.id = 'profile-img';
+                            if (data.success) {
+                                // Update foto profil
+                                const newImg = document.createElement('img');
+                                newImg.src = data.path;
+                                newImg.alt = 'Profile Picture';
+                                newImg.className = 'profile-avatar-img';
 
-                            const currentImg = document.getElementById('profile-img');
-                            const placeholder = document.getElementById('avatar-placeholder');
-                            
-                            if (currentImg) {
-                                currentImg.replaceWith(newImg);
-                            } else if (placeholder) {
-                                placeholder.replaceWith(newImg);
+                                const currentImg = document.querySelector('.profile-avatar-img');
+                                if (currentImg) {
+                                    currentImg.replaceWith(newImg);
+                                } else {
+                                    document.getElementById('avatar-placeholder').replaceWith(newImg);
+                                }
+
+                                showToast('Foto profil berhasil diperbarui!', 'success');
+                            } else {
+                                showToast(data.message, 'danger');
                             }
-
-                            showToast('Foto profil berhasil diperbarui!', 'success');
-                        } else {
-                            showToast(data.message, 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        hideLoading();
-                        console.error('Error:', error);
-                        showToast('Terjadi kesalahan saat mengupload foto', 'danger');
-                    });
+                        })
+                        .catch(error => {
+                            hideLoading();
+                            console.error('Error:', error);
+                            showToast('Terjadi kesalahan saat mengupload foto', 'danger');
+                        });
                 } else if (file) {
-                    showToast('Silakan pilih file gambar yang valid (JPEG, PNG, GIF).', 'danger');
+                    showToast('Silakan pilih file gambar yang valid.', 'danger');
                 }
             });
 
@@ -425,15 +440,15 @@ if (!isset($_SESSION['id_dosen'])) {
                 const toastId = 'toast-' + Date.now();
 
                 const toastHtml = `
-                    <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                ${message}
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
+            <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
                     </div>
-                `;
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
 
                 toastContainer.insertAdjacentHTML('beforeend', toastHtml);
                 const toastElement = document.getElementById(toastId);
@@ -448,4 +463,5 @@ if (!isset($_SESSION['id_dosen'])) {
         });
     </script>
 </body>
+
 </html>
