@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <?= htmlspecialchars($kategori['nama_kategori']) ?>
                             </option>
                         <?php endforeach; ?>
-                        <option value="lainnya">Lainnya (Isi Sendiri)</option>
+                        <option value="lainnya">Lainnya</option>
                     </select>
                     <!-- Input teks tersembunyi untuk kategori baru -->
                     <input type="text" name="kategori_lainnya" id="kategori_lainnya" class="form-control mt-2" placeholder="Tulis kategori baru..." style="display: none;">
