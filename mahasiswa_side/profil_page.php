@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
                         <!-- PERBAIKAN PENTING: Ganti .png menjadi .jpg -->
-                        <img id="previewFoto" src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.jpg') ?>" alt="Foto Profil">
+                        <img id="previewFoto" src="/WebPortofolioPBL/uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.jpg') ?>" alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
                         </label>

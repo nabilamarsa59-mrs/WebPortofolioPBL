@@ -119,7 +119,7 @@ try {
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card project-card">
                             <?php if (!empty($project['gambar'])): ?>
-                                <img src="../uploads/<?= htmlspecialchars($project['gambar']) ?>" class="card-img-top" alt="Project Image">
+                                <img src="/WebPortofolioPBL/uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>" class="card-img-top" alt="Project Image">
                             <?php else: ?>
                                 <img src="https://picsum.photos/seed/project<?= $project['id'] ?>/400/200.jpg" class="card-img-top" alt="Project Image">
                             <?php endif; ?>
