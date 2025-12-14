@@ -401,7 +401,7 @@ $projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
                                     data-nim="<?= htmlspecialchars($project['nim']) ?>"
                                     data-student-name="<?= htmlspecialchars($project['nama_lengkap']) ?>">
                                     <div class="card project-card h-100">
-                                        <img src="../uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>"
+                                        <img src="/WebPortofolioPBL/uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>" class="card-img-top" alt="Project Image">
                                             class="card-img-top" alt="Project Image">
                                         <div class="card-body d-flex flex-column">
                                             <!-- PERHATIKAN PENGGUNAAN htmlspecialchars() DI BAWAH INI -->
