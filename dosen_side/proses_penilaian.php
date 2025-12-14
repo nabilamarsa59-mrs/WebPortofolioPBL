@@ -8,8 +8,6 @@ if (!isset($_SESSION['id_dosen'])) {
     exit();
 }
 
-$dosen_id = $_SESSION['id_dosen'];
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_project = $_POST['id_project'] ?? null;
     $nilai = $_POST['nilai'] ?? null;
@@ -28,17 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $existing = $stmt_check->fetch();
         
         if ($existing) {
-            // Update penilaian yang sudah ada
-            $sql = "UPDATE penilaian SET nilai = ?, komentar = ?, tanggal_nilai = NOW() WHERE id_project = ? AND id_dosen = ?";
+            // Update penilaian
+            $sql = "UPDATE penilaian SET nilai = ?, komentar = ?, tanggal_dinilai = NOW() WHERE id_project = ?";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$nilai, $komentar, $id_project, $dosen_id]);
+            $stmt->execute([$nilai, $komentar, $id_project]);
             $message = 'Penilaian berhasil diperbarui';
         } else {
             // Insert penilaian baru
-            $sql = "INSERT INTO penilaian (id_project, id_dosen, nilai, komentar, tanggal_nilai) 
-                    VALUES (?, ?, ?, ?, NOW())";
+            $sql = "INSERT INTO penilaian (id_project, nilai, komentar, tanggal_dinilai) 
+                    VALUES (?, ?, ?, NOW())";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$id_project, $dosen_id, $nilai, $komentar]);
+            $stmt->execute([$id_project, $nilai, $komentar]);
             $message = 'Penilaian berhasil disimpan';
         }
         
