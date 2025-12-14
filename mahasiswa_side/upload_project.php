@@ -16,9 +16,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
 // --- AMBIL DATA KATEGORI UNTUK DROPDOWN ---
  $all_kategori = [];
 try {
-    // Ambil semua kategori yang sudah ada di tabel projects
-    $stmt_kategori = $pdo->query("SELECT DISTINCT kategori FROM projects ORDER BY kategori ASC");
-    $all_kategori = $stmt_kategori->fetchAll(PDO::FETCH_COLUMN);
+    // Ambil semua kategori yang sudah ada di database
+    $stmt_kategori = $pdo->query("SELECT id, nama_kategori FROM kategori_proyek ORDER BY nama_kategori ASC");
+    $all_kategori = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // Jika gagal, biarkan array kosong
     $all_kategori = [];
@@ -35,9 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- LOGIKA UNTUK MENENTUKAN KATEGORI ---
     $tipe_kategori = $_POST['tipe_kategori'];
     if ($tipe_kategori === 'lainnya') {
+        // Jika user memilih "Lainnya", ambil dari input teks
         $kategori = $_POST['kategori_lainnya'];
     } else {
-        $kategori = $_POST['kategori'];
+        // Jika user memilih dari dropdown, ambil nilainya
+        $kategori = $_POST['id_kategori'];
     }
 
     // Proses upload gambar
@@ -69,12 +71,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Proyek - WorkPiece</title>
+    <!-- Google Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar { background-color: #002b5b !important; }
-        .navbar a { color: #fff !important; text-decoration: none; margin-left: 15px; }
-        .navbar a:hover { text-decoration: underline; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: #002b5b !important;
+        }
+
+        .navbar a {
+            color: #fff !important;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -106,15 +125,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- --- DROPDOWN KATEGORI DENGAN OPSI "LAINNYA" --- -->
                 <div class="mb-3">
-                    <label for="kategori" class="form-label fw-semibold">Kategori Proyek</label>
-                    <select name="kategori" id="kategori_select" class="form-select" required>
+                    <label for="id_kategori" class="form-label fw-semibold">Kategori Proyek</label>
+                    <select name="id_kategori" id="id_kategori" class="form-select" required>
                         <option value="" disabled selected>-- Pilih Kategori --</option>
-                        <?php foreach ($all_kategori as $kat): ?>
-                            <option value="<?= htmlspecialchars($kat) ?>"><?= htmlspecialchars($kat) ?></option>
+                        <?php foreach ($all_kategori as $kategori): ?>
+                            <option value="<?= $kategori['id'] ?>">
+                                <?= htmlspecialchars($kategori['nama_kategori']) ?>
+                            </option>
                         <?php endforeach; ?>
                         <option value="lainnya">Lainnya (Isi Sendiri)</option>
                     </select>
-                    <!-- Input tersembunyi untuk kategori baru -->
+                    <!-- Input teks tersembunyi untuk kategori baru -->
                     <input type="text" name="kategori_lainnya" id="kategori_lainnya" class="form-control mt-2" placeholder="Tulis kategori baru..." style="display: none;">
                     <!-- Input tersembunyi untuk melacak tipe kategori -->
                     <input type="hidden" name="tipe_kategori" id="tipe_kategori" value="pilihan">
@@ -135,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const kategoriSelect = document.getElementById('kategori_select');
+            const kategoriSelect = document.getElementById('id_kategori');
             const kategoriLainnya = document.getElementById('kategori_lainnya');
             const tipeKategoriInput = document.getElementById('tipe_kategori');
 
