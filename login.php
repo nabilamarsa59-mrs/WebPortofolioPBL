@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - WorkPiece</title> <!-- login -->
+    <title>Login - WorkPiece</title>
 
     <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,7 +156,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-align: center;
         }
 
-        /* ukuran logo */
         .logo {
             font-size: 2.2rem;
             font-weight: 700;
