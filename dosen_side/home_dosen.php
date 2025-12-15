@@ -5,7 +5,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     exit();
 }
 
-require_once '../koneksi.php'; // Sambungkan ke database
+require_once '../koneksi.php'; // Menyambungkan ke database
 
 // --- KODE UNTUK MENGAMBIL DATA ---
 // Query untuk mengambil semua data proyek beserta data mahasiswa dan penilaiannya
@@ -404,6 +404,7 @@ $projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
                                         <img src="../uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>"
                                             class="card-img-top" alt="Project Image">
                                         <div class="card-body d-flex flex-column">
+
                                             <!-- PERHATIKAN PENGGUNAAN htmlspecialchars() DI BAWAH INI -->
                                             <h5 class="card-title"><?= htmlspecialchars($project['judul']) ?></h5>
                                             <p class="card-text text-muted small">Oleh:
