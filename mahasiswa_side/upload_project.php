@@ -9,12 +9,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
 }
 
 // Ambil data mahasiswa untuk mendapatkan id_mahasiswa
- $stmt_mahasiswa = $pdo->prepare("SELECT id_mahasiswa FROM users WHERE id = ?");
- $stmt_mahasiswa->execute([$_SESSION['user_id']]);
- $id_mahasiswa = $stmt_mahasiswa->fetchColumn();
+$stmt_mahasiswa = $pdo->prepare("SELECT id_mahasiswa FROM users WHERE id = ?");
+$stmt_mahasiswa->execute([$_SESSION['user_id']]);
+$id_mahasiswa = $stmt_mahasiswa->fetchColumn();
 
 // --- AMBIL DATA KATEGORI UNTUK DROPDOWN ---
- $all_kategori = [];
+$all_kategori = [];
 try {
     // Ambil semua kategori yang sudah ada di database
     $stmt_kategori = $pdo->query("SELECT id, nama_kategori FROM kategori_proyek ORDER BY nama_kategori ASC");
@@ -82,7 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .navbar {
-            background-color: #002b5b !important;
+            background: #00003c !important;
+            padding: 0.75rem 0;
+            z-index: 1000;
         }
 
         .navbar a {

@@ -1,5 +1,4 @@
 <?php
-// PERBAIKAN: Tambahkan session check di paling atas
 session_start();
 if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
     header("location:../login.php");
@@ -16,7 +15,10 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     <title>Profil Dosen - WorkPiece</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
@@ -30,7 +32,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         }
 
         .navbar {
-            background: rgba(0, 0, 60, 0.8) !important;
+            background: #00003c !important;
             padding: 0.75rem 0;
             z-index: 1000;
         }
@@ -56,7 +58,85 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             text-decoration: underline;
         }
 
-        /* --- PERUBAHAN & TAMBAHAN CSS --- */
+        .search-container {
+            position: relative;
+            margin-left: 25px;
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-form input {
+            border: none;
+            border-radius: 20px;
+            padding: 5px 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 200px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .search-form input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-form input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.3);
+            width: 250px;
+        }
+
+        .search-form button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: -35px;
+            cursor: pointer;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 0 2px;
+        }
+
+        .no-results {
+            padding: 15px;
+            text-align: center;
+            color: #666;
+        }
+
         .profile-container {
             position: relative;
             width: 150px;
@@ -64,7 +144,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             margin: 0 auto 1rem;
         }
 
-        /* Style untuk placeholder ikon dan gambar */
         .profile-avatar,
         .profile-avatar-img {
             width: 100%;
@@ -73,10 +152,8 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             border: 4px solid #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             object-fit: cover;
-            /* Hanya untuk <img> */
         }
 
-        /* Style khusus untuk placeholder ikon */
         .profile-avatar {
             background: rgba(0, 0, 60, 0.8) !important;
             display: flex;
@@ -104,20 +181,18 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             background-color: #0066cc;
         }
 
-        /* --- AKHIR PERUBAHAN CSS --- */
-
         .text-navy {
             color: #00003c !important;
         }
 
         .stat-number {
             font-size: 1.5rem;
-            color: var(--navy-blue);
+            color: #00003c;
             font-weight: 600;
         }
 
         .activity-item {
-            border-left: 4px solid var(--navy-blue);
+            border-left: 4px solid #00003c;
             background-color: #f8f9fa;
             padding: 1rem;
             margin-bottom: 0.75rem;
@@ -139,7 +214,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             margin-top: 0.25rem;
         }
 
-        /* Toast notification styling */
         .toast-container {
             position: fixed;
             top: 110px;
@@ -151,7 +225,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             min-width: 250px;
         }
 
-        /* Loading overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -176,16 +249,11 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
+            to {
                 transform: rotate(360deg);
             }
         }
 
-        /* Profile info styling */
         .profile-info {
             transition: all 0.2s ease;
         }
@@ -193,6 +261,21 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         .profile-info:hover {
             background-color: rgba(0, 0, 60, 0.05);
             border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                margin: 10px 0;
+                width: 100%;
+            }
+
+            .search-form input {
+                width: 100%;
+            }
+
+            .search-form input:focus {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -203,7 +286,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Navbar -->
+    <!-- Navbar - SAMA DENGAN home_dosen.php -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">WorkPiece</a>
@@ -215,13 +298,26 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#profil">Profil</a>
+                        <a class="nav-link active" href="profil_dosen.php">Profil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="home_dosen.html">Beranda</a>
+                        <a class="nav-link" href="home_dosen.php">Beranda</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Logout</a>
+                        <a class="nav-link" href="../logout.php">Logout</a>
+                    </li>
+                    <!-- FITUR SEARCH -->
+                    <li class="nav-item">
+                        <div class="search-container">
+                            <form class="search-form" role="search" id="searchForm">
+                                <input type="search" id="searchInput" placeholder="Cari NIM atau Nama..."
+                                    autocomplete="off">
+                                <button type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </form>
+                            <div class="search-results" id="searchResults"></div>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -250,14 +346,14 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                         <!-- Input file disembunyikan -->
                         <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
 
-                        <h5 class="text-navy mb-2 mt-3">Dr. Budi Santoso, M.Kom</h5>
-                        <p class="text-muted small mb-1">NIDN: 198501012010121001</p>
-                        <p class="text-muted small mb-4">Lektor Kepala</p>
+                        <h5 class="text-navy mb-2 mt-3" id="dosen-name">Loading...</h5>
+                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: -</p>
+                        <p class="text-muted small mb-4" id="dosen-bidang">-</p>
 
                         <div class="border-top pt-3">
                             <div class="profile-info d-flex align-items-center mb-2 small">
                                 <i class="bi bi-envelope text-navy me-2"></i>
-                                <span class="text-muted">budi.santoso@univ.ac.id</span>
+                                <span class="text-muted" id="dosen-email">-</span>
                             </div>
                         </div>
                     </div>
@@ -273,7 +369,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                                 <i class="bi bi-file-earmark-check text-navy me-2"></i>
                                 <span class="small text-muted">Portofolio Dinilai</span>
                             </div>
-                            <span class="stat-number">156</span>
+                            <span class="stat-number" id="stat-dinilai">0</span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center pt-3">
@@ -281,7 +377,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                                 <i class="bi bi-chat-square-text text-navy me-2"></i>
                                 <span class="small text-muted">Total Komentar</span>
                             </div>
-                            <span class="stat-number">342</span>
+                            <span class="stat-number" id="stat-komentar">0</span>
                         </div>
                     </div>
                 </div>
@@ -298,28 +394,8 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 
                         <div id="activity-list">
                             <div class="activity-item">
-                                <p class="small text-dark">Memberikan nilai A untuk portofolio Ahmad Rizki</p>
-                                <p class="activity-time">2 jam yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Berkomentar pada portofolio Siti Nurhaliza</p>
-                                <p class="activity-time">5 jam yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Memberikan nilai B+ untuk portofolio Budi Prasetyo</p>
-                                <p class="activity-time">1 hari yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Berkomentar pada portofolio Dewi Lestari</p>
-                                <p class="activity-time">1 hari yang lalu</p>
-                            </div>
-
-                            <div class="activity-item">
-                                <p class="small text-dark">Memberikan nilai A- untuk portofolio Andi Wijaya</p>
-                                <p class="activity-time">2 hari yang lalu</p>
+                                <p class="small text-dark">Memuat aktivitas...</p>
+                                <p class="activity-time">-</p>
                             </div>
                         </div>
                     </div>
@@ -332,98 +408,10 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     <div class="toast-container"></div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // JavaScript untuk mengambil data dosen dari server
         document.addEventListener('DOMContentLoaded', function () {
-            // Ambil data dosen dari server
-            fetch('get_dosen.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update profil dosen
-                        document.querySelector('.text-navy').textContent = data.data.nama_lengkap;
-                        document.querySelector('.text-muted.mb-1').textContent = 'NIDN: ' + data.data.nidn;
-                        document.querySelector('.text-muted.mb-4').textContent = data.data.jabatan;
-                        document.querySelector('.profile-info .text-muted').textContent = data.data.email;
-
-                        // Load foto profil jika ada
-                        if (data.data.foto_profil) {
-                            const img = document.createElement('img');
-                            img.src = data.data.foto_profil;
-                            img.alt = 'Profile Picture';
-                            img.className = 'profile-avatar-img';
-                            document.getElementById('avatar-placeholder').replaceWith(img);
-                        }
-                    } else {
-                        console.error('Error:', data.message);
-                        // Tampilkan pesan error di UI jika perlu
-                        showToast(data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Terjadi kesalahan saat memuat data', 'danger');
-                });
-
-            // Mendapatkan elemen-elemen yang dibutuhkan
-            const changePhotoBtn = document.getElementById('change-photo-btn');
-            const profilePicInput = document.getElementById('profile-pic-input');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-
-            // Event listener untuk tombol "Ganti Foto"
-            changePhotoBtn.addEventListener('click', () => {
-                profilePicInput.click();
-            });
-
-            // Event listener untuk input file
-            profilePicInput.addEventListener('change', function (event) {
-                const file = event.target.files[0];
-
-                if (file && file.type.startsWith('image/')) {
-                    showLoading();
-
-                    const formData = new FormData();
-                    formData.append('foto_profil', file);
-
-                    fetch('upload_foto.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            hideLoading();
-
-                            if (data.success) {
-                                // Update foto profil
-                                const newImg = document.createElement('img');
-                                newImg.src = data.path;
-                                newImg.alt = 'Profile Picture';
-                                newImg.className = 'profile-avatar-img';
-
-                                const currentImg = document.querySelector('.profile-avatar-img');
-                                if (currentImg) {
-                                    currentImg.replaceWith(newImg);
-                                } else {
-                                    document.getElementById('avatar-placeholder').replaceWith(newImg);
-                                }
-
-                                showToast('Foto profil berhasil diperbarui!', 'success');
-                            } else {
-                                showToast(data.message, 'danger');
-                            }
-                        })
-                        .catch(error => {
-                            hideLoading();
-                            console.error('Error:', error);
-                            showToast('Terjadi kesalahan saat mengupload foto', 'danger');
-                        });
-                } else if (file) {
-                    showToast('Silakan pilih file gambar yang valid.', 'danger');
-                }
-            });
-
             // Fungsi untuk menampilkan loading overlay
             function showLoading() {
                 document.getElementById('loadingOverlay').style.display = 'flex';
@@ -455,11 +443,149 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                 const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
                 toast.show();
 
-                // Hapus elemen toast setelah disembunyikan
                 toastElement.addEventListener('hidden.bs.toast', () => {
                     toastElement.remove();
                 });
             }
+
+            function searchProjects(query) {
+                if (query.trim() !== '') {
+                    window.location.href = `home_dosen.php?search=${encodeURIComponent(query)}`;
+                }
+            }
+
+            // EVENT LISTENER UNTUK FORM PENCARIAN
+            document.getElementById('searchForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const query = document.getElementById('searchInput').value;
+                searchProjects(query);
+            });
+
+            // SEMBUNYIKAN HASIL PENCARIAN SAAT KLIK DI LUAR
+            document.addEventListener('click', function (e) {
+                const searchContainer = document.querySelector('.search-container');
+                if (searchContainer && !searchContainer.contains(e.target)) {
+                    const searchResults = document.getElementById('searchResults');
+                    if (searchResults) {
+                        searchResults.style.display = 'none';
+                    }
+                }
+            });
+
+            // Ambil data dosen dari server
+            fetch('get_dosen.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update profil dosen
+                        document.getElementById('dosen-name').textContent = data.data.nama_lengkap;
+                        document.getElementById('dosen-nidn').textContent = 'NIDN: ' + data.data.nidn;
+                        document.getElementById('dosen-bidang').textContent = data.data.bidang_keahlian || '-';
+                        document.getElementById('dosen-email').textContent = data.data.email;
+
+                        // Load foto profil jika ada
+                        if (data.data.foto_profil) {
+                            const img = document.createElement('img');
+                            img.src = data.data.foto_profil;
+                            img.alt = 'Profile Picture';
+                            img.className = 'profile-avatar-img';
+                            img.onerror = function () {
+                                console.error('Error loading image:', data.data.foto_profil);
+                            };
+                            document.getElementById('avatar-placeholder').replaceWith(img);
+                        }
+                    } else {
+                        console.error('Error:', data.message);
+                        showToast(data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Terjadi kesalahan saat memuat data', 'danger');
+                });
+
+            // Ambil aktivitas dari server
+            fetch('get_aktivitas.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const activityList = document.getElementById('activity-list');
+                        activityList.innerHTML = '';
+
+                        data.data.forEach(activity => {
+                            const activityHtml = `
+                                <div class="activity-item">
+                                    <p class="small text-dark">${activity.deskripsi}</p>
+                                    <p class="activity-time">${activity.waktu}</p>
+                                </div>
+                            `;
+                            activityList.insertAdjacentHTML('beforeend', activityHtml);
+                        });
+
+                        // Update statistik
+                        document.getElementById('stat-dinilai').textContent = data.data.length;
+                        const komentarCount = data.data.filter(a => a.deskripsi.includes('komentar')).length;
+                        document.getElementById('stat-komentar').textContent = komentarCount;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            // Mendapatkan elemen-elemen yang dibutuhkan
+            const changePhotoBtn = document.getElementById('change-photo-btn');
+            const profilePicInput = document.getElementById('profile-pic-input');
+
+            // Event listener untuk tombol "Ganti Foto"
+            changePhotoBtn.addEventListener('click', () => {
+                profilePicInput.click();
+            });
+
+            // Event listener untuk input file
+            profilePicInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+
+                if (file && file.type.startsWith('image/')) {
+                    showLoading();
+
+                    const formData = new FormData();
+                    formData.append('foto_profil', file);
+
+                    fetch('upload_foto.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            hideLoading();
+
+                            if (data.success) {
+                                const newImg = document.createElement('img');
+                                newImg.src = data.path + '?t=' + new Date().getTime();
+                                newImg.alt = 'Profile Picture';
+                                newImg.className = 'profile-avatar-img';
+
+                                const currentImg = document.querySelector('.profile-avatar-img');
+                                if (currentImg) {
+                                    currentImg.replaceWith(newImg);
+                                } else {
+                                    document.getElementById('avatar-placeholder').replaceWith(newImg);
+                                }
+
+                                showToast('Foto profil berhasil diperbarui!', 'success');
+                            } else {
+                                showToast(data.message, 'danger');
+                            }
+                        })
+                        .catch(error => {
+                            hideLoading();
+                            console.error('Error:', error);
+                            showToast('Terjadi kesalahan saat mengupload foto', 'danger');
+                        });
+                } else if (file) {
+                    showToast('Silakan pilih file gambar yang valid.', 'danger');
+                }
+            });
         });
     </script>
 </body>

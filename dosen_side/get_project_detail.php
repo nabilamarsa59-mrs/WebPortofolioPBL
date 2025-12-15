@@ -9,9 +9,9 @@ if (!isset($_GET['id'])) {
 
 $project_id = $_GET['id'];
 
-$sql = "SELECT p.*, m.nama_lengkap, m.nim, m.jurusan 
-        FROM projects p 
-        JOIN mahasiswa m ON p.id_mahasiswa = m.id 
+$sql = "SELECT p.*, m.nama_lengkap, m.nim, m.jurusan
+        FROM projects p
+        JOIN mahasiswa m ON p.id_mahasiswa = m.id
         WHERE p.id = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$project_id]);

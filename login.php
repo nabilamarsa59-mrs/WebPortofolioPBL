@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // 5. Ambil Data dari Form
     $user_type = $_POST['user_type'];
-    $identifier = $_POST['identifier']; // Bisa NIM atau Username
+    $identifier = $_POST['identifier'];
     $password = $_POST['password'];
 
     // 6. Validasi Input
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // --- KASUS 1: JIKA YANG LOGIN ADALAH MAHASISWA ---
             if ($user_type == 'mahasiswa') {
                 // Query untuk mengambil data mahasiswa berdasarkan NIM
-                $sql = "SELECT u.id as user_id, u.password, u.role, m.nim
+                $sql = "SELECT u.id as user_id, u.password, u.role, m.id as id_mahasiswa, m.nim
                         FROM users u
                         JOIN mahasiswa m ON u.id_mahasiswa = m.id
                         WHERE m.nim = ? AND u.role = 'mahasiswa'";
@@ -38,8 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // --- KASUS 2: JIKA YANG LOGIN ADALAH DOSEN ---
             } elseif ($user_type == 'dosen') {
                 // Query untuk mengambil data dosen berdasarkan username
-                $sql = "SELECT u.id as user_id, u.password, u.role, u.id_dosen
+                $sql = "SELECT u.id as user_id, u.password, u.role, u.id_dosen, d.id as dosen_id
                         FROM users u
+                        LEFT JOIN dosen d ON u.id_dosen = d.id
                         WHERE u.username = ? AND u.role = 'dosen'";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$identifier]);
@@ -47,20 +48,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // 8. Verifikasi User dan Password
-// Periksa apakah user ditemukan dan passwordnya cocok
             if ($user && $password === $user['password']) {
                 // Jika berhasil, simpan data ke sesi
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['role'] = $user['role'];
-
-                // --- TAMBAHKAN DUA BARIS INI ---
                 $_SESSION['status'] = "login";
                 $_SESSION['level'] = $user['role'];
 
                 // Simpan identifier yang spesifik untuk setiap role
                 if ($user['role'] == 'dosen') {
-                    $_SESSION['id_dosen'] = $user['id_dosen'];
+                    // PERBAIKAN: Simpan id_dosen dengan benar
+                    $_SESSION['id_dosen'] = $user['id_dosen'] ?? $user['dosen_id'];
                 } else {
+                    $_SESSION['id_mahasiswa'] = $user['id_mahasiswa'];
                     $_SESSION['nim'] = $user['nim'];
                 }
 
@@ -144,7 +144,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             position: relative;
             z-index: 2;
             width: 100%;
-            max-width: 420px;
+            max-width: 600px;
+            /* Ditingkatkan dari 420px menjadi 600px */
             padding: 20px;
         }
 
@@ -340,7 +341,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             function updateFormState(userType) {
                 // Perbarui tampilan tombol pilihan
                 userTypeOptions.forEach(opt => opt.classList.remove('active'));
-                document.querySelector(`[data-type="${userType}"]`).classList.add('active');
+                document.querySelector([data-type="${userType}"]).classList.add('active');
 
                 // Perbarui nilai input tersembunyi
                 userTypeInput.value = userType;
