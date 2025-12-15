@@ -1,5 +1,4 @@
 <?php
-// --- 1. CEK KEAMANAN ---
 session_start();
 require_once '../koneksi.php';
 
@@ -8,9 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     exit();
 }
 
-// --- 2. AMBIL DATA MAHASISWA & PROYEK (CARA LEBIH SEDERHANA DAN PASTI) ---
 try {
-    // Satu query langsung untuk ambil data mahasiswa berdasarkan session user_id
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.foto_profil, m.nim, m.jurusan
                           FROM users u
                           JOIN mahasiswa m ON u.id_mahasiswa = m.id
@@ -23,7 +20,6 @@ try {
         die("Data mahasiswa tidak ditemukan untuk user yang login.");
     }
 
-    // Query untuk mengambil semua project milik mahasiswa ini berdasarkan ID mahasiswa yang sudah didapat
     $sql_projects = "SELECT p.id, p.judul, p.deskripsi, p.kategori, p.gambar, p.link_demo, p.tanggal
                     FROM projects p
                     WHERE p.id_mahasiswa = ?
@@ -53,7 +49,12 @@ try {
     <style>
         :root { --primary-color: #003366; --secondary-color: #001F3F; --accent-color: #55bddd; }
         body { font-family: 'Poppins', sans-serif; background-color: whitesmoke; color: #333; padding-top: 76px; }
-        .navbar { background-color: var(--primary-color); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .navbar {
+            background: #00003c !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 0;
+            z-index: 1000;
+        }
         .navbar-brand, .navbar-nav .nav-link, .dropdown-item { color: #fff !important; }
         .navbar-nav .nav-link:hover, .dropdown-item:hover { color: var(--accent-color) !important; }
         .dropdown-menu { background-color: var(--secondary-color); border: none; }
@@ -77,7 +78,7 @@ try {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <?php if (!empty($mahasiswa['foto_profil'])): ?>
-                                <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>" class="profile-img" alt="Profile">
+                                <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>?t=<?= time() ?>" class="profile-img" alt="Profile">
                             <?php else: ?>
                                 <i class="bi bi-person-circle fs-4 me-1"></i>
                             <?php endif; ?>
@@ -118,11 +119,14 @@ try {
                 <?php foreach ($projects as $project): ?>
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card project-card">
-                            <?php if (!empty($project['gambar'])): ?>
-                                <img src="/WebPortofolioPBL/uploads/<?= htmlspecialchars($project['gambar'] ?? 'default-project.png') ?>" class="card-img-top" alt="Project Image">
-                            <?php else: ?>
-                                <img src="https://picsum.photos/seed/project<?= $project['id'] ?>/400/200.jpg" class="card-img-top" alt="Project Image">
-                            <?php endif; ?>
+                            <?php
+                            // PERBAIKAN: Path foto proyek yang benar
+                            $project_image = '../uploads/default-project.png';
+                            if (!empty($project['gambar'])) {
+                                $project_image = '../uploads/' . $project['gambar'];
+                            }
+                            ?>
+                            <img src="<?= htmlspecialchars($project_image) ?>?t=<?= time() ?>" class="card-img-top" alt="Project Image" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23eeeeee%22 width=%22400%22 height=%22200%22/%3E%3Ctext fill=%22%23999999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title"><?= htmlspecialchars($project['judul']); ?></h5>
                                 <p class="card-text"><small class="text-muted">Kategori: <?= htmlspecialchars($project['kategori']); ?></small></p>

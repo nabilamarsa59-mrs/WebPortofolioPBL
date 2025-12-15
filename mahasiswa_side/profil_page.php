@@ -1,5 +1,4 @@
 <?php
-// --- 1. CEK KEAMANAN ---
 session_start();
 require_once '../koneksi.php';
 
@@ -8,9 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     exit();
 }
 
-// --- 2. AMBIL DATA MAHASISWA (QUERY LEBIH SEDERHANA) ---
 try {
-    // Query yang lebih langsung dan aman untuk mengambil data mahasiswa
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.email, m.nim, m.jurusan, m.foto_profil
                           FROM users u
                           JOIN mahasiswa m ON u.id_mahasiswa = m.id
@@ -26,9 +23,8 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
-// --- 3. PROSES UPDATE PROFIL ---
- $update_message = '';
- $update_error = '';
+$update_message = '';
+$update_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = $_POST['nama'];
@@ -52,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($mahasiswa['foto_profil']) && $mahasiswa['foto_profil'] !== 'default-avatar.jpg' && file_exists('../uploads/' . $mahasiswa['foto_profil'])) {
                 unlink('../uploads/' . $mahasiswa['foto_profil']);
             }
-            // Gunakan nama file baru
+            // Gunakan nama file baru (SIMPAN HANYA NAMA FILE, BUKAN PATH LENGKAP)
             $nama_foto = $new_file_name;
         } else {
             $update_error = "Gagal mengupload foto. Periksa folder 'uploads' dan izinnya.";
@@ -87,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons (GUNAKAN VERSI LEBIH STABIL) -->
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body {
@@ -96,7 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding-top: 80px;
         }
         .navbar {
-            background: rgba(0, 0, 60, 0.8) !important;
+            background: #00003c !important;
+            padding: 0.75rem 0;
+            z-index: 1000;
         }
         .navbar a {
             color: #fff !important;
@@ -183,8 +181,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
-                        <!-- PERBAIKAN PENTING: Ganti .png menjadi .jpg -->
-                        <img id="previewFoto" src="/WebPortofolioPBL/uploads/<?= htmlspecialchars($mahasiswa['foto_profil'] ?? 'default-avatar.jpg') ?>" alt="Foto Profil">
+                        <!-- PERBAIKAN: Path foto yang benar -->
+                        <?php
+                        $foto_path = '../uploads/default-avatar.jpg'; // default
+                        if (!empty($mahasiswa['foto_profil'])) {
+                            $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
+                        }
+                        ?>
+                        <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>" alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
                         </label>
