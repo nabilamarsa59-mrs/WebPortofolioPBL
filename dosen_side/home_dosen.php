@@ -34,7 +34,7 @@ $projects = $stmt->fetchAll(); // Simpan semua hasil ke dalam array $projects
 // --- AKHIR KODE PENGGAMBIL DATA ---
 ?>
 
-<!DOCTYPE html>
+<!DOCTYPE html> // Simpan semua hasil ke dalam array $projects
 <html lang="id">
 
 <head>
