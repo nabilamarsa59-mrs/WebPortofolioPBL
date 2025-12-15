@@ -75,12 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil - WorkPiece</title>
     <!-- Google Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -93,36 +95,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .navbar {
             background: #00003c !important;
-            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            /* --- Perubahan --- */
+            padding: 0.75rem 1rem;
+            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            /* Memisahkan item kiri dan kanan */
+            align-items: center;
+            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
         }
-        .navbar a {
-            color: #fff !important;
-            text-decoration: none;
+
+        /* --- Perubahan --- */
+        .navbar-brand {
+            font-weight: bold;
+            /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem;
+            /* Membesarkan ukuran font agar lebih menonjol */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav {
+            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
+            align-items: center;
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav .nav-item {
+            /* Memberi jarak antar item di navbar sebelah kanan */
             margin-left: 15px;
         }
-        .navbar a:hover {
-            text-decoration: underline;
+
+        .navbar-nav .nav-item:first-child {
+            /* Menghilangkan margin kiri untuk item pertama agar tidak terlalu menjorok ke dalam */
+            margin-left: 0;
         }
+
+        .navbar-brand,
+        .navbar-nav .nav-link,
+        .dropdown-item {
+            color: #fff !important;
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav .nav-link {
+            font-weight: bold;
+            /* Menebalkan teks "Dashboard" */
+        }
+
         .profile-card {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-radius: 15px;
             border: none;
         }
+
         .profile-img-container {
             position: relative;
             width: 180px;
             height: 180px;
             margin: 0 auto;
         }
+
         #previewFoto {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
             border: 5px solid #f0f0f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+
         .change-photo-btn {
             position: absolute;
             bottom: 5px;
@@ -138,11 +181,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .change-photo-btn:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
+
 <body class="bg-light">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
@@ -188,7 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
                         }
                         ?>
-                        <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>" alt="Foto Profil">
+                        <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
+                            alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
                         </label>
@@ -205,15 +251,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="nama" class="form-label">Nama Lengkap</label>
-                                <input type="text" name="nama" id="nama" class="form-control" value="<?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>" required>
+                                <input type="text" name="nama" id="nama" class="form-control"
+                                    value="<?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="nim" class="form-label">NIM</label>
-                                <input type="text" name="nim" id="nim" class="form-control" value="<?= htmlspecialchars($mahasiswa['nim']) ?>" required>
+                                <input type="text" name="nim" id="nim" class="form-control"
+                                    value="<?= htmlspecialchars($mahasiswa['nim']) ?>" required>
                             </div>
                             <div class="col-12">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($mahasiswa['email']) ?>" required>
+                                <input type="email" name="email" id="email" class="form-control"
+                                    value="<?= htmlspecialchars($mahasiswa['email']) ?>" required>
                             </div>
                             <div class="col-12">
                                 <label for="jurusan" class="form-label">Jurusan</label>
@@ -242,11 +291,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Preview foto saat dipilih
-        document.getElementById('uploadFoto').addEventListener('change', function(event) {
+        document.getElementById('uploadFoto').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.getElementById('previewFoto').src = e.target.result;
                 }
                 reader.readAsDataURL(file);
@@ -254,4 +303,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 </body>
+
 </html>
