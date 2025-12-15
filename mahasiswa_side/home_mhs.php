@@ -52,10 +52,44 @@ try {
         .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.75rem 0;
+            /* --- Perubahan --- */
+            padding: 0.75rem 1rem; /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
+            display: flex;
+            justify-content: space-between; /* Memisahkan item kiri dan kanan */
+            align-items: center; /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
         }
+
+        /* --- Perubahan --- */
+        .navbar-brand {
+            font-weight: bold; /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem; /* Membesarkan ukuran font agar lebih menonjol */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav {
+            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
+            align-items: center;
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav .nav-item {
+            /* Memberi jarak antar item di navbar sebelah kanan */
+            margin-left: 15px;
+        }
+
+        .navbar-nav .nav-item:first-child {
+            /* Menghilangkan margin kiri untuk item pertama agar tidak terlalu menjorok ke dalam */
+            margin-left: 0;
+        }
+
         .navbar-brand, .navbar-nav .nav-link, .dropdown-item { color: #fff !important; }
+
+        /* --- Perubahan --- */
+        .navbar-nav .nav-link {
+            font-weight: bold; /* Menebalkan teks "Dashboard" */
+        }
+
         .navbar-nav .nav-link:hover, .dropdown-item:hover { color: var(--accent-color) !important; }
         .dropdown-menu { background-color: var(--secondary-color); border: none; }
         .hero { background: linear-gradient(rgba(0, 51, 102, 0.7), rgba(0, 31, 63, 0.7)), url('../bg-gedung.jpg') no-repeat center center/cover; color: #fff; padding: 100px 0; text-align: center; margin-bottom: 30px; }
@@ -68,11 +102,11 @@ try {
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="home_mhs.php">WorkPiece</a>
+        <div class="container">
+            <a class="navbar-brand ms-3" href="home_mhs.php">WorkPiece</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link active" href="home_mhs.php">Dashboard</a></li>
+                    <li class="nav-item"></li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
