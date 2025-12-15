@@ -2,13 +2,11 @@
 session_start();
 require_once 'koneksi.php';
 
-// PERBAIKAN: Sesuaikan nama variabel session
 if (!isset($_SESSION['id_dosen'])) {
     echo json_encode(['success' => false, 'message' => 'Anda belum login']);
     exit();
 }
 
-// PERBAIKAN: Sesuaikan nama variabel session
 $dosen_id = $_SESSION['id_dosen'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
