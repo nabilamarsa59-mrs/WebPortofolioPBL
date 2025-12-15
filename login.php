@@ -17,6 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // 6. Validasi Input
+    
     if (empty($user_type) || empty($identifier) || empty($password)) {
         $error_message = "Semua field harus diisi.";
     } else {
@@ -155,6 +156,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-align: center;
         }
 
+        /* ukuran logo */
         .logo {
             font-size: 2.2rem;
             font-weight: 700;
@@ -365,4 +367,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
     </script>
 </body>
+
 </html>
