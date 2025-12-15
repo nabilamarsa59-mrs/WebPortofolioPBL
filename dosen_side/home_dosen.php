@@ -7,7 +7,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 
 require_once '../koneksi.php';
 
-$sql = "SELECT  /* --pilihan data proyek-- */
+$sql = "SELECT
            p.id,
            p.judul,
            p.deskripsi,

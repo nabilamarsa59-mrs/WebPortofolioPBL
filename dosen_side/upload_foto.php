@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_profil'])) {
             mkdir($upload_dir, 0777, true);
         }
 
-        // Upload file poto
+        // Upload file
         if (move_uploaded_file($file['tmp_name'], $upload_path)) {
             // Hapus foto lama jika ada
             if (!empty($old_photo) && file_exists('../uploads/dosen/' . basename($old_photo))) {
