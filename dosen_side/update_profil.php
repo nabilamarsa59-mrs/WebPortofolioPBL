@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bio = $_POST['bio'];
 
     try {
-        // Update database
         $sql = "UPDATE dosen SET nama_lengkap = ?, email = ?, jabatan = ?, bio = ? WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$nama_lengkap, $email, $jabatan, $bio, $dosen_id]);

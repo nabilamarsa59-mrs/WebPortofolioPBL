@@ -9,11 +9,9 @@ if (!isset($_SESSION['id_dosen']) || $_SESSION['role'] !== 'dosen') {
     exit();
 }
 
-// Ambil ID dosen dari session
 $dosen_id = $_SESSION['id_dosen'];
 
 try {
-    // Ambil data dosen
     $sql = "SELECT * FROM dosen WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$dosen_id]);

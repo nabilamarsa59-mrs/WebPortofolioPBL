@@ -32,10 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nim = $_POST['nim'];
     $jurusan = $_POST['jurusan'];
 
-    // Default-kan nama foto ke foto yang sudah ada di database
     $nama_foto = $mahasiswa['foto_profil'];
 
-    // Proses upload foto profil HANYA JIKA ADA FILE BARU
     if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_ERR_OK) {
         $file_tmp = $_FILES['foto_profil']['tmp_name'];
         $file_name = $_FILES['foto_profil']['name'];
@@ -44,18 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $upload_path = '../uploads/' . $new_file_name;
 
         if (move_uploaded_file($file_tmp, $upload_path)) {
-            // Jika berhasil, hapus foto lama (jika ada dan bukan default)
             if (!empty($mahasiswa['foto_profil']) && $mahasiswa['foto_profil'] !== 'default-avatar.jpg' && file_exists('../uploads/' . $mahasiswa['foto_profil'])) {
                 unlink('../uploads/' . $mahasiswa['foto_profil']);
             }
-            // Gunakan nama file baru (SIMPAN HANYA NAMA FILE, BUKAN PATH LENGKAP)
             $nama_foto = $new_file_name;
         } else {
             $update_error = "Gagal mengupload foto. Periksa folder 'uploads' dan izinnya.";
         }
     }
 
-    // Update database hanya jika tidak ada error upload
     if (empty($update_error)) {
         try {
             $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
@@ -63,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
             $update_message = "Profil berhasil diperbarui!";
 
-            // Refresh data mahasiswa untuk menampilkan perubahan
             $stmt->execute([$_SESSION['user_id']]);
             $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -80,12 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil - WorkPiece</title>
-    <!-- Google Font Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body {
@@ -97,39 +88,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            /* --- Perubahan --- */
             padding: 0.75rem 1rem;
-            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
             display: flex;
             justify-content: space-between;
-            /* Memisahkan item kiri dan kanan */
             align-items: center;
-            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
         }
 
-        /* --- Perubahan --- */
         .navbar-brand {
             font-weight: bold;
-            /* Menebalkan teks "WorkPiece" */
             font-size: 1.5rem;
-            /* Membesarkan ukuran font agar lebih menonjol */
         }
 
-        /* --- Perubahan --- */
         .navbar-nav {
-            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
             align-items: center;
         }
 
-        /* --- Perubahan --- */
         .navbar-nav .nav-item {
-            /* Memberi jarak antar item di navbar sebelah kanan */
             margin-left: 15px;
         }
 
         .navbar-nav .nav-item:first-child {
-            /* Menghilangkan margin kiri untuk item pertama agar tidak terlalu menjorok ke dalam */
             margin-left: 0;
         }
 
@@ -139,10 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #fff !important;
         }
 
-        /* --- Perubahan --- */
         .navbar-nav .nav-link {
             font-weight: bold;
-            /* Menebalkan teks "Dashboard" */
         }
 
         .profile-card {
@@ -209,7 +186,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Main Container -->
     <main class="container my-5">
-        <!-- Tampilkan Pesan Sukses atau Error -->
         <?php if ($update_message): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle-fill"></i> <?= $update_message ?>
@@ -225,14 +201,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="row g-4 align-items-md-center">
-            <!-- KIRI: Foto Profil -->
             <section class="col-md-4 text-center">
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
-                        <!-- PERBAIKAN: Path foto yang benar -->
                         <?php
-                        $foto_path = '../uploads/default-avatar.jpg'; // default
+                        $foto_path = '../uploads/default-avatar.jpg'; 
                         if (!empty($mahasiswa['foto_profil'])) {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
                         }
@@ -247,7 +221,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </section>
 
-            <!-- KANAN: Form Profil -->
             <section class="col-md-8">
                 <div class="profile-card card shadow-sm p-4">
                     <h4 class="text-primary border-bottom pb-3 mb-4">Informasi Profil</h4>
@@ -291,10 +264,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </main>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Preview foto saat dipilih
         document.getElementById('uploadFoto').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {

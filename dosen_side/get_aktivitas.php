@@ -36,7 +36,6 @@ try {
             $deskripsi .= " dengan komentar";
         }
         
-        // Format waktu
         $waktu = date('d M Y H:i', strtotime($act['waktu_penilaian']));
         
         $formatted_activities[] = [
@@ -45,7 +44,6 @@ try {
         ];
     }
     
-    // Jika tidak ada aktivitas, beri default
     if (empty($formatted_activities)) {
         $formatted_activities = [
             ['deskripsi' => 'Belum ada aktivitas penilaian', 'waktu' => '-']

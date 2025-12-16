@@ -6,12 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorkPiece - Portofolio PBL Polibatam</title>
 
-    <!-- Google Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Bootstrap CSS CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <style>
         html {
@@ -24,7 +20,6 @@
             background-color: whitesmoke;
         }
 
-        /* --- Navbar --- */
         .navbar {
             background: rgba(0, 0, 60, 0.8) !important;
             padding: 0.75rem 0;
@@ -48,7 +43,6 @@
             color: #00ffff !important;
         }
 
-        /* --- Hero Section --- */
         #beranda {
             padding-top: 80px;
             height: 100vh;
@@ -138,7 +132,6 @@
             font-size: 1rem;
         }
 
-        /* --- Responsif --- */
         @media (max-width: 768px) {
             #beranda {
                 padding-top: 70px;

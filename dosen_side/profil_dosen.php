@@ -14,13 +14,8 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Dosen - WorkPiece</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <style>
@@ -35,25 +30,17 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
-            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
             display: flex;
             justify-content: space-between;
-            /* Memisahkan item kiri dan kanan */
             align-items: center;
-            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
             height: 80px;
-            /* Menambahkan tinggi eksplisit untuk navbar */
         }
 
-        /* --- Perubahan --- */
         .navbar-brand {
             font-weight: bold;
-            /* Menebalkan teks "WorkPiece" */
             font-size: 1.5rem;
-            /* Membesarkan ukuran font agar lebih menonjol */
             padding-left:10px;
-            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
 
 
@@ -201,12 +188,11 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 </head>
 
 <body>
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Navbar - SAMA DENGAN home_dosen.php -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">WorkPiece</a>
@@ -234,14 +220,10 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     <!-- Main Content -->
     <div class="container mt-4">
         <div class="row g-4">
-            <!-- Left Column - Profile Card -->
             <div class="col-lg-4">
-                <!-- Profile Card -->
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
-                        <!-- Container untuk avatar (ikon atau gambar) -->
                         <div class="profile-container">
-                            <!-- Default: Ikon Profil -->
                             <div id="avatar-placeholder" class="profile-avatar">
                                 <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
                             </div>
@@ -250,7 +232,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                                 <i class="bi bi-camera-fill text-white"></i>
                             </button>
                         </div>
-                        <!-- Input file disembunyikan -->
                         <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
 
                         <h5 class="text-navy mb-2 mt-3" id="dosen-name">Loading...</h5>
@@ -266,7 +247,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                     </div>
                 </div>
 
-                <!-- Statistics Card -->
                 <div class="card shadow-sm mt-4">
                     <div class="card-body">
                         <h6 class="text-navy mb-3">Statistik Aktivitas</h6>
@@ -290,7 +270,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                 </div>
             </div>
 
-            <!-- Right Column - Activity -->
             <div class="col-lg-8">
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -311,25 +290,20 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div class="toast-container"></div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Fungsi untuk menampilkan loading overlay
             function showLoading() {
                 document.getElementById('loadingOverlay').style.display = 'flex';
             }
 
-            // Fungsi untuk menyembunyikan loading overlay
             function hideLoading() {
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
 
-            // Fungsi untuk menampilkan toast notifikasi
             function showToast(message, type = 'success') {
                 const toastContainer = document.querySelector('.toast-container');
                 const toastId = 'toast-' + Date.now();
@@ -355,18 +329,15 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                 });
             }
 
-            // Ambil data dosen dari server
             fetch('get_dosen.php')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update profil dosen
                         document.getElementById('dosen-name').textContent = data.data.nama_lengkap;
                         document.getElementById('dosen-nidn').textContent = 'NIDN: ' + data.data.nidn;
                         document.getElementById('dosen-bidang').textContent = data.data.bidang_keahlian || '-';
                         document.getElementById('dosen-email').textContent = data.data.email;
 
-                        // Load foto profil jika ada
                         if (data.data.foto_profil) {
                             const img = document.createElement('img');
                             img.src = data.data.foto_profil;
@@ -387,7 +358,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                     showToast('Terjadi kesalahan saat memuat data', 'danger');
                 });
 
-            // Ambil aktivitas dari server
             fetch('get_aktivitas.php')
                 .then(response => response.json())
                 .then(data => {
@@ -405,7 +375,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                             activityList.insertAdjacentHTML('beforeend', activityHtml);
                         });
 
-                        // Update statistik
                         document.getElementById('stat-dinilai').textContent = data.data.length;
                         const komentarCount = data.data.filter(a => a.deskripsi.includes('komentar')).length;
                         document.getElementById('stat-komentar').textContent = komentarCount;
@@ -414,17 +383,13 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                 .catch(error => {
                     console.error('Error:', error);
                 });
-
-            // Mendapatkan elemen-elemen yang dibutuhkan
             const changePhotoBtn = document.getElementById('change-photo-btn');
             const profilePicInput = document.getElementById('profile-pic-input');
 
-            // Event listener untuk tombol "Ganti Foto"
             changePhotoBtn.addEventListener('click', () => {
                 profilePicInput.click();
             });
 
-            // Event listener untuk input file
             profilePicInput.addEventListener('change', function (event) {
                 const file = event.target.files[0];
 

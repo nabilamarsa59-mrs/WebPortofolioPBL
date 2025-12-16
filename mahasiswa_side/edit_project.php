@@ -7,7 +7,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     exit();
 }
 
-// Ambil ID project dari URL
 $id_project = $_GET['id'] ?? null;
 
 if (!$id_project) {
@@ -27,18 +26,15 @@ if (!$project) {
     exit();
 }
 
-// Ambil data mahasiswa untuk verifikasi
 $stmt_mahasiswa = $pdo->prepare("SELECT id_mahasiswa FROM users WHERE id = ?");
 $stmt_mahasiswa->execute([$_SESSION['user_id']]);
 $id_mahasiswa = $stmt_mahasiswa->fetchColumn();
 
-// Pastikan project milik mahasiswa yang login
 if ($project['id_mahasiswa'] != $id_mahasiswa) {
     header("Location: home_mhs.php");
     exit();
 }
 
-// Proses jika form disubmit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $judul = $_POST['judul'];
     $deskripsi = $_POST['deskripsi'];
@@ -47,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nama_file_gambar = $project['gambar'];
 
-    // Proses upload gambar baru jika ada
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] === UPLOAD_ERR_OK) {
         $file_tmp = $_FILES['gambar']['tmp_name'];
         $file_name = $_FILES['gambar']['name'];
@@ -56,17 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $upload_path = '../uploads/' . $new_file_name;
 
         if (move_uploaded_file($file_tmp, $upload_path)) {
-            // Hapus gambar lama jika ada
             if (!empty($project['gambar']) && file_exists('../uploads/' . $project['gambar'])) {
                 unlink('../uploads/' . $project['gambar']);
             }
 
-            // Update dengan gambar baru (SIMPAN HANYA NAMA FILE)
             $nama_file_gambar = $new_file_name;
         }
     }
 
-    // Update database
     $sql = "UPDATE projects SET judul = ?, deskripsi = ?, kategori = ?, link_demo = ?, gambar = ? WHERE id = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$judul, $deskripsi, $kategori, $link_video, $nama_file_gambar, $id_project]);
@@ -83,10 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Proyek - WorkPiece</title>
-    <!-- Google Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Bootstrap CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
         body {
@@ -98,36 +87,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
-            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
             display: flex;
             justify-content: space-between;
-            /* Memisahkan item kiri dan kanan */
             align-items: center;
-            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
             height: 80px;
-            /* Menambahkan tinggi eksplisit untuk navbar */
         }
-
-        /* --- Perubahan --- */
         .navbar-brand {
             font-weight: bold;
-            /* Menebalkan teks "WorkPiece" */
             font-size: 1.5rem;
-            /* Membesarkan ukuran font agar lebih menonjol */
             padding-left: 50px;
-            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
-
-        /* --- Perubahan --- */
         .navbar-nav {
-            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
             align-items: center;
             padding-right: 50px;
-            /* Menambahkan jarak di kanan menu (Profil) untuk memindahkannya sedikit ke tengah */
         }
-
-        /* --- Perubahan --- */
         .navbar-nav .nav-item {
             margin-left: 15px;
         }
@@ -202,8 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="gambar" class="form-label fw-semibold">Foto Proyek</label>
                     <input type="file" name="gambar" id="gambar" class="form-control" accept="image/*">
                     <small class="text-muted">Kosongkan jika tidak ingin mengubah foto</small>
-
-                    <!-- Preview Gambar Lama -->
                     <?php if (!empty($project['gambar'])): ?>
                         <div class="mt-3">
                             <p class="fw-semibold">Foto Saat Ini:</p>
@@ -212,8 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%23eeeeee%22 width=%22300%22 height=%22200%22/%3E%3Ctext fill=%22%23999999%22 font-family=%22Arial%22 font-size=%2216%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
                         </div>
                     <?php endif; ?>
-
-                    <!-- Preview Gambar Baru -->
                     <div class="mt-3" id="newImagePreview" style="display: none;">
                         <p class="fw-semibold">Preview Foto Baru:</p>
                         <img src="" alt="New Project Image" class="preview-image" id="newImage">
@@ -225,7 +195,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </main>
 
     <script>
-        // Preview gambar baru saat dipilih
         document.getElementById('gambar').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {

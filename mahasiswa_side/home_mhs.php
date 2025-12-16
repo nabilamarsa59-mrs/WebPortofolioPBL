@@ -42,11 +42,8 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorkPiece - Dashboard Mahasiswa</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -65,37 +62,27 @@ try {
          .navbar { 
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.75rem 1rem; /* Ditambah padding horizontal agar tidak mepet */
-            z-index: 1000;
+            padding: 0.75rem 1rem; 
             display: flex;
-            justify-content: space-between; /* Memisahkan item kiri dan kanan */
-            align-items: center; /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
+            justify-content: space-between; 
+            align-items: center; 
         }
         
-        /* --- Perubahan --- */
         .navbar-brand {
-            font-weight: bold; /* Menebalkan teks "WorkPiece" */
-            font-size: 1.5rem; /* Membesarkan ukuran font agar lebih menonjol */
-            /* --- Perubahan Baru --- */
-            padding-left: 100px; /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
+            font-weight: bold; 
+            font-size: 1.5rem; 
+            padding-left: 100px; 
         }
 
-        /* --- Perubahan --- */
         .navbar-nav {
-            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
             align-items: center;
-            /* --- Perubahan Baru --- */
-            padding-right: 50px; /* Menambahkan jarak di kanan menu (Profil) untuk memindahkannya sedikit ke tengah */
+            padding-right: 50px; 
         }
-
-        /* --- Perubahan --- */
         .navbar-nav .nav-item {
-            /* Memberi jarak antar item di navbar sebelah kanan */
             margin-left: 15px; 
         }
         
         .navbar-nav .nav-item:first-child {
-            /* Menghilangkan margin kiri untuk item pertama agar tidak terlalu menjorok ke dalam */
             margin-left: 0; 
         }
 
@@ -217,7 +204,6 @@ try {
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card project-card">
                             <?php
-                            // PERBAIKAN: Path foto proyek yang benar
                             $project_image = '../uploads/default-project.png';
                             if (!empty($project['gambar'])) {
                                 $project_image = '../uploads/' . $project['gambar'];

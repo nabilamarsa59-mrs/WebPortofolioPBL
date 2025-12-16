@@ -54,25 +54,17 @@ $projects = $stmt->fetchAll();
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
-            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
             display: flex;
             justify-content: space-between;
-            /* Memisahkan item kiri dan kanan */
             align-items: center;
-            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
             height: 80px;
-            /* Menambahkan tinggi eksplisit untuk navbar */
         }
 
-        /* --- Perubahan --- */
         .navbar-brand {
             font-weight: bold;
-            /* Menebalkan teks "WorkPiece" */
             font-size: 1.5rem;
-            /* Membesarkan ukuran font agar lebih menonjol */
             padding-left:20px;
-            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
 
         .navbar-nav .nav-link {
@@ -727,7 +719,6 @@ $projects = $stmt->fetchAll();
                 document.getElementById('modalProjectKategori').textContent = kategori;
                 document.getElementById('modalProjectDescription').textContent = description;
 
-                // BARU: Tampilkan link YouTube jika ada
                 const youtubeLinkSection = document.getElementById('youtubeLinkSection');
                 const youtubeLink = document.getElementById('youtubeLink');
 
@@ -756,14 +747,12 @@ $projects = $stmt->fetchAll();
                 }
             });
 
-            // Reset form saat modal ditutup
             document.getElementById('gradeModal').addEventListener('hidden.bs.modal', function () {
                 document.getElementById('gradeForm').reset();
                 document.getElementById('existingGradeSection').style.display = 'none';
                 document.getElementById('youtubeLinkSection').style.display = 'none';
             });
 
-            // Event listener untuk tombol simpan
             document.getElementById('saveGradeBtn').addEventListener('click', function () {
                 const grade = document.getElementById('gradeSelect').value;
                 const comment = document.getElementById('commentText').value;

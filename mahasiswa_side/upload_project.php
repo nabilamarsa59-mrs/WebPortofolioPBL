@@ -2,29 +2,23 @@
 session_start();
 require_once '../koneksi.php';
 
-// Cek apakah user mahasiswa sudah login
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     header("Location: ../login.php");
     exit();
 }
 
-// Ambil data mahasiswa untuk mendapatkan id_mahasiswa
 $stmt_mahasiswa = $pdo->prepare("SELECT id_mahasiswa FROM users WHERE id = ?");
 $stmt_mahasiswa->execute([$_SESSION['user_id']]);
 $id_mahasiswa = $stmt_mahasiswa->fetchColumn();
 
-// --- AMBIL DATA KATEGORI UNTUK DROPDOWN ---
 $all_kategori = [];
 try {
-    // Ambil semua kategori yang sudah ada di database
     $stmt_kategori = $pdo->query("SELECT id, nama_kategori FROM kategori_proyek ORDER BY nama_kategori ASC");
     $all_kategori = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // Jika gagal, biarkan array kosong
     $all_kategori = [];
 }
 
-// Proses jika form disubmit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $judul = $_POST['judul'];
     $deskripsi = $_POST['deskripsi'];
@@ -32,17 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tanggal = date('Y-m-d');
     $nama_file = '';
 
-    // --- LOGIKA UNTUK MENENTUKAN KATEGORI ---
     $tipe_kategori = $_POST['tipe_kategori'];
     if ($tipe_kategori === 'lainnya') {
-        // Jika user memilih "Lainnya", ambil dari input teks
         $kategori = $_POST['kategori_lainnya'];
     } else {
-        // Jika user memilih dari dropdown, ambil nilainya
         $kategori = $_POST['id_kategori'];
     }
 
-    // Proses upload gambar
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] === UPLOAD_ERR_OK) {
         $file_tmp = $_FILES['gambar']['tmp_name'];
         $file_name = $_FILES['gambar']['name'];
@@ -55,12 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Simpan ke database
     $sql = "INSERT INTO projects (id_mahasiswa, judul, deskripsi, kategori, tanggal, gambar, link_demo) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id_mahasiswa, $judul, $deskripsi, $kategori, $tanggal, $nama_file, $link_video]);
 
-    // Arahkan ke halaman home mahasiswa
     header("Location: home_mhs.php");
     exit();
 }
@@ -72,10 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Proyek - WorkPiece</title>
-    <!-- Google Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Bootstrap CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -87,36 +72,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
-            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
             display: flex;
             justify-content: space-between;
-            /* Memisahkan item kiri dan kanan */
             align-items: center;
-            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
             height: 80px;
-            /* Menambahkan tinggi eksplisit untuk navbar */
         }
 
-        /* --- Perubahan --- */
         .navbar-brand {
             font-weight: bold;
-            /* Menebalkan teks "WorkPiece" */
             font-size: 1.5rem;
-            /* Membesarkan ukuran font agar lebih menonjol */
             padding-left: 50px;
-            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
-
-        /* --- Perubahan --- */
         .navbar-nav {
-            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
             align-items: center;
             padding-right: 50px;
-            /* Menambahkan jarak di kanan menu (Profil) untuk memindahkannya sedikit ke tengah */
         }
-
-        /* --- Perubahan --- */
         .navbar-nav .nav-item {
             margin-left: 15px;
         }
@@ -176,10 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endforeach; ?>
                         <option value="lainnya">Lainnya</option>
                     </select>
-                    <!-- Input teks tersembunyi untuk kategori baru -->
                     <input type="text" name="kategori_lainnya" id="kategori_lainnya" class="form-control mt-2"
                         placeholder="Tulis kategori baru..." style="display: none;">
-                    <!-- Input tersembunyi untuk melacak tipe kategori -->
                     <input type="hidden" name="tipe_kategori" id="tipe_kategori" value="pilihan">
                 </div>
 
@@ -207,12 +176,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const selectedValue = this.value;
 
                 if (selectedValue === 'lainnya') {
-                    // Tampilkan input teks untuk "Lainnya"
                     kategoriLainnya.style.display = 'block';
                     kategoriLainnya.required = true;
                     tipeKategoriInput.value = 'lainnya';
                 } else {
-                    // Sembunyikan input teks dan kosongkan nilainya
                     kategoriLainnya.style.display = 'none';
                     kategoriLainnya.required = false;
                     kategoriLainnya.value = '';

@@ -1,12 +1,10 @@
 <?php
-// Sederhanakan: Matikan semua error
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
 require_once '../koneksi.php';
 
-// Cek login sederhana
 if (!isset($_SESSION['user_id'])) {
     die("Anda belum login.");
 }
@@ -46,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 echo "<hr><h2>ISI FOLDER UPLOADS?</h2>";
 
-// Cek apakah folder bisa dibaca oleh PHP
  $folder_path = '../uploads';
 if (is_dir($folder_path)) {
     echo "<p style='color:green;'>Folder 'uploads' DITEMUKAN.</p>";
