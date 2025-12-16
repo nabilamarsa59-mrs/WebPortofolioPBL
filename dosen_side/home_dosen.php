@@ -71,7 +71,7 @@ $projects = $stmt->fetchAll();
             /* Menebalkan teks "WorkPiece" */
             font-size: 1.5rem;
             /* Membesarkan ukuran font agar lebih menonjol */
-            padding-left:20px;
+            padding-left: 20px;
             /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
 
@@ -282,6 +282,17 @@ $projects = $stmt->fetchAll();
                 width: 100% !important;
                 margin-bottom: 10px;
             }
+        }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
         }
     </style>
 </head>
