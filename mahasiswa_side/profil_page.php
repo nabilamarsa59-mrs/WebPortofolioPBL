@@ -165,6 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 50%;
             border: 5px solid #f0f0f0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background-image: url('https://th.bing.com/th/id/OIP.QEKaYl7YdueCqGHy5yJ-xQHaHa?w=202&h=202&c=7&r=0&o=5&cb=ucfimg2&dpr=1.3&pid=1.7&ucfimg=1');
+            background-size: cover;
+            background-position: center;
         }
 
         .change-photo-btn {
@@ -298,12 +301,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </section>
         </div>
     </main>
-    <!-- Footer -->
-    <footer class="footer-custom">
-        <div class="container">
-            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
-        </div>
-    </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
