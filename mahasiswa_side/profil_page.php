@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
                         }
                         ?>
-                        <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
+                        <img src="profil.jpeg" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
                             alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
