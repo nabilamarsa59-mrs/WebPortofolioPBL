@@ -64,7 +64,13 @@ $projects = $stmt->fetchAll();
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
+<<<<<<< HEAD
             padding-left:20px;
+=======
+            /* Membesarkan ukuran font agar lebih menonjol */
+            padding-left: 20px;
+            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
+>>>>>>> 3b30e749da6dea53540ff2afd0ba852a4b496adf
         }
 
         .navbar-nav .nav-link {
@@ -274,6 +280,17 @@ $projects = $stmt->fetchAll();
                 width: 100% !important;
                 margin-bottom: 10px;
             }
+        }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
         }
     </style>
 </head>
@@ -508,6 +525,13 @@ $projects = $stmt->fetchAll();
     </div>
 
     <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+    
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

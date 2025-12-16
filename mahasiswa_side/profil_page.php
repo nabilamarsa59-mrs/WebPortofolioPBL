@@ -166,6 +166,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .change-photo-btn:hover {
             background-color: #0056b3;
         }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -263,6 +274,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </section>
         </div>
     </main>
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

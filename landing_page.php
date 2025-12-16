@@ -21,7 +21,7 @@
         }
 
         .navbar {
-            background: rgba(0, 0, 60, 0.8) !important;
+            background-color: #00003C;
             padding: 0.75rem 0;
             z-index: 1000;
         }
@@ -89,6 +89,7 @@
             padding: 80px 0;
         }
 
+
         .about h2 {
             color: #003366;
             font-weight: bold;
@@ -144,6 +145,17 @@
             .hero-content p {
                 font-size: 1.2rem;
             }
+        }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
         }
     </style>
 </head>
@@ -226,6 +238,12 @@
             </div>
         </div>
     </section>
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>

@@ -59,9 +59,10 @@ try {
             padding-top: 76px;
         }
 
-         .navbar { 
+        .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+<<<<<<< HEAD
             padding: 0.75rem 1rem; 
             display: flex;
             justify-content: space-between; 
@@ -72,24 +73,68 @@ try {
             font-weight: bold; 
             font-size: 1.5rem; 
             padding-left: 100px; 
+=======
+            padding: 0.75rem 1rem;
+            /* Ditambah padding horizontal agar tidak mepet */
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            /* Memisahkan item kiri dan kanan */
+            align-items: center;
+            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-brand {
+            font-weight: bold;
+            /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem;
+            /* Membesarkan ukuran font agar lebih menonjol */
+            /* --- Perubahan Baru --- */
+            padding-left: 100px;
+            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
+>>>>>>> 3b30e749da6dea53540ff2afd0ba852a4b496adf
         }
 
         .navbar-nav {
             align-items: center;
+<<<<<<< HEAD
             padding-right: 50px; 
+=======
+            /* --- Perubahan Baru --- */
+            padding-right: 50px;
+            /* Menambahkan jarak di kanan menu (Profil) untuk memindahkannya sedikit ke tengah */
+>>>>>>> 3b30e749da6dea53540ff2afd0ba852a4b496adf
         }
         .navbar-nav .nav-item {
+<<<<<<< HEAD
             margin-left: 15px; 
+=======
+            /* Memberi jarak antar item di navbar sebelah kanan */
+            margin-left: 15px;
+>>>>>>> 3b30e749da6dea53540ff2afd0ba852a4b496adf
         }
-        
+
         .navbar-nav .nav-item:first-child {
+<<<<<<< HEAD
             margin-left: 0; 
+=======
+            /* Menghilangkan margin kiri untuk item pertama agar tidak terlalu menjorok ke dalam */
+            margin-left: 0;
+>>>>>>> 3b30e749da6dea53540ff2afd0ba852a4b496adf
         }
 
-        .navbar-brand, .navbar-nav .nav-link, .dropdown-item { color: #fff !important; }
+        .navbar-brand,
+        .navbar-nav .nav-link,
+        .dropdown-item {
+            color: #fff !important;
+        }
 
-        .navbar-nav .nav-link:hover, .dropdown-item:hover { color: var(--accent-color) !important; }
-        
+        .navbar-nav .nav-link:hover,
+        .dropdown-item:hover {
+            color: var(--accent-color) !important;
+        }
+
         .dropdown-item {
             color: #fff !important;
         }
@@ -105,12 +150,42 @@ try {
             border: none;
         }
 
+        /* --- Ganti seluruh bagian .hero dengan ini --- */
         .hero {
-            background: linear-gradient(rgba(0, 51, 102, 0.7), rgba(0, 31, 63, 0.7)), url('../bg-gedung.jpg') no-repeat center center/cover;
+            padding-top: 80px;
+            /* Tambahkan padding atas agar tidak tertutup navbar */
+            height: 100vh;
+            /* Buat hero memenuhi tinggi layar */
+            background: linear-gradient(rgba(0, 30, 100, 0.5), rgba(0, 30, 100, 0.5)), url('../bg-gedung.jpg') no-repeat center center/cover;
             color: #fff;
-            padding: 100px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            margin-bottom: 30px;
+        }
+
+        /* --- Tambahkan class .hero-content ini --- */
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            /* Font size yang sama dengan landing page */
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .hero-content span {
+            color: #55bddd;
+            /* Warna accent untuk nama */
+        }
+
+        .hero-content p {
+            font-size: 1.5rem;
+            /* Font size yang sama dengan landing page */
         }
 
         .project-card {
@@ -136,6 +211,17 @@ try {
             object-fit: cover;
             border-radius: 50%;
             margin-right: 8px;
+        }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
         }
     </style>
 </head>
@@ -179,10 +265,10 @@ try {
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
+    <section id="beranda" class="hero">
+        <div class="hero-content">
             <h1>Selamat datang, <span><?= htmlspecialchars($mahasiswa['nama_lengkap']); ?>!</span></h1>
-            <p class="lead">Kelola dan tampilkan karya terbaikmu di sini.</p>
+            <p>Kelola dan tampilkan karya terbaikmu di sini.</p>
             <a href="upload_project.php" class="btn btn-lg btn-light mt-3"><i class="bi bi-plus-circle"></i> Tambah
                 Proyek Baru</a>
         </div>
@@ -243,6 +329,12 @@ try {
             <?php endif; ?>
         </div>
     </section>
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
