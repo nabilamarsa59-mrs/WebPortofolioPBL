@@ -25,7 +25,7 @@ try {
                 $dosen['foto_profil'] = '../uploads/dosen/' . $dosen['foto_profil'];
             }
         }
-
+        
         echo json_encode(['success' => true, 'data' => $dosen]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Data dosen tidak ditemukan']);

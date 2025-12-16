@@ -33,15 +33,29 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 
         .navbar {
             background: #00003c !important;
-            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem;
+            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            /* Memisahkan item kiri dan kanan */
+            align-items: center;
+            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
+            height: 80px;
+            /* Menambahkan tinggi eksplisit untuk navbar */
         }
 
+        /* --- Perubahan --- */
         .navbar-brand {
-            font-size: 1.5rem;
             font-weight: bold;
-            color: #fff !important;
+            /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem;
+            /* Membesarkan ukuran font agar lebih menonjol */
+            padding-left:10px;
+            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
+
 
         .navbar-nav .nav-link {
             color: #fff !important;
@@ -56,85 +70,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 
         .navbar a:hover {
             text-decoration: underline;
-        }
-
-        .search-container {
-            position: relative;
-            margin-left: 25px;
-        }
-
-        .search-form {
-            display: flex;
-            align-items: center;
-        }
-
-        .search-form input {
-            border: none;
-            border-radius: 20px;
-            padding: 5px 15px;
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 200px;
-            transition: width 0.3s, background-color 0.3s;
-        }
-
-        .search-form input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .search-form input:focus {
-            outline: none;
-            background-color: rgba(255, 255, 255, 0.3);
-            width: 250px;
-        }
-
-        .search-form button {
-            background: none;
-            border: none;
-            color: white;
-            margin-left: -35px;
-            cursor: pointer;
-        }
-
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-            margin-top: 5px;
-        }
-
-        .search-result-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            color: #333;
-        }
-
-        .search-result-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-
-        .highlight {
-            background-color: #ffeb3b;
-            padding: 0 2px;
-        }
-
-        .no-results {
-            padding: 15px;
-            text-align: center;
-            color: #666;
         }
 
         .profile-container {
@@ -262,21 +197,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             background-color: rgba(0, 0, 60, 0.05);
             border-radius: 5px;
         }
-
-        @media (max-width: 768px) {
-            .search-container {
-                margin: 10px 0;
-                width: 100%;
-            }
-
-            .search-form input {
-                width: 100%;
-            }
-
-            .search-form input:focus {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 
@@ -305,19 +225,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../logout.php">Logout</a>
-                    </li>
-                    <!-- FITUR SEARCH -->
-                    <li class="nav-item">
-                        <div class="search-container">
-                            <form class="search-form" role="search" id="searchForm">
-                                <input type="search" id="searchInput" placeholder="Cari NIM atau Nama..."
-                                    autocomplete="off">
-                                <button type="submit">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </form>
-                            <div class="search-results" id="searchResults"></div>
-                        </div>
                     </li>
                 </ul>
             </div>
@@ -447,30 +354,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                     toastElement.remove();
                 });
             }
-
-            function searchProjects(query) {
-                if (query.trim() !== '') {
-                    window.location.href = `home_dosen.php?search=${encodeURIComponent(query)}`;
-                }
-            }
-
-            // EVENT LISTENER UNTUK FORM PENCARIAN
-            document.getElementById('searchForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const query = document.getElementById('searchInput').value;
-                searchProjects(query);
-            });
-
-            // SEMBUNYIKAN HASIL PENCARIAN SAAT KLIK DI LUAR
-            document.addEventListener('click', function (e) {
-                const searchContainer = document.querySelector('.search-container');
-                if (searchContainer && !searchContainer.contains(e.target)) {
-                    const searchResults = document.getElementById('searchResults');
-                    if (searchResults) {
-                        searchResults.style.display = 'none';
-                    }
-                }
-            });
 
             // Ambil data dosen dari server
             fetch('get_dosen.php')

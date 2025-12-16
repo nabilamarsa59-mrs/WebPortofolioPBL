@@ -1,36 +1,87 @@
 <?php
+// 1. Memulai Sesi
 session_start();
-require_once '../koneksi.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
-    header("Location: ../login.php");
-    exit();
-}
+// 2. Menghubungkan ke Database
+require_once 'koneksi.php';
 
-try {
-    $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.foto_profil, m.nim, m.jurusan
-                          FROM users u
-                          JOIN mahasiswa m ON u.id_mahasiswa = m.id
-                          WHERE u.id = ?";
-    $stmt_mahasiswa = $pdo->prepare($sql_mahasiswa);
-    $stmt_mahasiswa->execute([$_SESSION['user_id']]);
-    $mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
+// 3. Inisialisasi Variabel Pesan Error
+$error_message = '';
 
-    if (!$mahasiswa) {
-        die("Data mahasiswa tidak ditemukan untuk user yang login.");
+// 4. Cek Apakah Form Telah Dikirim (Metode POST)
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // 5. Ambil Data dari Form
+    $user_type = $_POST['user_type'];
+    $identifier = $_POST['identifier'];
+    $password = $_POST['password'];
+
+    // 6. Validasi Input
+    if (empty($user_type) || empty($identifier) || empty($password)) {
+        $error_message = "Semua field harus diisi.";
+    } else {
+        // 7. Query Database Berdasarkan Tipe User
+        try {
+            $user = null; // Inisialisasi variabel user
+
+            // --- KASUS 1: JIKA YANG LOGIN ADALAH MAHASISWA ---
+            if ($user_type == 'mahasiswa') {
+                // Query untuk mengambil data mahasiswa berdasarkan NIM
+                $sql = "SELECT u.id as user_id, u.password, u.role, m.id as id_mahasiswa, m.nim
+                        FROM users u
+                        JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                        WHERE m.nim = ? AND u.role = 'mahasiswa'";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$identifier]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // --- KASUS 2: JIKA YANG LOGIN ADALAH DOSEN ---
+            } elseif ($user_type == 'dosen') {
+                // Query untuk mengambil data dosen berdasarkan username
+                $sql = "SELECT u.id as user_id, u.password, u.role, u.id_dosen, d.id as dosen_id
+                        FROM users u
+                        LEFT JOIN dosen d ON u.id_dosen = d.id
+                        WHERE u.username = ? AND u.role = 'dosen'";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$identifier]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+
+            // 8. Verifikasi User dan Password
+            if ($user && $password === $user['password']) {
+                // Jika berhasil, simpan data ke sesi
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['status'] = "login";
+                $_SESSION['level'] = $user['role'];
+
+                // Simpan identifier yang spesifik untuk setiap role
+                if ($user['role'] == 'dosen') {
+                    // PERBAIKAN: Simpan id_dosen dengan benar
+                    $_SESSION['id_dosen'] = $user['id_dosen'] ?? $user['dosen_id'];
+                } else {
+                    $_SESSION['id_mahasiswa'] = $user['id_mahasiswa'];
+                    $_SESSION['nim'] = $user['nim'];
+                }
+
+                // Arahkan ke halaman dashboard yang sesuai
+                if ($user['role'] == 'dosen') {
+                    header("Location: dosen_side/home_dosen.php");
+                } else {
+                    header("Location: mahasiswa_side/home_mhs.php");
+                }
+                exit(); // Hentikan skrip setelah redirect
+
+            } else {
+                // Jika user tidak ditemukan atau password salah
+                $error_message = "NIM/Username atau Kata Sandi salah.";
+            }
+
+        } catch (PDOException $e) {
+            // Jika terjadi error pada database
+            $error_message = "Terjadi kesalahan. Silakan coba lagi.";
+        }
     }
-
-    $sql_projects = "SELECT p.id, p.judul, p.deskripsi, p.kategori, p.gambar, p.link_demo, p.tanggal
-                    FROM projects p
-                    WHERE p.id_mahasiswa = ?
-                    ORDER BY p.tanggal DESC";
-
-    $stmt_projects = $pdo->prepare($sql_projects);
-    $stmt_projects->execute([$mahasiswa['id']]);
-    $projects = $stmt_projects->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    die("Terjadi kesalahan: " . $e->getMessage());
 }
 ?>
 
@@ -40,227 +91,283 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WorkPiece - Dashboard Mahasiswa</title>
+    <title>Login - WorkPiece</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary-color: #003366;
             --secondary-color: #001F3F;
             --accent-color: #55bddd;
+            --light-color: #ffffff;
+            --text-dark: #333333;
+            --error-color: #dc3545;
+            --font-family: 'Poppins', sans-serif;
         }
 
+        /* --- Styling Dasar --- */
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: whitesmoke;
-            color: #333;
-            padding-top: 76px;
-        }
-
-        .navbar {
-            background: #00003c !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            /* --- Perubahan --- */
-            padding: 0.75rem 1rem;
-            /* Ditambah padding horizontal agar tidak mepet */
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            /* Memisahkan item kiri dan kanan */
-            align-items: center;
-            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
-        }
-
-        /* --- Perubahan --- */
-        .navbar-brand {
-            font-weight: bold;
-            /* Menebalkan teks "WorkPiece" */
-            font-size: 1.5rem;
-            /* Membesarkan ukuran font agar lebih menonjol */
-        }
-
-        /* --- Perubahan --- */
-        .navbar-nav {
-            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
-            align-items: center;
-        }
-
-        /* --- Perubahan --- */
-        .navbar-nav .nav-item {
-            /* Memberi jarak antar item di navbar sebelah kanan */
-            margin-left: 15px;
-        }
-
-        .navbar-nav .nav-item:first-child {
-            /* Menghilangkan margin kiri untuk item pertama agar tidak terlalu menjorok ke dalam */
-            margin-left: 0;
-        }
-
-        /* --- Gaya Dropdown Menu --- */
-        .dropdown-menu {
-            background-color: var(--secondary-color);
-            border: none;
-        }
-
-        .dropdown-item {
-            color: #fff !important;
-        }
-
-        /* --- Perubahan: Tambahkan gaya untuk saat Hover, Fokus, dan Aktif --- */
-        .dropdown-item:hover,
-        .dropdown-item:focus,
-        .dropdown-item:active {
-            /* Gunakan warna primer yang lebih terang untuk latar saat interaksi */
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: url('bg-gedung.jpg') no-repeat center center/cover;
             background-color: var(--primary-color);
-            color: #fff !important;
-            /* Pastikan teks tetap putih dan tidak berubah */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
 
-        .hero {
-            background: linear-gradient(rgba(0, 51, 102, 0.7), rgba(0, 31, 63, 0.7)), url('../bg-gedung.jpg') no-repeat center center/cover;
-            color: #fff;
-            padding: 100px 0;
+        /* Overlay gelap untuk kontras teks */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        /* --- Kotak Login Utama --- */
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 600px;
+            /* Ditingkatkan dari 420px menjadi 600px */
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: var(--light-color);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             text-align: center;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .login-title {
+            color: var(--text-dark);
+            font-weight: 600;
             margin-bottom: 30px;
         }
 
-        .project-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        /* --- Pemilih Tipe User --- */
+        .user-type-selector {
+            display: flex;
+            background-color: #f0f0f0;
+            border-radius: 50px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .user-type-option {
+            flex: 1;
+            padding: 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #777;
+        }
+
+        .user-type-option.active {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            box-shadow: 0 4px 10px rgba(0, 51, 102, 0.3);
+        }
+
+        .user-type-option i {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* --- Form Input --- */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+            outline: none;
+        }
+
+        /* --- Alert Error --- */
+        .alert-danger-custom {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* --- Tombol --- */
+        .btn-login {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: var(--light-color);
             border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            height: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
         }
 
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        .btn-login:hover {
+            background-color: var(--secondary-color);
         }
 
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
+        /* --- Responsivitas --- */
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 30px 25px;
+            }
 
-        .profile-img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 8px;
+            .logo {
+                font-size: 1.9rem;
+            }
+
+            .user-type-option i {
+                font-size: 1rem;
+            }
+
+            .user-type-option span {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand ms-3" href="home_mhs.php">WorkPiece</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"></li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
-                            role="button" data-bs-toggle="dropdown">
-                            <?php if (!empty($mahasiswa['foto_profil'])): ?>
-                                <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>?t=<?= time() ?>"
-                                    class="profile-img" alt="Profile">
-                            <?php else: ?>
-                                <i class="bi bi-person-circle fs-4 me-1"></i>
-                            <?php endif; ?>
-                            <?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil
-                                    Saya</a></li>
-                            <li><a class="dropdown-item" href="upload_project.php"><i
-                                        class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="../logout.php"><i
-                                        class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Selamat datang, <span><?= htmlspecialchars($mahasiswa['nama_lengkap']); ?>!</span></h1>
-            <p class="lead">Kelola dan tampilkan karya terbaikmu di sini.</p>
-            <a href="upload_project.php" class="btn btn-lg btn-light mt-3"><i class="bi bi-plus-circle"></i> Tambah
-                Proyek Baru</a>
-        </div>
-    </section>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="logo">WorkPiece</div>
+            <h2 class="login-title">Selamat Datang</h2>
 
-    <!-- Main Content: Daftar Proyek -->
-    <section class="container my-5">
-        <h2>Proyek Saya</h2>
-        <div class="row">
-            <?php if (empty($projects)): ?>
-                <div class="col-12">
-                    <div class="alert alert-info text-center" role="alert">
-                        <i class="bi bi-info-circle"></i> Anda belum memiliki proyek. <a href="upload_project.php">Tambahkan
-                            proyek pertama Anda!</a>
+            <!-- Tampilkan pesan error jika ada -->
+            <?php if (!empty($error_message)): ?>
+                <div class="alert-danger-custom">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <?php echo htmlspecialchars($error_message); ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="login.php" method="post" id="loginForm">
+                <!-- Input tersembunyi untuk menyimpan tipe user -->
+                <input type="hidden" name="user_type" id="user_type_input" value="mahasiswa">
+
+                <!-- Pilihan Tipe User -->
+                <div class="user-type-selector">
+                    <div class="user-type-option active" data-type="mahasiswa">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <span>Mahasiswa</span>
+                    </div>
+                    <div class="user-type-option" data-type="dosen">
+                        <i class="bi bi-person-badge-fill"></i>
+                        <span>Dosen</span>
                     </div>
                 </div>
-            <?php else: ?>
-                <?php foreach ($projects as $project): ?>
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card project-card">
-                            <?php
-                            // PERBAIKAN: Path foto proyek yang benar
-                            $project_image = '../uploads/default-project.png';
-                            if (!empty($project['gambar'])) {
-                                $project_image = '../uploads/' . $project['gambar'];
-                            }
-                            ?>
-                            <img src="<?= htmlspecialchars($project_image) ?>?t=<?= time() ?>" class="card-img-top"
-                                alt="Project Image"
-                                onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23eeeeee%22 width=%22400%22 height=%22200%22/%3E%3Ctext fill=%22%23999999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title"><?= htmlspecialchars($project['judul']); ?></h5>
-                                <p class="card-text"><small class="text-muted">Kategori:
-                                        <?= htmlspecialchars($project['kategori']); ?></small></p>
-                                <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
 
-                                <!-- Tampilkan tombol video hanya jika ada linknya -->
-                                <?php if (!empty($project['link_demo'])): ?>
-                                    <a href="<?= htmlspecialchars($project['link_demo']) ?>" target="_blank"
-                                        class="btn btn-sm btn-danger mb-2">
-                                        <i class="bi bi-youtube"></i> Lihat Video
-                                    </a>
-                                <?php endif; ?>
+                <!-- Input NIM/Username -->
+                <div class="form-group">
+                    <label for="identifier" id="identifierLabel">NIM</label>
+                    <input type="text" class="form-control" id="identifier" name="identifier"
+                        placeholder="Masukkan NIM Anda" required>
+                </div>
 
-                                <div class="mt-auto d-flex justify-content-between">
-                                    <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </a>
-                                    <a href="proses_hapus_project.php?id=<?= $project['id']; ?>"
-                                        class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');">
-                                        <i class="bi bi-trash"></i> Hapus
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                <!-- Input Password -->
+                <div class="form-group">
+                    <label for="password">Kata Sandi</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                        placeholder="Masukkan kata sandi" required>
+                </div>
+
+                <button type="submit" class="btn-login">Masuk</button>
+            </form>
         </div>
-    </section>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const userTypeOptions = document.querySelectorAll('.user-type-option');
+            const userTypeInput = document.getElementById('user_type_input');
+            const identifierLabel = document.getElementById('identifierLabel');
+            const identifierInput = document.getElementById('identifier');
+
+            function updateFormState(userType) {
+                // Perbarui tampilan tombol pilihan
+                userTypeOptions.forEach(opt => opt.classList.remove('active'));
+                document.querySelector(`[data-type="${userType}"]`).classList.add('active');
+
+                // Perbarui nilai input tersembunyi
+                userTypeInput.value = userType;
+
+                // Perbarui label dan placeholder
+                if (userType === 'mahasiswa') {
+                    identifierLabel.textContent = 'NIM';
+                    identifierInput.placeholder = 'Masukkan NIM Anda';
+                } else { // Dosen
+                    identifierLabel.textContent = 'Username';
+                    identifierInput.placeholder = 'Masukkan username Anda';
+                }
+            }
+
+            // Event listener untuk pilihan tipe user
+            userTypeOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    const selectedType = this.getAttribute('data-type');
+                    updateFormState(selectedType);
+                });
+            });
+
+            // Set state awal saat halaman dimuat
+            updateFormState('mahasiswa');
+        });
+    </script>
 </body>
 
 </html>

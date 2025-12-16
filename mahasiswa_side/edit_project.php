@@ -19,6 +19,9 @@ $stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
 $stmt->execute([$id_project]);
 $project = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$stmt_kategori = $pdo->query("SELECT id, nama_kategori FROM kategori_proyek ORDER BY nama_kategori");
+$kategori_list = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
+
 if (!$project) {
     header("Location: home_mhs.php");
     exit();
@@ -80,16 +83,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Proyek - WorkPiece</title>
+    <!-- Google Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+        <style>
         body {
+            font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
         }
 
         .navbar {
             background: #00003c !important;
-            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem;
+            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            /* Memisahkan item kiri dan kanan */
+            align-items: center;
+            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
+            height: 80px;
+            /* Menambahkan tinggi eksplisit untuk navbar */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-brand {
+            font-weight: bold;
+            /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem;
+            /* Membesarkan ukuran font agar lebih menonjol */
+            padding-left: 50px;
+            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav {
+            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
+            align-items: center;
+            padding-right: 50px;
+            /* Menambahkan jarak di kanan menu (Profil) untuk memindahkannya sedikit ke tengah */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav .nav-item {
+            margin-left: 15px;
+        }
+
+        .navbar-nav .nav-item:first-child {
+            margin-left: 0;
         }
 
         .navbar a {
@@ -99,9 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .navbar a:hover {
-            color: #00ffff !important;
+            text-decoration: underline;
         }
-
         .preview-image {
             max-width: 300px;
             max-height: 300px;
@@ -141,8 +184,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="mb-3">
                     <label for="kategori" class="form-label fw-semibold">Kategori Proyek</label>
-                    <input type="text" name="kategori" class="form-control"
-                        value="<?= htmlspecialchars($project['kategori']) ?>" required>
+                    <select name="kategori" class="form-select" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <?php foreach ($kategori_list as $kat): ?>
+                            <option value="<?= $kat['id'] ?>" <?= ($project['kategori'] == $kat['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($kat['nama_kategori']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="link_video" class="form-label fw-semibold">Link Video YouTube</label>
@@ -159,9 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mt-3">
                             <p class="fw-semibold">Foto Saat Ini:</p>
                             <img src="../uploads/<?= htmlspecialchars($project['gambar']) ?>?t=<?= time() ?>"
-                                alt="Current Project Image"
-                                class="preview-image"
-                                id="currentImage"
+                                alt="Current Project Image" class="preview-image" id="currentImage"
                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%22%23eeeeee%22 width=%22300%22 height=%22200%22/%3E%3Ctext fill=%22%23999999%22 font-family=%22Arial%22 font-size=%2216%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
                         </div>
                     <?php endif; ?>
@@ -179,11 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         // Preview gambar baru saat dipilih
-        document.getElementById('gambar').addEventListener('change', function(event) {
+        document.getElementById('gambar').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.getElementById('newImage').src = e.target.result;
                     document.getElementById('newImagePreview').style.display = 'block';
                 }

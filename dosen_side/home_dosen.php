@@ -52,14 +52,27 @@ $projects = $stmt->fetchAll();
 
         .navbar {
             background: #00003c !important;
-            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem;
+            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            /* Memisahkan item kiri dan kanan */
+            align-items: center;
+            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
+            height: 80px;
+            /* Menambahkan tinggi eksplisit untuk navbar */
         }
 
+        /* --- Perubahan --- */
         .navbar-brand {
-            font-size: 1.5rem;
             font-weight: bold;
-            color: #fff !important;
+            /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem;
+            /* Membesarkan ukuran font agar lebih menonjol */
+            padding-left:20px;
+            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
         }
 
         .navbar-nav .nav-link {
@@ -234,7 +247,19 @@ $projects = $stmt->fetchAll();
             }
         }
 
-        /* Responsive untuk mobile */
+        /* Style untuk link YouTube */
+        .youtube-link-section {
+            background-color: #fff3cd;
+            border-left: 4px solid #ff0000;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .youtube-link-section i {
+            color: #ff0000;
+        }
+
         @media (max-width: 768px) {
             .search-container {
                 margin: 10px 0;
@@ -297,7 +322,6 @@ $projects = $stmt->fetchAll();
     <div class="container mt-4">
         <h2 class="mt-4 mb-3 text-navy">Dashboard Penilaian Proyek Mahasiswa</h2>
 
-        <!-- FILTER SECTION DITAMBAHKAN DI SINI -->
         <div class="filter-section">
             <div class="row align-items-center">
                 <div class="col-12">
@@ -376,6 +400,7 @@ $projects = $stmt->fetchAll();
                                             data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                                             data-kategori="<?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>"
                                             data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
+                                            data-link-demo="<?= htmlspecialchars($project['link_demo'] ?? '') ?>"
                                             data-nilai="<?= htmlspecialchars($project['nilai']) ?>"
                                             data-komentar="<?= htmlspecialchars($project['komentar']) ?>"
                                             data-status="sudah-dinilai">
@@ -391,6 +416,7 @@ $projects = $stmt->fetchAll();
                                             data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                                             data-kategori="<?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>"
                                             data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
+                                            data-link-demo="<?= htmlspecialchars($project['link_demo'] ?? '') ?>"
                                             data-status="belum-dinilai">
                                             <i class="bi bi-eye"></i> Lihat & Nilai
                                         </button>
@@ -429,6 +455,15 @@ $projects = $stmt->fetchAll();
                             <p><strong>Kategori:</strong> <span id="modalProjectKategori">-</span></p>
                         </div>
                     </div>
+
+                    <!-- BAGIAN BARU: Link YouTube -->
+                    <div id="youtubeLinkSection" class="youtube-link-section" style="display: none;">
+                        <p class="mb-2"><strong><i class="bi bi-youtube me-2"></i>Video Proyek:</strong></p>
+                        <a href="#" id="youtubeLink" target="_blank" class="btn btn-danger btn-sm">
+                            <i class="bi bi-play-circle-fill me-1"></i>Tonton Video YouTube
+                        </a>
+                    </div>
+
                     <p><strong>Deskripsi:</strong></p>
                     <p id="modalProjectDescription">-</p>
 
@@ -483,6 +518,7 @@ $projects = $stmt->fetchAll();
     <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -599,7 +635,6 @@ $projects = $stmt->fetchAll();
                         const resultItem = document.createElement('div');
                         resultItem.className = 'search-result-item';
 
-                        // Highlight matching text
                         let highlightedName = item.dataset.studentName;
                         let highlightedNim = nim;
 
@@ -619,10 +654,8 @@ $projects = $stmt->fetchAll();
                 `;
 
                         resultItem.addEventListener('click', function () {
-                            // Scroll to the project card
                             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                            // Highlight the card temporarily
                             const card = item.querySelector('.project-card');
                             card.style.transition = 'box-shadow 0.3s';
                             card.style.boxShadow = '0 0 15px rgba(0, 51, 102, 0.5)';
@@ -669,6 +702,7 @@ $projects = $stmt->fetchAll();
                 }
             });
 
+            // BAGIAN BARU: Event listener untuk modal dengan link YouTube
             document.getElementById('gradeModal').addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
 
@@ -679,6 +713,7 @@ $projects = $stmt->fetchAll();
                 const jurusan = button.getAttribute('data-jurusan');
                 const kategori = button.getAttribute('data-kategori');
                 const description = button.getAttribute('data-description');
+                const linkDemo = button.getAttribute('data-link-demo'); // BARU
                 const status = button.getAttribute('data-status');
                 const nilai = button.getAttribute('data-nilai');
                 const komentar = button.getAttribute('data-komentar');
@@ -691,6 +726,17 @@ $projects = $stmt->fetchAll();
                 document.getElementById('modalJurusanProdi').textContent = jurusan;
                 document.getElementById('modalProjectKategori').textContent = kategori;
                 document.getElementById('modalProjectDescription').textContent = description;
+
+                // BARU: Tampilkan link YouTube jika ada
+                const youtubeLinkSection = document.getElementById('youtubeLinkSection');
+                const youtubeLink = document.getElementById('youtubeLink');
+
+                if (linkDemo && linkDemo.trim() !== '') {
+                    youtubeLink.href = linkDemo;
+                    youtubeLinkSection.style.display = 'block';
+                } else {
+                    youtubeLinkSection.style.display = 'none';
+                }
 
                 const existingSection = document.getElementById('existingGradeSection');
 
@@ -714,6 +760,7 @@ $projects = $stmt->fetchAll();
             document.getElementById('gradeModal').addEventListener('hidden.bs.modal', function () {
                 document.getElementById('gradeForm').reset();
                 document.getElementById('existingGradeSection').style.display = 'none';
+                document.getElementById('youtubeLinkSection').style.display = 'none';
             });
 
             // Event listener untuk tombol simpan

@@ -67,12 +67,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Proyek - WorkPiece</title>
     <!-- Google Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -83,8 +85,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .navbar {
             background: #00003c !important;
-            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem;
+            /* Ditambah padding horizontal agar tidak mepet */
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            /* Memisahkan item kiri dan kanan */
+            align-items: center;
+            /* Menyelaraskan item secara vertikal (ini penting untuk meratakan foto profil dan teks) */
+            height: 80px;
+            /* Menambahkan tinggi eksplisit untuk navbar */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-brand {
+            font-weight: bold;
+            /* Menebalkan teks "WorkPiece" */
+            font-size: 1.5rem;
+            /* Membesarkan ukuran font agar lebih menonjol */
+            padding-left: 50px;
+            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav {
+            /* Menyelaraskan item di dalam navbar (Dashboard & Profil) secara vertikal */
+            align-items: center;
+            padding-right: 50px;
+            /* Menambahkan jarak di kanan menu (Profil) untuk memindahkannya sedikit ke tengah */
+        }
+
+        /* --- Perubahan --- */
+        .navbar-nav .nav-item {
+            margin-left: 15px;
+        }
+
+        .navbar-nav .nav-item:first-child {
+            margin-left: 0;
         }
 
         .navbar a {
@@ -98,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark px-5">
         <div class="container-fluid">
@@ -138,14 +177,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="lainnya">Lainnya</option>
                     </select>
                     <!-- Input teks tersembunyi untuk kategori baru -->
-                    <input type="text" name="kategori_lainnya" id="kategori_lainnya" class="form-control mt-2" placeholder="Tulis kategori baru..." style="display: none;">
+                    <input type="text" name="kategori_lainnya" id="kategori_lainnya" class="form-control mt-2"
+                        placeholder="Tulis kategori baru..." style="display: none;">
                     <!-- Input tersembunyi untuk melacak tipe kategori -->
                     <input type="hidden" name="tipe_kategori" id="tipe_kategori" value="pilihan">
                 </div>
 
                 <div class="mb-3">
                     <label for="link_video" class="form-label fw-semibold">Link Video YouTube (Opsional)</label>
-                    <input type="url" name="link_video" class="form-control" placeholder="https://youtube.com/watch?v=...">
+                    <input type="url" name="link_video" class="form-control"
+                        placeholder="https://youtube.com/watch?v=...">
                 </div>
                 <div class="mb-3">
                     <label for="gambar" class="form-label fw-semibold">Foto/Gambar Proyek</label>
@@ -157,12 +198,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const kategoriSelect = document.getElementById('id_kategori');
             const kategoriLainnya = document.getElementById('kategori_lainnya');
             const tipeKategoriInput = document.getElementById('tipe_kategori');
 
-            kategoriSelect.addEventListener('change', function() {
+            kategoriSelect.addEventListener('change', function () {
                 const selectedValue = this.value;
 
                 if (selectedValue === 'lainnya') {
@@ -181,4 +222,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 </body>
+
 </html>
