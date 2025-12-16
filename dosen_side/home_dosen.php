@@ -527,6 +527,13 @@ $projects = $stmt->fetchAll();
     </div>
 
     <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+    
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
