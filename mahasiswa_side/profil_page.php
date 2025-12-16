@@ -93,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: whitesmoke;
             padding-top: 80px;
         }
+
         .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -164,6 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 50%;
             border: 5px solid #f0f0f0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background-image: url('profil.jpeg');
+            background-size: cover;
+            background-position: center;
         }
 
         .change-photo-btn {
@@ -233,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
                         }
                         ?>
-                        <img src="profil.jpeg" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
+                        <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
                             alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
