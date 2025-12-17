@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <div class="row g-4 align-items-md-center">
+        <div class="row g-4 align-items-md-center"> < ---addddddd--- >
             <section class="col-md-4 text-center">
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
