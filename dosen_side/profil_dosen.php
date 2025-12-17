@@ -40,7 +40,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
-            padding-left: 10px;
+            padding-left:10px;
         }
 
 
@@ -74,6 +74,13 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             border: 4px solid #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             object-fit: cover;
+        }
+
+        .profile-avatar {
+            background: rgba(0, 0, 60, 0.8) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #change-photo-btn {
@@ -218,7 +225,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                     <div class="card-body text-center">
                         <div class="profile-container">
                             <div id="avatar-placeholder" class="profile-avatar">
-                                <img src="../uploads/profil.jpeg" class="profile-avatar-img" alt="Profile Placeholder">
+                                <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
                             </div>
 
                             <button class="btn btn-primary" id="change-photo-btn" title="Ganti Foto Profil">
