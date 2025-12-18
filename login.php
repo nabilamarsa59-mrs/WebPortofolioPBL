@@ -286,7 +286,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="password" class="form-control" id="password" name="password"
                         placeholder="Masukkan kata sandi" required>
                 </div>
-<!-- cara login-->
+
                 <button type="submit" class="btn-login">Masuk</button>
             </form>
         </div>

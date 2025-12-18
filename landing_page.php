@@ -213,7 +213,6 @@
                 diri untuk masa depan.
             </p>
 
-            <!-- div class-->
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="feature-box">
