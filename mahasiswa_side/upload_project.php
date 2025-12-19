@@ -60,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Proyek - WorkPiece</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -84,10 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1.5rem;
             padding-left: 50px;
         }
+
         .navbar-nav {
             align-items: center;
             padding-right: 50px;
         }
+
         .navbar-nav .nav-item {
             margin-left: 15px;
         }
@@ -104,6 +107,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .navbar a:hover {
             text-decoration: underline;
+        }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
         }
     </style>
 </head>
@@ -165,7 +179,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </main>
-
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const kategoriSelect = document.getElementById('id_kategori');

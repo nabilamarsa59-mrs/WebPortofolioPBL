@@ -211,13 +211,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <div class="row g-4 align-items-md-center"> < ---addddddd--- >
+        <div class="row g-4 align-items-md-center">
             <section class="col-md-4 text-center">
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
                         <?php
-                        $foto_path = '../uploads/default-avatar.jpg'; 
+                        $foto_path = '../uploads/default-avatar.jpg';
                         if (!empty($mahasiswa['foto_profil'])) {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
                         }

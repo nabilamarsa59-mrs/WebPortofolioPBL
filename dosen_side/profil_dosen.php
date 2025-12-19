@@ -12,7 +12,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Dosen - WorkPiece</title> 
+    <title>Profil Dosen - WorkPiece</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,7 +40,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
-            padding-left:10px;
+            padding-left: 10px;
         }
 
 
@@ -184,6 +184,17 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             background-color: rgba(0, 0, 60, 0.05);
             border-radius: 5px;
         }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            /* Warna biru tua yang solid */
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 50px;
+            /* Memberi jarak dengan section di atasnya */
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -291,6 +302,12 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     </div>
 
     <div class="toast-container"></div>
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
