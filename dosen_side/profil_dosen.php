@@ -24,8 +24,8 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
- $update_message = '';
- $update_error = '';
+$update_message = '';
+$update_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = $_POST['nama'];
@@ -135,16 +135,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 0 auto;
         }
 
-        #previewFoto {
+        /* Ganti CSS lama Anda untuk #previewFoto dengan ini */
+        div.profile-img-container>img#previewFoto {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 50%;
+            border-radius: 50% !important;
+            /* Tambahkan !important untuk memastikan ini diterapkan */
             border: 5px solid #f0f0f0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            background-image: url('../uploads/default-avatar.jpg');
-            background-size: cover;
-            background-position: center;
+            /* Hapus background-image karena kita menggunakan tag <img> */
         }
 
         .change-photo-btn {
@@ -312,14 +312,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" style="display: none;">
 
-                        <h5 class="text-navy mb-2 mt-3" id="dosen-name"><?= htmlspecialchars($dosen['nama_lengkap']) ?></h5>
-                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: <?= htmlspecialchars($dosen['nidn']) ?></p>
-                        <p class="text-muted small mb-4" id="dosen-bidang"><?= htmlspecialchars($dosen['bidang_keahlian']) ?></p>
+                        <h5 class="text-navy mb-2 mt-3" id="dosen-name"><?= htmlspecialchars($dosen['nama_lengkap']) ?>
+                        </h5>
+                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: <?= htmlspecialchars($dosen['nidn']) ?>
+                        </p>
+                        <p class="text-muted small mb-4" id="dosen-bidang">
+                            <?= htmlspecialchars($dosen['bidang_keahlian']) ?></p>
 
                         <div class="border-top pt-3">
                             <div class="profile-info d-flex align-items-center mb-2 small">
                                 <i class="bi bi-envelope text-navy me-2"></i>
-                                <span class="text-muted" id="dosen-email"><?= htmlspecialchars($dosen['email']) ?></span>
+                                <span class="text-muted"
+                                    id="dosen-email"><?= htmlspecialchars($dosen['email']) ?></span>
                             </div>
                         </div>
                     </div>
