@@ -4,6 +4,70 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     header("location:../login.php");
     exit();
 }
+
+// Get lecturer data from database
+require_once '../koneksi.php';
+
+try {
+    $sql_dosen = "SELECT d.id, d.nama_lengkap, d.email, d.nidn, d.bidang_keahlian, d.foto_profil
+                      FROM users u
+                      JOIN dosen d ON u.id_dosen = d.id
+                      WHERE u.id = ?";
+    $stmt = $pdo->prepare($sql_dosen);
+    $stmt->execute([$_SESSION['user_id']]);
+    $dosen = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$dosen) {
+        die("Data dosen tidak ditemukan.");
+    }
+} catch (PDOException $e) {
+    die("Error saat mengambil data: " . $e->getMessage());
+}
+
+ $update_message = '';
+ $update_error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama = $_POST['nama'];
+    $email = $_POST['email'];
+    $nidn = $_POST['nidn'];
+    $bidang = $_POST['bidang'];
+
+    $nama_foto = $dosen['foto_profil'];
+
+    if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_ERR_OK) {
+        $file_tmp = $_FILES['foto_profil']['tmp_name'];
+        $file_name = $_FILES['foto_profil']['name'];
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $new_file_name = 'profil_dosen_' . $dosen['nidn'] . '_' . uniqid() . '.' . $file_ext;
+        $upload_path = '../uploads/' . $new_file_name;
+
+        if (move_uploaded_file($file_tmp, $upload_path)) {
+            if (!empty($dosen['foto_profil']) && $dosen['foto_profil'] !== 'default-avatar.jpg' && file_exists('../uploads/' . $dosen['foto_profil'])) {
+                unlink('../uploads/' . $dosen['foto_profil']);
+            }
+            $nama_foto = $new_file_name;
+        } else {
+            $update_error = "Gagal mengupload foto. Periksa folder 'uploads' dan izinnya.";
+        }
+    }
+
+    if (empty($update_error)) {
+        try {
+            $sql_update = "UPDATE dosen SET nama_lengkap = ?, email = ?, nidn = ?, bidang_keahlian = ?, foto_profil = ? WHERE id = ?";
+            $stmt_update = $pdo->prepare($sql_update);
+            $stmt_update->execute([$nama, $email, $nidn, $bidang, $nama_foto, $dosen['id']]);
+            $update_message = "Profil berhasil diperbarui!";
+
+            // Refresh data
+            $stmt->execute([$_SESSION['user_id']]);
+            $dosen = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            $update_error = "Gagal memperbarui profil: " . $e->getMessage();
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -43,7 +107,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             padding-left: 10px;
         }
 
-
         .navbar-nav .nav-link {
             color: #fff !important;
             font-weight: 500;
@@ -59,48 +122,49 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             text-decoration: underline;
         }
 
-        .profile-container {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 1rem;
+        .profile-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            border: none;
         }
 
-        .profile-avatar,
-        .profile-avatar-img {
+        .profile-img-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+        }
+
+        #previewFoto {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            border: 4px solid #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background-image: url('../uploads/default-avatar.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
-        .profile-avatar {
-            background: rgba(0, 0, 60, 0.8) !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #change-photo-btn {
+        .change-photo-btn {
             position: absolute;
             bottom: 5px;
             right: 5px;
+            background-color: #007bff;
+            color: white;
             border-radius: 50%;
             width: 40px;
             height: 40px;
-            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        #change-photo-btn:hover {
-            transform: scale(1.1);
-            background-color: #0066cc;
+        .change-photo-btn:hover {
+            background-color: #0056b3;
         }
 
         .text-navy {
@@ -188,11 +252,9 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
         /* --- Footer --- */
         .footer-custom {
             background-color: #00003C;
-            /* Warna biru tua yang solid */
             color: whitesmoke;
             padding: 20px 0;
             margin-top: 50px;
-            /* Memberi jarak dengan section di atasnya */
             width: 100%;
         }
     </style>
@@ -234,25 +296,30 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
             <div class="col-lg-4">
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
-                        <div class="profile-container">
-                            <div id="avatar-placeholder" class="profile-avatar">
-                                <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
-                            </div>
-
-                            <button class="btn btn-primary" id="change-photo-btn" title="Ganti Foto Profil">
-                                <i class="bi bi-camera-fill text-white"></i>
-                            </button>
+                        <!-- Profile Photo Section - Modified to match student profile -->
+                        <div class="profile-img-container">
+                            <?php
+                            $foto_path = '../uploads/default-avatar.jpg';
+                            if (!empty($dosen['foto_profil'])) {
+                                $foto_path = '../uploads/' . $dosen['foto_profil'];
+                            }
+                            ?>
+                            <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
+                                alt="Foto Profil">
+                            <label for="uploadFoto" class="change-photo-btn">
+                                <i class="bi bi-camera-fill"></i>
+                            </label>
                         </div>
-                        <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                        <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" style="display: none;">
 
-                        <h5 class="text-navy mb-2 mt-3" id="dosen-name">Loading...</h5>
-                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: -</p>
-                        <p class="text-muted small mb-4" id="dosen-bidang">-</p>
+                        <h5 class="text-navy mb-2 mt-3" id="dosen-name"><?= htmlspecialchars($dosen['nama_lengkap']) ?></h5>
+                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: <?= htmlspecialchars($dosen['nidn']) ?></p>
+                        <p class="text-muted small mb-4" id="dosen-bidang"><?= htmlspecialchars($dosen['bidang_keahlian']) ?></p>
 
                         <div class="border-top pt-3">
                             <div class="profile-info d-flex align-items-center mb-2 small">
                                 <i class="bi bi-envelope text-navy me-2"></i>
-                                <span class="text-muted" id="dosen-email">-</span>
+                                <span class="text-muted" id="dosen-email"><?= htmlspecialchars($dosen['email']) ?></span>
                             </div>
                         </div>
                     </div>
@@ -346,35 +413,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                 });
             }
 
-            fetch('get_dosen.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('dosen-name').textContent = data.data.nama_lengkap;
-                        document.getElementById('dosen-nidn').textContent = 'NIDN: ' + data.data.nidn;
-                        document.getElementById('dosen-bidang').textContent = data.data.bidang_keahlian || '-';
-                        document.getElementById('dosen-email').textContent = data.data.email;
-
-                        if (data.data.foto_profil) {
-                            const img = document.createElement('img');
-                            img.src = data.data.foto_profil;
-                            img.alt = 'Profile Picture';
-                            img.className = 'profile-avatar-img';
-                            img.onerror = function () {
-                                console.error('Error loading image:', data.data.foto_profil);
-                            };
-                            document.getElementById('avatar-placeholder').replaceWith(img);
-                        }
-                    } else {
-                        console.error('Error:', data.message);
-                        showToast(data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Terjadi kesalahan saat memuat data', 'danger');
-                });
-
             fetch('get_aktivitas.php')
                 .then(response => response.json())
                 .then(data => {
@@ -400,14 +438,11 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                 .catch(error => {
                     console.error('Error:', error);
                 });
-            const changePhotoBtn = document.getElementById('change-photo-btn');
-            const profilePicInput = document.getElementById('profile-pic-input');
 
-            changePhotoBtn.addEventListener('click', () => {
-                profilePicInput.click();
-            });
+            // Profile photo upload functionality
+            const uploadFoto = document.getElementById('uploadFoto');
 
-            profilePicInput.addEventListener('change', function (event) {
+            uploadFoto.addEventListener('change', function (event) {
                 const file = event.target.files[0];
 
                 if (file && file.type.startsWith('image/')) {
@@ -425,18 +460,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
                             hideLoading();
 
                             if (data.success) {
-                                const newImg = document.createElement('img');
-                                newImg.src = data.path + '?t=' + new Date().getTime();
-                                newImg.alt = 'Profile Picture';
-                                newImg.className = 'profile-avatar-img';
-
-                                const currentImg = document.querySelector('.profile-avatar-img');
-                                if (currentImg) {
-                                    currentImg.replaceWith(newImg);
-                                } else {
-                                    document.getElementById('avatar-placeholder').replaceWith(newImg);
-                                }
-
+                                document.getElementById('previewFoto').src = data.path + '?t=' + new Date().getTime();
                                 showToast('Foto profil berhasil diperbarui!', 'success');
                             } else {
                                 showToast(data.message, 'danger');
