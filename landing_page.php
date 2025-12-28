@@ -147,14 +147,11 @@
             }
         }
 
-        /* --- Footer --- */
         .footer-custom {
             background-color: #00003C;
-            /* Warna biru tua yang solid */
             color: whitesmoke;
             padding: 20px 0;
             margin-top: 50px;
-            /* Memberi jarak dengan section di atasnya */
             width: 100%;
         }
     </style>

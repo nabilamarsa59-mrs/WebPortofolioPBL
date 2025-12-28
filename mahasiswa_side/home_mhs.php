@@ -20,7 +20,6 @@ try {
         die("Data mahasiswa tidak ditemukan untuk user yang login.");
     }
 
-    // Get MY projects only (existing functionality - NOT CHANGED)
     $sql_projects = "SELECT p.id, p.judul, p.deskripsi, k.nama_kategori, p.gambar, p.link_demo, p.tanggal
                 FROM projects p
                 LEFT JOIN kategori_proyek k ON p.kategori = k.id
@@ -31,10 +30,13 @@ try {
     $stmt_projects->execute([$mahasiswa['id']]);
     $projects = $stmt_projects->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get all categories for filter dropdown
     $sql_kategori = "SELECT * FROM kategori_proyek ORDER BY nama_kategori ASC";
     $stmt_kategori = $pdo->query($sql_kategori);
     $categories = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
+
+    $sql_jurusan = "SELECT DISTINCT jurusan FROM mahasiswa WHERE jurusan IS NOT NULL ORDER BY jurusan ASC";
+    $stmt_jurusan = $pdo->query($sql_jurusan);
+    $jurusan_list = $stmt_jurusan->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     die("Terjadi kesalahan: " . $e->getMessage());
@@ -43,7 +45,6 @@ try {
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,76 +57,48 @@ try {
             --primary-color: #003366;
             --secondary-color: #001F3F;
             --accent-color: #55bddd;
+            --navbar-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
             background-color: whitesmoke;
             color: #333;
-            padding-top: 76px;
+            padding-top: var(--navbar-height);
         }
 
-        /* Existing styles - NOT CHANGED */
         .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            min-height: var(--navbar-height);
         }
 
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
-            padding-left: 100px;
-            padding: 0.75rem 1rem;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-            padding-left: 100px;
+            color: #fff !important;
         }
 
         .navbar-nav {
             align-items: center;
-            padding-right: 50px;
-            padding-right: 50px;
         }
 
         .navbar-nav .nav-item {
             margin-left: 15px;
-            margin-left: 15px;
         }
 
-        .navbar-nav .nav-item:first-child {
-            margin-left: 0;
-            margin-left: 0;
-        }
-
-        .navbar-brand,
-        .navbar-nav .nav-link,
-        .dropdown-item {
+        .navbar-brand, .navbar-nav .nav-link, .dropdown-item {
             color: #fff !important;
         }
 
-        .navbar-nav .nav-link:hover,
-        .dropdown-item:hover {
-            color: var(--accent-color) !important;
-        }
-
-        .dropdown-item {
-            color: #fff !important;
-        }
-
-        .navbar-nav .nav-link:hover,
-
-        .dropdown-item:hover {
+        .navbar-nav .nav-link:hover, .dropdown-item:hover {
             color: var(--accent-color) !important;
         }
 
@@ -134,25 +107,27 @@ try {
             border: none;
         }
 
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
         .hero {
-            padding-top: 80px;
-            height: 100vh;
+            min-height: 100vh;
             background: linear-gradient(rgba(0, 30, 100, 0.5), rgba(0, 30, 100, 0.5)), url('../bg-gedung.jpg') no-repeat center center/cover;
             color: #fff;
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
+            padding: 2rem 1rem;
         }
 
         .hero-content h1 {
-            font-size: 3.5rem;
+            font-size: clamp(2rem, 5vw, 3.5rem);
             font-weight: bold;
             margin-bottom: 20px;
         }
@@ -162,7 +137,8 @@ try {
         }
 
         .hero-content p {
-            font-size: 1.5rem;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 1.5rem;
         }
 
         .project-card {
@@ -194,18 +170,14 @@ try {
             background-color: #00003C;
             color: whitesmoke;
             padding: 20px 0;
-            margin-top: 80x;
-            width: 100%;
+            margin-top: 80px;
         }
 
-        /* ============================================ */
-        /* NEW STYLES - Search & Filter (ADDITION ONLY) */
-        /* ============================================ */
-
-        /* Tab Navigation */
         .view-tabs {
             margin: 2rem 0;
             border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
         .view-tabs .nav-link {
@@ -215,7 +187,6 @@ try {
             border: none;
             border-bottom: 3px solid transparent;
             background: transparent;
-            cursor: pointer;
         }
 
         .view-tabs .nav-link:hover {
@@ -227,7 +198,6 @@ try {
             border-bottom: 3px solid var(--primary-color);
         }
 
-        /* Search & Filter Section */
         .search-filter-section {
             background: white;
             padding: 1.5rem;
@@ -255,6 +225,7 @@ try {
             border: 1px solid #ddd;
             padding: 0.75rem 1rem 0.75rem 45px;
             font-size: 1rem;
+            width: 100%;
         }
 
         .search-box input:focus {
@@ -268,7 +239,7 @@ try {
             border: 1px solid #ddd;
             padding: 0.75rem 1rem;
             font-size: 1rem;
-            cursor: pointer;
+            width: 100%;
         }
 
         .filter-dropdown:focus {
@@ -277,49 +248,48 @@ try {
             outline: none;
         }
 
-        /* Project Card Enhancement */
-        .project-card .mahasiswa-info {
+        .mahasiswa-info {
             display: flex;
             align-items: center;
             padding: 0.75rem;
             background: #f8f9fa;
             border-radius: 8px;
             margin-top: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
 
-        .project-card .mahasiswa-avatar {
+        .mahasiswa-info:hover {
+            background: #e9ecef;
+        }
+
+        .mahasiswa-avatar {
             width: 35px;
             height: 35px;
             border-radius: 50%;
             object-fit: cover;
             margin-right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
         }
 
-        .project-card .mahasiswa-name {
+        .mahasiswa-name {
             font-weight: 600;
             font-size: 0.9rem;
             color: var(--primary-color);
             margin: 0;
         }
 
-        .project-card .mahasiswa-details {
+        .mahasiswa-details {
             font-size: 0.8rem;
             color: #666;
             margin: 0;
-        }
-
-        /* Loading & Error States */
-        .loading-spinner {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
         }
 
         .no-results {
@@ -336,107 +306,200 @@ try {
             margin-bottom: 1rem;
         }
 
-        /* ============================================ */
-        /* RESPONSIVE DESIGN - NEW ADDITION */
-        /* ============================================ */
-
-        /* Extra Small Devices (phones, 576px and down) */
-        @media (max-width: 575.98px) {
-            body {
-                padding-top: 65px;
-            }
-
-            .navbar-brand {
-                font-size: 1.2rem;
-                padding-left: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem !important;
-            }
-
-            .hero p {
-                font-size: 1rem !important;
-            }
-
-            .hero-content h1 {
-                font-size: 2.5rem;
-            }
-
-            .view-tabs .nav-link {
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .search-filter-section {
-                padding: 1rem;
-            }
-
-            .search-box input,
-            .filter-dropdown {
-                font-size: 0.9rem;
-            }
-
-            .card-img-top {
-                height: 150px;
-            }
-
-            .project-card .card-body {
-                padding: 1rem;
-            }
-
-            .btn-sm {
-                font-size: 0.8rem;
-                padding: 0.35rem 0.75rem;
-            }
-        }
-
-        /* Small Devices (landscape phones, 576px and up) */
-        @media (min-width: 576px) and (max-width: 767.98px) {
-            .hero-content h1 {
-                font-size: 3rem;
-            }
-
-            .hero-content p {
-                font-size: 1.2rem;
-            }
-        }
-
-        /* Medium Devices (tablets, 768px and up) */
-        @media (min-width: 768px) and (max-width: 991.98px) {
-            .hero-content h1 {
-                font-size: 3.2rem;
-            }
-        }
-
-        /* Large Devices (desktops, 992px and up) */
-        @media (min-width: 992px) {
-            .hero-content h1 {
-                font-size: 3.5rem;
-            }
-
-            .search-filter-section .row {
-                align-items: end;
-            }
-        }
-
-        /* Extra Large Devices (large desktops, 1200px and up) */
-        @media (min-width: 1200px) {
-            .hero-content h1 {
-                font-size: 4rem;
-            }
-        }
-
-        /* Fix navbar collapse on mobile */
+        /* Responsive Styles */
         @media (max-width: 991.98px) {
             .navbar-nav {
-                padding-right: 0;
                 margin-top: 1rem;
             }
 
             .navbar-nav .nav-item {
                 margin-left: 0;
                 margin-bottom: 0.5rem;
+            }
+
+            .hero {
+                min-height: 80vh;
+            }
+
+            .view-tabs .nav-link {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            body {
+                padding-top: 70px;
+            }
+
+            :root {
+                --navbar-height: 70px;
+            }
+
+            .navbar {
+                min-height: 70px;
+                padding: 0.5rem 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .search-filter-section {
+                padding: 1rem;
+            }
+
+            .search-box input {
+                font-size: 0.9rem;
+                padding: 0.625rem 1rem 0.625rem 40px;
+            }
+
+            .filter-dropdown {
+                font-size: 0.9rem;
+                padding: 0.625rem 0.875rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .card-img-top {
+                height: 180px;
+            }
+
+            .mahasiswa-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+
+            .mahasiswa-name {
+                font-size: 0.85rem;
+            }
+
+            .mahasiswa-details {
+                font-size: 0.75rem;
+            }
+
+            .footer-custom {
+                margin-top: 40px;
+                padding: 15px 0;
+            }
+
+            .hero {
+                min-height: calc(100vh - 70px);
+                padding: 1.5rem 1rem;
+            }
+
+            .profile-img {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            body {
+                padding-top: 60px;
+            }
+
+            :root {
+                --navbar-height: 60px;
+            }
+
+            .navbar {
+                min-height: 60px;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            .hero {
+                min-height: calc(100vh - 60px);
+                padding: 1rem 0.75rem;
+            }
+
+            .hero-content h1 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .hero-content p {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+
+            .btn-lg {
+                font-size: 0.9rem;
+                padding: 0.625rem 1.25rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .card-text {
+                font-size: 0.875rem;
+            }
+
+            .btn-sm {
+                font-size: 0.8rem;
+                padding: 0.375rem 0.75rem;
+            }
+
+            .profile-img {
+                width: 32px;
+                height: 32px;
+                margin-right: 6px;
+            }
+
+            .dropdown-toggle {
+                font-size: 0.85rem;
+            }
+
+            .dropdown-menu {
+                font-size: 0.9rem;
+            }
+
+            .view-tabs .nav-link {
+                padding: 0.625rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .search-filter-section {
+                padding: 0.75rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .hero-content h1 {
+                font-size: 1.3rem;
+            }
+
+            .hero-content p {
+                font-size: 0.85rem;
+            }
+
+            .profile-img {
+                width: 28px;
+                height: 28px;
             }
         }
     </style>
@@ -445,38 +508,30 @@ try {
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
+        <div class="container">
             <a class="navbar-brand" href="home_mhs.php">WorkPiece</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"></li>
-                </ul>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
-                            role="button" data-bs-toggle="dropdown">
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <?php if (!empty($mahasiswa['foto_profil'])): ?>
                                 <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>?t=<?= time() ?>"
                                     class="profile-img" alt="Profile">
                             <?php else: ?>
                                 <i class="bi bi-person-circle fs-4 me-1"></i>
                             <?php endif; ?>
-                            <?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>
+                            <span class="d-none d-md-inline"><?= htmlspecialchars($mahasiswa['nama_lengkap']) ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil
-                                    Saya</a></li>
-                            <li><a class="dropdown-item" href="upload_project.php"><i
-                                        class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="../logout.php"><i
-                                        class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="upload_project.php"><i class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -489,47 +544,45 @@ try {
         <div class="hero-content">
             <h1>Selamat datang, <span><?= htmlspecialchars($mahasiswa['nama_lengkap']); ?>!</span></h1>
             <p>Kelola dan tampilkan karya terbaikmu di sini.</p>
-            <a href="upload_project.php" class="btn btn-lg btn-light mt-3"><i class="bi bi-plus-circle"></i> Tambah
-                Proyek Baru</a>
+            <a href="upload_project.php" class="btn btn-lg btn-light mt-3">
+                <i class="bi bi-plus-circle"></i> Tambah Proyek Baru
+            </a>
         </div>
     </section>
-
     <!-- Main Content -->
     <section class="container my-5">
-        <!-- NEW: Tab Navigation -->
+        <!-- Tab Navigation -->
         <ul class="nav nav-pills view-tabs" id="viewTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-projects" data-bs-toggle="pill"
-                    data-bs-target="#projects-section" type="button" role="tab" aria-controls="projects-section"
-                    aria-selected="true">
+                    data-bs-target="#projects-section" type="button" role="tab">
                     <i class="bi bi-folder me-2"></i>Proyek Saya
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="tab-explore" data-bs-toggle="pill" data-bs-target="#explore-section"
-                    type="button" role="tab" aria-controls="explore-section" aria-selected="false">
-                    <i class="bi bi-globe me-2"></i>Jelajah Proyek Mahasiswa Lain
+                    type="button" role="tab">
+                    <i class="bi bi-globe me-2"></i>Jelajah Proyek
                 </button>
             </li>
         </ul>
 
         <!-- Tab Content -->
         <div class="tab-content" id="viewTabContent">
-            <!-- Proyek Saya Tab (Original - NOT CHANGED) -->
-            <div class="tab-pane fade show active" id="projects-section" role="tabpanel" aria-labelledby="tab-projects">
+            <!-- Proyek Saya Tab -->
+            <div class="tab-pane fade show active" id="projects-section" role="tabpanel">
                 <h2 class="mb-4">Proyek Saya</h2>
                 <div class="row">
                     <?php if (empty($projects)): ?>
                         <div class="col-12">
                             <div class="alert alert-info text-center" role="alert">
-                                <i class="bi bi-info-circle"></i> Anda belum memiliki proyek. <a
-                                    href="upload_project.php">Tambahkan
-                                    proyek pertama Anda!</a>
+                                <i class="bi bi-info-circle"></i> Anda belum memiliki proyek. 
+                                <a href="upload_project.php">Tambahkan proyek pertama Anda!</a>
                             </div>
                         </div>
                     <?php else: ?>
                         <?php foreach ($projects as $project): ?>
-                            <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="col-12 col-sm-6 col-lg-4 mb-4">
                                 <div class="card project-card">
                                     <?php
                                     $project_image = '../uploads/default-project.png';
@@ -537,32 +590,23 @@ try {
                                         $project_image = '../uploads/' . $project['gambar'];
                                     }
                                     ?>
-                                    <img src="<?= htmlspecialchars($project_image) ?>?t=<?= time() ?>" class="card-img-top"
-                                        alt="Project Image"
-                                        onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23eeeeee%22 width=%22400%22 height=%22200%22/%3E%3Ctext fill=%22%23999999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
+                                    <img src="<?= htmlspecialchars($project_image) ?>?t=<?= time() ?>" class="card-img-top" alt="Project Image">
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title"><?= htmlspecialchars($project['judul']); ?></h5>
-                                        <p class="card-text"><small class="text-muted">Kategori:
-                                                <?= htmlspecialchars($project['nama_kategori'] ?? 'Tidak ada kategori'); ?></small>
-                                        </p>
-                                        <p class="card-text">
-                                            <?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
+                                        <p class="card-text"><small class="text-muted">Kategori: <?= htmlspecialchars($project['nama_kategori'] ?? 'Tidak ada kategori'); ?></small></p>
+                                        <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
 
-                                        <!-- Tampilkan tombol video hanya jika ada linknya -->
                                         <?php if (!empty($project['link_demo'])): ?>
-                                            <a href="<?= htmlspecialchars($project['link_demo']) ?>" target="_blank"
-                                                class="btn btn-sm btn-danger mb-2">
+                                            <a href="<?= htmlspecialchars($project['link_demo']) ?>" target="_blank" class="btn btn-sm btn-danger mb-2">
                                                 <i class="bi bi-youtube"></i> Lihat Video
                                             </a>
                                         <?php endif; ?>
 
-                                        <div class="mt-auto d-flex justify-content-between">
-                                            <a href="edit_project.php?id=<?= $project['id']; ?>"
-                                                class="btn btn-sm btn-outline-primary">
+                                        <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
+                                            <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
                                                 <i class="bi bi-pencil"></i> Edit
                                             </a>
-                                            <a href="proses_hapus_project.php?id=<?= $project['id']; ?>"
-                                                class="btn btn-sm btn-outline-danger"
+                                            <a href="proses_hapus_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');">
                                                 <i class="bi bi-trash"></i> Hapus
                                             </a>
@@ -575,21 +619,20 @@ try {
                 </div>
             </div>
 
-            <!-- NEW: Jelajah Proyek Mahasiswa Lain Tab -->
-            <div class="tab-pane fade" id="explore-section" role="tabpanel" aria-labelledby="tab-explore">
+            <!-- Jelajah Proyek Mahasiswa Lain Tab -->
+            <div class="tab-pane fade" id="explore-section" role="tabpanel">
                 <h2 class="mb-4">Jelajah Proyek Mahasiswa Lain</h2>
 
-                <!-- NEW: Search & Filter Section -->
+                <!-- Search & Filter Section -->
                 <div class="search-filter-section">
                     <div class="row">
-                        <div class="col-md-8 mb-3 mb-md-0">
+                        <div class="col-12 col-md-6 mb-3">
                             <div class="search-box">
                                 <i class="bi bi-search"></i>
-                                <input type="text" id="searchInput" class="form-control"
-                                    placeholder="Cari proyek, nama mahasiswa, atau deskripsi...">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Cari proyek, nama mahasiswa, atau deskripsi...">
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-3 mb-3">
                             <select id="categoryFilter" class="form-control filter-dropdown">
                                 <option value="all">Semua Kategori</option>
                                 <?php foreach ($categories as $cat): ?>
@@ -599,18 +642,21 @@ try {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                    </div>
-
-                    <!-- Active Filters Display -->
-                    <div id="activeFilters" class="mt-2" style="display: none;">
-                        <span class="badge bg-primary me-2 mb-2" id="searchBadge"></span>
-                        <span class="badge bg-secondary me-2 mb-2" id="categoryBadge"></span>
+                        <div class="col-12 col-md-3 mb-3">
+                            <select id="jurusanFilter" class="form-control filter-dropdown">
+                                <option value="all">Semua Jurusan</option>
+                                <?php foreach ($jurusan_list as $jurusan): ?>
+                                    <option value="<?= htmlspecialchars($jurusan['jurusan']) ?>">
+                                        <?= htmlspecialchars($jurusan['jurusan']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- NEW: Projects Container for AJAX Loading -->
+                <!-- Projects Container -->
                 <div id="exploreProjectsContainer" class="row">
-                    <!-- Projects will be loaded here via AJAX -->
                     <div class="col-12 text-center py-5">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -619,11 +665,11 @@ try {
                     </div>
                 </div>
 
-                <!-- NEW: No Results Message -->
+                <!-- No Results Message -->
                 <div id="noResults" class="no-results" style="display: none;">
                     <i class="bi bi-search"></i>
                     <h3>Tidak ada proyek yang ditemukan</h3>
-                    <p class="text-muted">Coba kata kunci atau kategori lain.</p>
+                    <p class="text-muted">Coba kata kunci, kategori, atau jurusan lain.</p>
                 </div>
             </div>
         </div>
@@ -635,47 +681,40 @@ try {
             <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
         </div>
     </footer>
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- NEW: JavaScript for Search & Filter -->
     <script>
-        // Load projects when page loads
-        document.addEventListener('DOMContentLoaded', function () {
+        const currentUserId = <?= $mahasiswa['id'] ?>;
+
+        document.getElementById('tab-explore').addEventListener('click', function() {
             loadProjects();
         });
 
-        // Search input debounce
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function () {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                loadProjects();
-            }, 500); // Wait 500ms after typing stops
+            searchTimeout = setTimeout(() => loadProjects(), 500);
         });
 
-        // Category filter change
         document.getElementById('categoryFilter').addEventListener('change', function () {
             loadProjects();
         });
 
-        // Load projects from API
+        document.getElementById('jurusanFilter').addEventListener('change', function () {
+            loadProjects();
+        });
+
         function loadProjects() {
             const search = document.getElementById('searchInput').value.trim();
             const kategori = document.getElementById('categoryFilter').value;
+            const jurusan = document.getElementById('jurusanFilter').value;
             const container = document.getElementById('exploreProjectsContainer');
             const noResults = document.getElementById('noResults');
 
-            // Update active filters display
-            updateActiveFilters(search, kategori);
-
-            // Build API URL
-            const apiUrl = 'api/search_projects.php?' +
+            const apiUrl = '../api/search_projects.php?' +
                 (search ? 'search=' + encodeURIComponent(search) + '&' : '') +
-                (kategori ? 'kategori=' + encodeURIComponent(kategori) : '');
+                (kategori && kategori !== 'all' ? 'kategori=' + encodeURIComponent(kategori) + '&' : '') +
+                (jurusan && jurusan !== 'all' ? 'jurusan=' + encodeURIComponent(jurusan) : '');
 
-            // Show loading
             container.innerHTML = `
                 <div class="col-12 text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -686,12 +725,18 @@ try {
             `;
             noResults.style.display = 'none';
 
-            // Fetch from API
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data.length > 0) {
-                        renderProjects(data.data);
+                        const otherProjects = data.data.filter(project => project.id_mahasiswa != currentUserId);
+                        
+                        if (otherProjects.length > 0) {
+                            renderProjects(otherProjects);
+                        } else {
+                            container.innerHTML = '';
+                            noResults.style.display = 'block';
+                        }
                     } else {
                         container.innerHTML = '';
                         noResults.style.display = 'block';
@@ -701,7 +746,7 @@ try {
                     console.error('Error:', error);
                     container.innerHTML = `
                         <div class="col-12">
-                            <div class="error-message">
+                            <div class="alert alert-danger">
                                 <i class="bi bi-exclamation-triangle me-2"></i>
                                 Terjadi kesalahan saat memuat proyek. Silakan coba lagi.
                             </div>
@@ -710,95 +755,58 @@ try {
                 });
         }
 
-        // Render projects to DOM
         function renderProjects(projects) {
             const container = document.getElementById('exploreProjectsContainer');
             container.innerHTML = '';
 
             projects.forEach(project => {
-                const projectCard = `
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card project-card">
-                            ${project.gambar
-                        ? `<img src="../uploads/${project.gambar}?t=${new Date().getTime()}" class="card-img-top" alt="Project Image">`
-                        : `<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23eeeeee%22 width=%22400%22 height=%22200%22/%3E%3Ctext fill=%22%23999999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E" class="card-img-top" alt="Project Image">`
-                    }
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">${escapeHtml(project.judul)}</h5>
-                                <p class="card-text"><small class="text-muted">Kategori: ${escapeHtml(project.nama_kategori || 'Tidak ada kategori')}</small></p>
-                                <p class="card-text">${escapeHtml(project.deskripsi || '').substring(0, 80)}...</p>
+                const projectCard = document.createElement('div');
+                projectCard.className = 'col-12 col-sm-6 col-lg-4 mb-4';
+                
+                projectCard.innerHTML = `
+                    <div class="card project-card">
+                        <img src="../uploads/${project.gambar || 'default-project.png'}?t=${Date.now()}" 
+                             class="card-img-top" alt="Project Image"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23eee%22 width=%22400%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${escapeHtml(project.judul)}</h5>
+                            <p class="card-text"><small class="text-muted">Kategori: ${escapeHtml(project.nama_kategori || 'Tidak ada kategori')}</small></p>
+                            <p class="card-text">${escapeHtml(project.deskripsi || '').substring(0, 80)}...</p>
 
-                                <!-- Mahasiswa Info -->
-                                <div class="mahasiswa-info">
-                                    ${project.mahasiswa_foto
-                        ? `<img src="../uploads/${project.mahasiswa_foto}?t=${new Date().getTime()}" class="mahasiswa-avatar" alt="Avatar">`
-                        : `<div class="mahasiswa-avatar bg-primary text-white d-flex align-items-center justify-content-center">${getInitials(project.nama_lengkap)}</div>`
-                    }
-                                    <div>
-                                        <p class="mahasiswa-name">${escapeHtml(project.nama_lengkap)}</p>
-                                        <p class="mahasiswa-details">${escapeHtml(project.nim || '')} • ${escapeHtml(project.jurusan || '')}</p>
-                                    </div>
+                            <div class="mahasiswa-info" onclick="window.location.href='view_profile.php?id=${project.id_mahasiswa}'">
+                                ${project.mahasiswa_foto 
+                                    ? `<img src="../uploads/${project.mahasiswa_foto}?t=${Date.now()}" class="mahasiswa-avatar" alt="Avatar" onerror="this.outerHTML='<div class=\\'mahasiswa-avatar\\'>${getInitials(project.nama_lengkap)}</div>';">`
+                                    : `<div class="mahasiswa-avatar">${getInitials(project.nama_lengkap)}</div>`
+                                }
+                                <div class="flex-grow-1">
+                                    <p class="mahasiswa-name">${escapeHtml(project.nama_lengkap)}</p>
+                                    <p class="mahasiswa-details">${escapeHtml(project.nim || '')} • ${escapeHtml(project.jurusan || '')}</p>
                                 </div>
-
-                                <!-- Demo Button -->
-                                ${project.link_demo
-                        ? `<a href="${escapeHtml(project.link_demo)}" target="_blank" class="btn btn-sm btn-danger mb-2 mt-2">
-                                        <i class="bi bi-youtube"></i> Lihat Video
-                                       </a>`
-                        : ''
-                    }
                             </div>
+
+                            ${project.link_demo 
+                                ? `<a href="${escapeHtml(project.link_demo)}" target="_blank" class="btn btn-sm btn-danger mt-2">
+                                       <i class="bi bi-youtube"></i> Lihat Video
+                                   </a>`
+                                : ''
+                            }
                         </div>
                     </div>
                 `;
-                container.innerHTML += projectCard;
+                
+                container.appendChild(projectCard);
             });
         }
 
-        // Update active filters display
-        function updateActiveFilters(search, kategori) {
-            const container = document.getElementById('activeFilters');
-            const searchBadge = document.getElementById('searchBadge');
-            const categoryBadge = document.getElementById('categoryBadge');
-
-            if (!search && (kategori === 'all' || !kategori)) {
-                container.style.display = 'none';
-                return;
-            }
-
-            container.style.display = 'block';
-
-            if (search) {
-                searchBadge.textContent = 'Search: ' + escapeHtml(search);
-                searchBadge.style.display = 'inline-block';
-            } else {
-                searchBadge.style.display = 'none';
-            }
-
-            if (kategori && kategori !== 'all') {
-                categoryBadge.textContent = 'Kategori: ' + escapeHtml(kategori);
-                categoryBadge.style.display = 'inline-block';
-            } else {
-                categoryBadge.style.display = 'none';
-            }
-        }
-
-        // Escape HTML to prevent XSS
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // Get initials for avatar placeholder
         function getInitials(name) {
-            return name.split(' ')
-                .map(n => n[0])
-                .join('')
-                .toUpperCase()
-                .substring(0, 2);
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
     </script>
 </body>
-
 </html>

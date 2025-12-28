@@ -5,7 +5,6 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
     exit();
 }
 
-// Get lecturer data from database
 require_once '../koneksi.php';
 
 try {
@@ -24,8 +23,8 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
- $update_message = '';
- $update_error = '';
+$update_message = '';
+$update_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = $_POST['nama'];
@@ -59,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_update->execute([$nama, $email, $nidn, $bidang, $nama_foto, $dosen['id']]);
             $update_message = "Profil berhasil diperbarui!";
 
-            // Refresh data
             $stmt->execute([$_SESSION['user_id']]);
             $dosen = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -72,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,6 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #333;
             background-color: whitesmoke;
             padding-top: 100px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .navbar {
@@ -95,16 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
             z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 80px;
+            min-height: 80px;
         }
 
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
-            padding-left: 10px;
+            color: #fff !important;
         }
 
         .navbar-nav .nav-link {
@@ -118,14 +115,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #00ffff !important;
         }
 
-        .navbar a:hover {
-            text-decoration: underline;
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .profile-card {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 15px;
-            border: none;
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .main-content {
+            flex: 1;
+            padding-bottom: 2rem;
         }
 
         .profile-img-container {
@@ -139,12 +139,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 0;
+            border-radius: 50%;
             border: 5px solid #f0f0f0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            background-image: url('../uploads/default-avatar.jpg');
-            background-size: cover;
-            background-position: center;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 4rem;
         }
 
         .change-photo-btn {
@@ -161,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.3s;
+            border: 3px solid white;
         }
 
         .change-photo-btn:hover {
@@ -249,13 +253,135 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
         }
 
-        /* --- Footer --- */
         .footer-custom {
             background-color: #00003C;
             color: whitesmoke;
             padding: 20px 0;
-            margin-top: 50px;
+            margin-top: auto;
             width: 100%;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: grey;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            font-weight: bold;
+            border: 5px solid #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 991.98px) {
+            body {
+                padding-top: 80px;
+            }
+
+            .navbar-nav .nav-link {
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+            }
+
+            .toast-container {
+                top: 90px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            body {
+                padding-top: 70px;
+            }
+
+            .navbar {
+                min-height: auto;
+                padding: 0.5rem 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .profile-img-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            #previewFoto,
+            .avatar-placeholder {
+                font-size: 3rem;
+            }
+
+            .stat-number {
+                font-size: 1.25rem;
+            }
+
+            .activity-item {
+                padding: 0.75rem;
+            }
+
+            .toast-container {
+                top: 80px;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .container {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            .profile-img-container {
+                width: 120px;
+                height: 120px;
+            }
+
+            #previewFoto,
+            .avatar-placeholder {
+                font-size: 2.5rem;
+            }
+
+            .change-photo-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 0.875rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            h5, h6 {
+                font-size: 1rem;
+            }
+
+            .small {
+                font-size: 0.8rem;
+            }
+
+            .stat-number {
+                font-size: 1.1rem;
+            }
+
+            .activity-item {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .activity-time {
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -270,7 +396,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <a class="navbar-brand" href="#">WorkPiece</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -291,75 +417,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </nav>
 
     <!-- Main Content -->
-    <div class="container mt-4">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <!-- Profile Photo Section - Modified to match student profile -->
-                        <div class="profile-img-container">
-                            <?php
-                            $foto_path = '../uploads/default-avatar.jpg';
-                            if (!empty($dosen['foto_profil'])) {
-                                $foto_path = '../uploads/' . $dosen['foto_profil'];
-                            }
-                            ?>
-                            <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
-                                alt="Foto Profil">
-                            <label for="uploadFoto" class="change-photo-btn">
-                                <i class="bi bi-camera-fill"></i>
-                            </label>
+    <div class="main-content">
+        <div class="container mt-4">
+            <div class="row g-4">
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <!-- Profile Photo Section -->
+                            <div class="profile-img-container">
+                                <?php
+                                $foto_path = '';
+                                $show_placeholder = true;
+                                
+                                if (!empty($dosen['foto_profil'])) {
+                                    $foto_path = '../uploads/' . basename($dosen['foto_profil']);
+                                    if (file_exists($foto_path)) {
+                                        $show_placeholder = false;
+                                    }
+                                }
+                                
+                                if ($show_placeholder) {
+                                    $initials = '';
+                                    $nama_parts = explode(' ', $dosen['nama_lengkap']);
+                                    if (count($nama_parts) >= 2) {
+                                        $initials = strtoupper(substr($nama_parts[0], 0, 1) . substr($nama_parts[1], 0, 1));
+                                    } else {
+                                        $initials = strtoupper(substr($dosen['nama_lengkap'], 0, 2));
+                                    }
+                                    echo '<div class="avatar-placeholder" id="previewFoto">' . $initials . '</div>';
+                                } else {
+                                    echo '<img id="previewFoto" src="' . htmlspecialchars($foto_path) . '?t=' . time() . '" alt="Foto Profil" style="border-radius: 50%;">';
+                                }
+                                ?>
+                                <label for="uploadFoto" class="change-photo-btn">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                            </div>
+                            <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" style="display: none;">
+
+                            <h5 class="text-navy mb-2 mt-3" id="dosen-name"><?= htmlspecialchars($dosen['nama_lengkap']) ?></h5>
+                            <p class="text-muted small mb-1" id="dosen-nidn">NIDN: <?= htmlspecialchars($dosen['nidn']) ?></p>
+                            <p class="text-muted small mb-4" id="dosen-bidang"><?= htmlspecialchars($dosen['bidang_keahlian']) ?></p>
+
+                            <div class="border-top pt-3">
+                                <div class="profile-info d-flex align-items-center mb-2 small">
+                                    <i class="bi bi-envelope text-navy me-2"></i>
+                                    <span class="text-muted" id="dosen-email"><?= htmlspecialchars($dosen['email']) ?></span>
+                                </div>
+                            </div>
                         </div>
-                        <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" style="display: none;">
+                    </div>
 
-                        <h5 class="text-navy mb-2 mt-3" id="dosen-name"><?= htmlspecialchars($dosen['nama_lengkap']) ?></h5>
-                        <p class="text-muted small mb-1" id="dosen-nidn">NIDN: <?= htmlspecialchars($dosen['nidn']) ?></p>
-                        <p class="text-muted small mb-4" id="dosen-bidang"><?= htmlspecialchars($dosen['bidang_keahlian']) ?></p>
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-body">
+                            <h6 class="text-navy mb-3">Statistik Aktivitas</h6>
 
-                        <div class="border-top pt-3">
-                            <div class="profile-info d-flex align-items-center mb-2 small">
-                                <i class="bi bi-envelope text-navy me-2"></i>
-                                <span class="text-muted" id="dosen-email"><?= htmlspecialchars($dosen['email']) ?></span>
+                            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-check text-navy me-2"></i>
+                                    <span class="small text-muted">Portofolio Dinilai</span>
+                                </div>
+                                <span class="stat-number" id="stat-dinilai">0</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center pt-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-chat-square-text text-navy me-2"></i>
+                                    <span class="small text-muted">Total Komentar</span>
+                                </div>
+                                <span class="stat-number" id="stat-komentar">0</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm mt-4">
-                    <div class="card-body">
-                        <h6 class="text-navy mb-3">Statistik Aktivitas</h6>
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-navy mb-4">
+                                <i class="bi bi-clock-history me-2"></i>
+                                Aktivitas Terakhir
+                            </h6>
 
-                        <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-file-earmark-check text-navy me-2"></i>
-                                <span class="small text-muted">Portofolio Dinilai</span>
-                            </div>
-                            <span class="stat-number" id="stat-dinilai">0</span>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center pt-3">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-chat-square-text text-navy me-2"></i>
-                                <span class="small text-muted">Total Komentar</span>
-                            </div>
-                            <span class="stat-number" id="stat-komentar">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h6 class="text-navy mb-4">
-                            <i class="bi bi-clock-history me-2"></i>
-                            Aktivitas Terakhir
-                        </h6>
-
-                        <div id="activity-list">
-                            <div class="activity-item">
-                                <p class="small text-dark">Memuat aktivitas...</p>
-                                <p class="activity-time">-</p>
+                            <div id="activity-list">
+                                <div class="activity-item">
+                                    <p class="small text-dark">Memuat aktivitas...</p>
+                                    <p class="activity-time">-</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -369,13 +513,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="toast-container"></div>
+    
     <!-- Footer -->
     <footer class="footer-custom">
         <div class="container">
             <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -393,12 +537,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const toastId = 'toast-' + Date.now();
 
                 const toastHtml = `
-            <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type} border-0" role="alert">
                 <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             </div>
         `;
@@ -413,6 +555,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             }
 
+            // Load activities
             fetch('get_aktivitas.php')
                 .then(response => response.json())
                 .then(data => {
@@ -439,7 +582,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     console.error('Error:', error);
                 });
 
-            // Profile photo upload functionality
             const uploadFoto = document.getElementById('uploadFoto');
 
             uploadFoto.addEventListener('change', function (event) {
@@ -460,8 +602,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             hideLoading();
 
                             if (data.success) {
-                                document.getElementById('previewFoto').src = data.path + '?t=' + new Date().getTime();
+                                const previewContainer = document.querySelector('.profile-img-container');
+                                const timestamp = new Date().getTime();
+                                previewContainer.querySelector('#previewFoto').outerHTML = 
+                                    `<img id="previewFoto" src="${data.path}?t=${timestamp}" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 5px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">`;
+                                
                                 showToast('Foto profil berhasil diperbarui!', 'success');
+                                
                             } else {
                                 showToast(data.message, 'danger');
                             }
@@ -478,5 +625,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 </body>
-
 </html>

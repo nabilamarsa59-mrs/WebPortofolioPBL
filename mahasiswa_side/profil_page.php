@@ -83,6 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: 'Poppins', sans-serif;
             background-color: whitesmoke;
             padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
         }
 
         .navbar {
@@ -90,14 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
             z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            min-height: 80px;
         }
 
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
+            color: #fff !important;
         }
 
         .navbar-nav {
@@ -108,18 +111,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-left: 15px;
         }
 
-        .navbar-nav .nav-item:first-child {
-            margin-left: 0;
-        }
-
         .navbar-brand,
         .navbar-nav .nav-link,
         .dropdown-item {
             color: #fff !important;
         }
 
-        .navbar-nav .nav-link {
-            font-weight: bold;
+        .navbar-nav .nav-link:hover,
+        .dropdown-item:hover {
+            color: #55bddd !important;
+        }
+
+        .dropdown-menu {
+            background-color: #001F3F;
+            border: none;
+        }
+
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 8px;
         }
 
         .profile-card {
@@ -142,9 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 50%;
             border: 5px solid #f0f0f0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            background-image: url('https://th.bing.com/th/id/OIP.QEKaYl7YdueCqGHy5yJ-xQHaHa?w=202&h=202&c=7&r=0&o=5&cb=ucfimg2&dpr=1.3&pid=1.7&ucfimg=1');
-            background-size: cover;
-            background-position: center;
+            background-color: #e0e0e0;
         }
 
         .change-photo-btn {
@@ -161,21 +180,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.3s;
+            border: 3px solid white;
         }
 
         .change-photo-btn:hover {
             background-color: #0056b3;
         }
 
-        /* --- Footer --- */
         .footer-custom {
             background-color: #00003C;
-            /* Warna biru tua yang solid */
             color: whitesmoke;
             padding: 20px 0;
-            margin-top: 50px;
-            /* Memberi jarak dengan section di atasnya */
+            margin-top: auto;
             width: 100%;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: grey;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            font-weight: bold;
+            border: 5px solid #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 991.98px) {
+            .navbar-nav {
+                margin-top: 1rem;
+            }
+
+            .navbar-nav .nav-item {
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            body {
+                padding-top: 70px;
+            }
+
+            .navbar {
+                min-height: auto;
+                padding: 0.5rem 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .profile-img-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            .avatar-placeholder {
+                font-size: 3rem;
+            }
+
+            .profile-card {
+                margin-bottom: 1rem;
+            }
+
+            .row.g-4 {
+                gap: 1rem !important;
+            }
+
+            .profile-img {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .container {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            .profile-img-container {
+                width: 120px;
+                height: 120px;
+            }
+
+            .avatar-placeholder {
+                font-size: 2.5rem;
+            }
+
+            .change-photo-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 0.875rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            h4, h5 {
+                font-size: 1.1rem;
+            }
+
+            .form-label {
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+            }
+
+            .dropdown-toggle {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -184,12 +307,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand ms-3" href="home_mhs.php">WorkPiece</a>
+            <a class="navbar-brand" href="home_mhs.php">WorkPiece</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="home_mhs.php">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link active text-decoration-underline" href="#">Profil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../logout.php">Logout</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <?php if (!empty($mahasiswa['foto_profil'])): ?>
+                                <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>?t=<?= time() ?>"
+                                    class="profile-img" alt="Profile">
+                            <?php else: ?>
+                                <i class="bi bi-person-circle fs-4 me-1"></i>
+                            <?php endif; ?>
+                            <span class="d-none d-md-inline"><?= htmlspecialchars($mahasiswa['nama_lengkap']) ?></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="upload_project.php"><i class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -212,18 +354,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="row g-4 align-items-md-center">
-            <section class="col-md-4 text-center">
+            <section class="col-12 col-md-4 text-center">
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
                         <?php
-                        $foto_path = '../uploads/default-avatar.jpg';
+                        $foto_path = '';
+                        $show_placeholder = true;
+                        
                         if (!empty($mahasiswa['foto_profil'])) {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
+                            if (file_exists($foto_path)) {
+                                $show_placeholder = false;
+                            }
+                        }
+                        
+                        if ($show_placeholder) {
+                            $initials = strtoupper(substr($mahasiswa['nama_lengkap'], 0, 2));
+                            echo '<div class="avatar-placeholder" id="previewFoto">' . $initials . '</div>';
+                        } else {
+                            echo '<img id="previewFoto" src="' . htmlspecialchars($foto_path) . '?t=' . time() . '" alt="Foto Profil">';
                         }
                         ?>
-                        <img id="previewFoto" src="<?= htmlspecialchars($foto_path) ?>?t=<?= time() ?>"
-                            alt="Foto Profil">
                         <label for="uploadFoto" class="change-photo-btn">
                             <i class="bi bi-camera-fill"></i>
                         </label>
@@ -232,17 +384,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </section>
 
-            <section class="col-md-8">
+            <section class="col-12 col-md-8">
                 <div class="profile-card card shadow-sm p-4">
                     <h4 class="text-primary border-bottom pb-3 mb-4">Informasi Profil</h4>
                     <form action="profil_page.php" method="post" enctype="multipart/form-data">
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <label for="nama" class="form-label">Nama Lengkap</label>
                                 <input type="text" name="nama" id="nama" class="form-control"
                                     value="<?= htmlspecialchars($mahasiswa['nama_lengkap']) ?>" required>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <label for="nim" class="form-label">NIM</label>
                                 <input type="text" name="nim" id="nim" class="form-control"
                                     value="<?= htmlspecialchars($mahasiswa['nim']) ?>" required>
@@ -274,6 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </section>
         </div>
     </main>
+    
     <!-- Footer -->
     <footer class="footer-custom">
         <div class="container">
@@ -288,7 +441,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    document.getElementById('previewFoto').src = e.target.result;
+                    const previewContainer = document.querySelector('.profile-img-container');
+                    previewContainer.querySelector('#previewFoto').outerHTML = 
+                        `<img id="previewFoto" src="${e.target.result}" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 5px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">`;
                 }
                 reader.readAsDataURL(file);
             }

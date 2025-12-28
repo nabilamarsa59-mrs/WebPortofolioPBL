@@ -43,11 +43,22 @@ $projects = $stmt->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             color: #333;
             background-color: whitesmoke;
             padding-top: 100px;
+            margin: 0;
+            padding-bottom: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .navbar {
@@ -55,22 +66,13 @@ $projects = $stmt->fetchAll();
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.75rem 1rem;
             z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 80px;
+            min-height: 80px;
         }
 
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
-<<<<<<< HEAD
-            padding-left:20px;
-=======
-            /* Membesarkan ukuran font agar lebih menonjol */
-            padding-left: 20px;
-            /* Menambahkan jarak di kiri "WorkPiece" untuk memindahkannya sedikit ke tengah */
->>>>>>> 3b30e749da6dea53540ff2afd0ba852a4b496adf
+            color: #fff !important;
         }
 
         .navbar-nav .nav-link {
@@ -84,8 +86,12 @@ $projects = $stmt->fetchAll();
             color: #00ffff !important;
         }
 
-        .navbar a:hover {
-            text-decoration: underline;
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
 
         .search-container {
@@ -168,12 +174,29 @@ $projects = $stmt->fetchAll();
         }
 
         .filter-section {
-            background-color: rgba(0, 30, 100, 0.05);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
+    background-color: rgba(0, 30, 100, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.filter-section label.form-label {
+    color: #00003c;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.filter-section .form-select {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.filter-section .form-select:focus {
+    border-color: #00003c;
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 60, 0.15);
+}
 
         .project-card {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -245,7 +268,6 @@ $projects = $stmt->fetchAll();
             }
         }
 
-        /* Style untuk link YouTube */
         .youtube-link-section {
             background-color: #fff3cd;
             border-left: 4px solid #ff0000;
@@ -258,7 +280,25 @@ $projects = $stmt->fetchAll();
             color: #ff0000;
         }
 
-        @media (max-width: 768px) {
+        .footer-custom {
+            background-color: #00003C;
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 991.98px) {
+            body {
+                padding-top: 80px;
+            }
+
+            .navbar-nav .nav-link {
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+            }
+
             .search-container {
                 margin: 10px 0;
                 width: 100%;
@@ -271,27 +311,54 @@ $projects = $stmt->fetchAll();
             .search-form input:focus {
                 width: 100%;
             }
-
-            .filter-section .d-flex {
-                flex-direction: column;
-            }
-
-            .filter-section .form-select {
-                width: 100% !important;
-                margin-bottom: 10px;
-            }
         }
 
-        /* --- Footer --- */
-        .footer-custom {
-            background-color: #00003C;
-            /* Warna biru tua yang solid */
-            color: whitesmoke;
-            padding: 20px 0;
-            margin-top: 50px;
-            /* Memberi jarak dengan section di atasnya */
-            width: 100%;
-        }
+        @media (max-width: 767.98px) {
+    .filter-section {
+        padding: 15px;
+    }
+    
+    .filter-section label.form-label {
+        font-size: 0.9rem;
+    }
+    
+    .filter-section .form-select-sm {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        height: auto;
+    }
+    
+    .filter-section .btn-sm {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        height: auto;
+    }
+    
+    .filter-section .row.g-2 {
+        row-gap: 0.75rem !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .filter-section {
+        padding: 12px;
+    }
+    
+    .filter-section label.form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .filter-section .form-select-sm {
+        font-size: 0.813rem;
+        padding: 0.45rem 0.65rem;
+    }
+    
+    .filter-section .btn-sm {
+        font-size: 0.813rem;
+        padding: 0.45rem 0.85rem;
+    }
+}
     </style>
 </head>
 
@@ -303,7 +370,8 @@ $projects = $stmt->fetchAll();
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">WorkPiece</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -327,47 +395,71 @@ $projects = $stmt->fetchAll();
             </div>
         </div>
     </nav>
-
+    
     <div class="container mt-4">
         <h2 class="mt-4 mb-3 text-navy">Dashboard Penilaian Proyek Mahasiswa</h2>
 
         <div class="filter-section">
-            <div class="row align-items-center">
+            <div class="row g-2">
                 <div class="col-12">
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <label class="me-2 mb-0">Filter:</label>
-                        <select class="form-select form-select-sm" id="statusFilter" style="width: auto;">
-                            <option value="all">Semua Status</option>
-                            <option value="belum-dinilai">Belum Dinilai</option>
-                            <option value="sudah-dinilai">Sudah Dinilai</option>
-                        </select>
-                        <select class="form-select form-select-sm" id="jurusanProdiFilter" style="width: auto;">
-                            <option value="all">Semua Jurusan</option>
-                            <option value="Teknik Informatika">Teknik Informatika</option>
-                            <option value="Teknik Elektro">Teknik Elektro</option>
-                            <option value="Teknik Mesin">Teknik Mesin</option>
-                            <option value="Manajemen dan Bisnis">Manajemen dan Bisnis</option>
-                        </select>
-                        <select class="form-select form-select-sm" id="kategoriFilter" style="width: auto;">
-                            <option value="all">Semua Kategori</option>
-                            <option value="Aplikasi Web">Aplikasi Web</option>
-                            <option value="Aplikasi Mobile">Aplikasi Mobile</option>
-                            <option value="IoT">IoT</option>
-                            <option value="Desain & Manufaktur">Desain & Manufaktur</option>
-                            <option value="Sistem Informasi">Sistem Informasi</option>
-                            <option value="Game">Game</option>
-                        </select>
-                        <button class="btn btn-sm btn-primary" id="resetFilters">
-                            <i class="bi bi-arrow-clockwise"></i> Reset
-                        </button>
-                    </div>
+                    <label class="form-label mb-2 fw-semibold">Filter:</label>
                 </div>
+                
+                <!-- Status Filter -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <select class="form-select form-select-sm" id="statusFilter">
+                        <option value="all">Semua Status</option>
+                        <option value="belum-dinilai">Belum Dinilai</option>
+                        <option value="sudah-dinilai">Sudah Dinilai</option>
+                    </select>
+                </div>
+                
+                <!-- Jurusan Filter -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <select class="form-select form-select-sm" id="jurusanFilter">
+                        <option value="all">Semua Jurusan</option>
+                        <option value="Teknik Informatika">Teknik Informatika</option>
+                        <option value="Teknik Elektro">Teknik Elektro</option>
+                        <option value="Teknik Mesin">Teknik Mesin</option>
+                        <option value="Manajemen dan Bisnis">Manajemen dan Bisnis</option>
+                    </select>
+                </div>
+                
+                <!-- Kategori Filter -->
+                <div class="col-12 col-md-8 col-lg-4">
+                    <select class="form-select form-select-sm" id="kategoriFilter">
+                        <option value="all">Semua Kategori</option>
+                        <option value="Aplikasi Web">Aplikasi Web</option>
+                        <option value="Aplikasi Mobile">Aplikasi Mobile</option>
+                        <option value="IoT">IoT</option>
+                        <option value="Desain & Manufaktur">Desain & Manufaktur</option>
+                        <option value="Sistem Informasi">Sistem Informasi</option>
+                        <option value="Game">Game</option>
+                        <option value="Sistem Elektronika">Sistem Elektronika</option>
+                        <option value="Robotika">Robotika</option>
+                        <option value="Mekatronika">Mekatronika</option>
+                        <option value="Manufaktur">Manufaktur</option>
+                        <option value="Sistem Informasi Bisnis">Sistem Informasi Bisnis</option>
+                        <option value="Logistik & Supply Chain">Logistik & Supply Chain</option>
+                    </select>
+                </div>
+                
+                <!-- Reset Button -->
+                <div class="col-12 col-md-4 col-lg-2">
+                    <button class="btn btn-sm btn-primary w-100" id="resetFilters">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+                
+                <!-- Project Count -->
                 <div class="col-12 mt-2">
-                    <span class="text-muted">Menampilkan <span id="projectCount"><?= count($projects) ?></span>
-                        proyek</span>
+                    <span class="text-muted small">
+                        Menampilkan <span id="projectCount"><?= count($projects) ?></span> proyek
+                    </span>
                 </div>
             </div>
         </div>
+
 
         <div class="row" id="projectList">
             <?php if (empty($projects)): ?>
@@ -376,9 +468,9 @@ $projects = $stmt->fetchAll();
                 </div>
             <?php else: ?>
                 <?php foreach ($projects as $project): ?>
-                    <div class="col-md-6 col-lg-4 project-item"
+                    <div class="col-12 col-sm-6 col-lg-4 project-item"
                         data-status="<?= $project['nilai'] ? 'sudah-dinilai' : 'belum-dinilai' ?>"
-                        data-jurusan-prodi="<?= htmlspecialchars($project['jurusan']) ?>"
+                        data-jurusan="<?= htmlspecialchars($project['jurusan']) ?>"
                         data-kategori="<?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>"
                         data-nim="<?= htmlspecialchars($project['nim']) ?>"
                         data-student-name="<?= htmlspecialchars($project['nama_lengkap']) ?>">
@@ -393,8 +485,7 @@ $projects = $stmt->fetchAll();
                                     <i class="bi bi-building me-1"></i><?= htmlspecialchars($project['jurusan']) ?>
                                 </p>
                                 <p class="card-text small text-secondary mb-2">
-                                    <i
-                                        class="bi bi-tag me-1"></i><?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>
+                                    <i class="bi bi-tag me-1"></i><?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>
                                 </p>
                                 <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
                                 <div class="mt-auto">
@@ -413,7 +504,7 @@ $projects = $stmt->fetchAll();
                                             data-nilai="<?= htmlspecialchars($project['nilai']) ?>"
                                             data-komentar="<?= htmlspecialchars($project['komentar']) ?>"
                                             data-status="sudah-dinilai">
-                                            <i class="bi bi-eye"></i> Lihat Detail
+                                            <i class="bi bi-eye"></i> Lihat
                                         </button>
                                     <?php else: ?>
                                         <span class="badge bg-warning">Belum Dinilai</span>
@@ -427,7 +518,7 @@ $projects = $stmt->fetchAll();
                                             data-description="<?= htmlspecialchars($project['deskripsi']) ?>"
                                             data-link-demo="<?= htmlspecialchars($project['link_demo'] ?? '') ?>"
                                             data-status="belum-dinilai">
-                                            <i class="bi bi-eye"></i> Lihat & Nilai
+                                            <i class="bi bi-eye"></i> Nilai
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -441,7 +532,7 @@ $projects = $stmt->fetchAll();
 
     <!-- Modal -->
     <div class="modal fade" id="gradeModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalProjectTitle">Judul Proyek</h5>
@@ -449,23 +540,22 @@ $projects = $stmt->fetchAll();
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Nama:</strong> <span id="modalStudentName">-</span></p>
+                        <div class="col-12 col-md-6 mb-2 mb-md-0">
+                            <p class="mb-1"><strong>Nama:</strong> <span id="modalStudentName">-</span></p>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>NIM:</strong> <span id="modalStudentNim">-</span></p>
+                        <div class="col-12 col-md-6">
+                            <p class="mb-1"><strong>NIM:</strong> <span id="modalStudentNim">-</span></p>
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Jurusan:</strong> <span id="modalJurusanProdi">-</span></p>
+                        <div class="col-12 col-md-6 mb-2 mb-md-0">
+                            <p class="mb-1"><strong>Jurusan:</strong> <span id="modalJurusan">-</span></p>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Kategori:</strong> <span id="modalProjectKategori">-</span></p>
+                        <div class="col-12 col-md-6">
+                            <p class="mb-1"><strong>Kategori:</strong> <span id="modalProjectKategori">-</span></p>
                         </div>
                     </div>
 
-                    <!-- BAGIAN BARU: Link YouTube -->
                     <div id="youtubeLinkSection" class="youtube-link-section" style="display: none;">
                         <p class="mb-2"><strong><i class="bi bi-youtube me-2"></i>Video Proyek:</strong></p>
                         <a href="#" id="youtubeLink" target="_blank" class="btn btn-danger btn-sm">
@@ -479,11 +569,11 @@ $projects = $stmt->fetchAll();
                     <div id="existingGradeSection" class="penilaian-section" style="display: none;">
                         <h6><i class="bi bi-clipboard-check me-2"></i>Penilaian Anda</h6>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4 mb-2">
                                 <p class="mb-2"><strong>Nilai:</strong></p>
                                 <span id="existingNilai" class="badge bg-success nilai-badge">-</span>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-12 col-md-8">
                                 <p class="mb-2"><strong>Komentar:</strong></p>
                                 <p id="existingKomentar" class="text-muted fst-italic">-</p>
                             </div>
@@ -517,8 +607,9 @@ $projects = $stmt->fetchAll();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-success" id="saveGradeBtn"><i class="bi bi-check-circle"></i>
-                        Simpan Penilaian</button>
+                    <button type="button" class="btn btn-success" id="saveGradeBtn">
+                        <i class="bi bi-check-circle"></i> Simpan Penilaian
+                    </button>
                 </div>
             </div>
         </div>
@@ -535,10 +626,8 @@ $projects = $stmt->fetchAll();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Fungsi toast
             function showToast(message, type = 'success') {
                 const toastContainer = document.querySelector('.toast-container');
                 const toastId = 'toast-' + Date.now();
@@ -561,7 +650,6 @@ $projects = $stmt->fetchAll();
                 toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
             }
 
-            // Fungsi loading
             function showLoading() {
                 document.getElementById('loadingOverlay').style.display = 'flex';
             }
@@ -577,26 +665,29 @@ $projects = $stmt->fetchAll();
 
             function applyFilters() {
                 const statusFilter = document.getElementById('statusFilter').value;
-                const jurusanProdiFilter = document.getElementById('jurusanProdiFilter').value;
+                const jurusanFilter = document.getElementById('jurusanFilter').value;
                 const kategoriFilter = document.getElementById('kategoriFilter').value;
 
                 const projectItems = document.querySelectorAll('.project-item');
 
                 projectItems.forEach(item => {
                     const status = item.dataset.status;
-                    const jurusanProdi = item.dataset.jurusanProdi;
+                    const jurusan = item.dataset.jurusan;
                     const kategori = item.dataset.kategori;
 
                     let showItem = true;
 
+                    // Filter status
                     if (statusFilter !== 'all' && status !== statusFilter) {
                         showItem = false;
                     }
 
-                    if (jurusanProdiFilter !== 'all' && jurusanProdi !== jurusanProdiFilter) {
+                    // Filter jurusan - PERBAIKAN: Perbandingan exact match
+                    if (jurusanFilter !== 'all' && jurusan !== jurusanFilter) {
                         showItem = false;
                     }
 
+                    // Filter kategori
                     if (kategoriFilter !== 'all' && kategori !== kategoriFilter) {
                         showItem = false;
                     }
@@ -612,12 +703,12 @@ $projects = $stmt->fetchAll();
             }
 
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
-            document.getElementById('jurusanProdiFilter').addEventListener('change', applyFilters);
+            document.getElementById('jurusanFilter').addEventListener('change', applyFilters);
             document.getElementById('kategoriFilter').addEventListener('change', applyFilters);
 
             document.getElementById('resetFilters').addEventListener('click', function () {
                 document.getElementById('statusFilter').value = 'all';
-                document.getElementById('jurusanProdiFilter').value = 'all';
+                document.getElementById('jurusanFilter').value = 'all';
                 document.getElementById('kategoriFilter').value = 'all';
 
                 applyFilters();
@@ -718,7 +809,6 @@ $projects = $stmt->fetchAll();
                 }
             });
 
-            // BAGIAN BARU: Event listener untuk modal dengan link YouTube
             document.getElementById('gradeModal').addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
 
@@ -729,7 +819,7 @@ $projects = $stmt->fetchAll();
                 const jurusan = button.getAttribute('data-jurusan');
                 const kategori = button.getAttribute('data-kategori');
                 const description = button.getAttribute('data-description');
-                const linkDemo = button.getAttribute('data-link-demo'); // BARU
+                const linkDemo = button.getAttribute('data-link-demo');
                 const status = button.getAttribute('data-status');
                 const nilai = button.getAttribute('data-nilai');
                 const komentar = button.getAttribute('data-komentar');
@@ -739,7 +829,7 @@ $projects = $stmt->fetchAll();
                 document.getElementById('modalProjectTitle').textContent = title;
                 document.getElementById('modalStudentName').textContent = student;
                 document.getElementById('modalStudentNim').textContent = nim;
-                document.getElementById('modalJurusanProdi').textContent = jurusan;
+                document.getElementById('modalJurusan').textContent = jurusan;
                 document.getElementById('modalProjectKategori').textContent = kategori;
                 document.getElementById('modalProjectDescription').textContent = description;
 
