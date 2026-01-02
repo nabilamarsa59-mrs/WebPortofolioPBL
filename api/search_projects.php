@@ -6,6 +6,7 @@ require_once '../koneksi.php';
 // Get parameters
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $kategori = isset($_GET['kategori']) ? trim($_GET['kategori']) : '';
+$jurusan = isset($_GET['jurusan']) ? trim($_GET['jurusan']) : '';
 
 try {
     // Build base query for ALL projects (not just logged-in user's projects)
@@ -18,6 +19,7 @@ try {
                 p.link_demo,
                 p.link_source,
                 p.tanggal,
+                p.id_mahasiswa,
                 m.nama_lengkap,
                 m.nim,
                 m.jurusan,
@@ -44,6 +46,12 @@ try {
         $params[] = $kategori;
     }
 
+    // Add jurusan filter - INI YANG DIPERBAIKI
+    if (!empty($jurusan) && $jurusan !== 'all') {
+        $sql .= " AND m.jurusan = ?";
+        $params[] = $jurusan;
+    }
+
     // Order by date desc
     $sql .= " ORDER BY p.tanggal DESC";
 
@@ -54,7 +62,12 @@ try {
     echo json_encode([
         'success' => true,
         'data' => $projects,
-        'count' => count($projects)
+        'count' => count($projects),
+        'filters' => [
+            'search' => $search,
+            'kategori' => $kategori,
+            'jurusan' => $jurusan
+        ]
     ]);
 
 } catch (PDOException $e) {
