@@ -328,6 +328,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
                             <li><a class="dropdown-item" href="upload_project.php"><i class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
+                            <li><a class="dropdown-item" href="home_mhs.php"><i class="bi bi-arrow-left me-1"></i>Beranda</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
