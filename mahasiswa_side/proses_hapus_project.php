@@ -22,6 +22,17 @@ if (!$project || $project['id_mahasiswa'] != $id_mahasiswa_login) {
     exit();
 }
 
+// Cek apakah proyek sudah dinilai
+$stmt_penilaian = $pdo->prepare("SELECT id FROM penilaian WHERE id_project = ?");
+$stmt_penilaian->execute([$id_project]);
+$penilaian = $stmt_penilaian->fetch();
+
+if ($penilaian) {
+    // Jika sudah dinilai, redirect ke home dengan pesan
+    header("Location: home_mhs.php?error=sudah_dinilai_hapus");
+    exit();
+}
+
 if (!empty($project['gambar'])) {
     $file_path = '../uploads/' . $project['gambar'];
     if (file_exists($file_path)) {

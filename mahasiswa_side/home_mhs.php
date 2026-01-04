@@ -20,9 +20,11 @@ try {
         die("Data mahasiswa tidak ditemukan untuk user yang login.");
     }
 
-    $sql_projects = "SELECT p.id, p.judul, p.deskripsi, k.nama_kategori, p.gambar, p.link_demo, p.tanggal
+    $sql_projects = "SELECT p.id, p.judul, p.deskripsi, k.nama_kategori, p.gambar, p.link_demo, p.tanggal,
+                pen.nilai, pen.komentar, pen.tanggal_dinilai
                 FROM projects p
                 LEFT JOIN kategori_proyek k ON p.kategori = k.id
+                LEFT JOIN penilaian pen ON p.id = pen.id_project
                 WHERE p.id_mahasiswa = ?
                 ORDER BY p.tanggal DESC";
 
@@ -300,6 +302,19 @@ try {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
+        .grade-badge {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .grade-comment {
+            background-color: #f8f9fa;
+            border-left: 4px solid #198754;
+            padding: 0.75rem;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+
         .no-results i {
             font-size: 4rem;
             color: #ddd;
@@ -549,6 +564,27 @@ try {
             </a>
         </div>
     </section>
+
+    <!-- Alert Messages -->
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'sudah_dinilai'): ?>
+        <div class="container mt-3">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Pemberitahuan:</strong> Proyek ini sudah dinilai oleh dosen dan tidak dapat diedit lagi.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'sudah_dinilai_hapus'): ?>
+        <div class="container mt-3">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Pemberitahuan:</strong> Proyek ini sudah dinilai oleh dosen dan tidak dapat dihapus lagi.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    <?php endif; ?>
     <!-- Main Content -->
     <section class="container my-5">
         <!-- Tab Navigation -->
@@ -602,15 +638,45 @@ try {
                                             </a>
                                         <?php endif; ?>
 
-                                        <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
-                                            <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </a>
-                                            <a href="proses_hapus_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </a>
-                                        </div>
+                                        <!-- Tampilkan Nilai dan Komentar jika sudah dinilai -->
+                                        <?php if (!empty($project['nilai'])): ?>
+                                            <div class="alert alert-success p-2 mt-2 mb-2">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <strong class="text-success"><i class="bi bi-check-circle me-1"></i>Sudah Dinilai</strong>
+                                                    <span class="badge bg-success">Nilai: <?= htmlspecialchars($project['nilai']) ?>/100</span>
+                                                </div>
+                                                <?php if (!empty($project['komentar'])): ?>
+                                                    <div class="mt-2 border-top pt-2">
+                                                        <small><strong>Komentar Dosen:</strong></small>
+                                                        <p class="mb-0" style="font-size: 0.9rem; line-height: 1.4;"><?= nl2br(htmlspecialchars($project['komentar'])); ?></p>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="bi bi-calendar me-1"></i><?= date('d M Y H:i', strtotime($project['tanggal_dinilai'])); ?>
+                                                </small>
+                                            </div>
+
+                                            <!-- Tombol Edit dan Hapus dinonaktifkan jika sudah dinilai -->
+                                            <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
+                                                <button class="btn btn-sm btn-outline-primary" disabled title="Tidak dapat diedit karena sudah dinilai">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" disabled title="Tidak dapat dihapus karena sudah dinilai">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </div>
+                                        <?php else: ?>
+                                            <!-- Tombol Edit dan Hapus aktif jika belum dinilai -->
+                                            <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
+                                                <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </a>
+                                                <a href="proses_hapus_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>

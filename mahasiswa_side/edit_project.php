@@ -53,6 +53,17 @@ if ($project['id_mahasiswa'] != $id_mahasiswa) {
     exit();
 }
 
+// Cek apakah proyek sudah dinilai
+$stmt_penilaian = $pdo->prepare("SELECT id FROM penilaian WHERE id_project = ?");
+$stmt_penilaian->execute([$id_project]);
+$penilaian = $stmt_penilaian->fetch(PDO::FETCH_ASSOC);
+
+if ($penilaian) {
+    // Jika sudah dinilai, redirect ke home dengan pesan
+    header("Location: home_mhs.php?error=sudah_dinilai");
+    exit();
+}
+
 // Ambil kategori sesuai jurusan mahasiswa
 $stmt_kategori = $pdo->prepare("SELECT id, nama_kategori FROM kategori_proyek WHERE jurusan = ? ORDER BY nama_kategori");
 $stmt_kategori->execute([$jurusan_mahasiswa]);
