@@ -8,10 +8,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
 }
 
 try {
+    // Ambil Data Mahasiswa (User Login)
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.foto_profil, m.nim, m.jurusan
-                          FROM users u
-                          JOIN mahasiswa m ON u.id_mahasiswa = m.id
-                          WHERE u.id = ?";
+                      FROM users u
+                      JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                      WHERE u.id = ?";
     $stmt_mahasiswa = $pdo->prepare($sql_mahasiswa);
     $stmt_mahasiswa->execute([$_SESSION['user_id']]);
     $mahasiswa = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
@@ -20,22 +21,25 @@ try {
         die("Data mahasiswa tidak ditemukan untuk user yang login.");
     }
 
+    // Ambil Data Proyek Milik Mahasiswa (Bersama dengan Kategori & Penilaian)
     $sql_projects = "SELECT p.id, p.judul, p.deskripsi, k.nama_kategori, p.gambar, p.link_demo, p.tanggal,
-                pen.nilai, pen.komentar, pen.tanggal_dinilai
-                FROM projects p
-                LEFT JOIN kategori_proyek k ON p.kategori = k.id
-                LEFT JOIN penilaian pen ON p.id = pen.id_project
-                WHERE p.id_mahasiswa = ?
-                ORDER BY p.tanggal DESC";
+                            pen.nilai, pen.komentar, pen.tanggal_dinilai
+                     FROM projects p
+                     LEFT JOIN kategori_proyek k ON p.kategori = k.id
+                     LEFT JOIN penilaian pen ON p.id = pen.id_project
+                     WHERE p.id_mahasiswa = ?
+                     ORDER BY p.tanggal DESC";
 
     $stmt_projects = $pdo->prepare($sql_projects);
     $stmt_projects->execute([$mahasiswa['id']]);
     $projects = $stmt_projects->fetchAll(PDO::FETCH_ASSOC);
 
+    // Ambil Data Kategori (Untuk Filter)
     $sql_kategori = "SELECT * FROM kategori_proyek ORDER BY nama_kategori ASC";
     $stmt_kategori = $pdo->query($sql_kategori);
     $categories = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
 
+    // Ambil Data Jurusan (Untuk Filter)
     $sql_jurusan = "SELECT DISTINCT jurusan FROM mahasiswa WHERE jurusan IS NOT NULL ORDER BY jurusan ASC";
     $stmt_jurusan = $pdo->query($sql_jurusan);
     $jurusan_list = $stmt_jurusan->fetchAll(PDO::FETCH_ASSOC);
@@ -47,13 +51,16 @@ try {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorkPiece - Dashboard Mahasiswa</title>
+    <!-- CSS Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary-color: #003366;
@@ -75,6 +82,7 @@ try {
             padding-top: var(--navbar-height);
         }
 
+        /* --- Navbar --- */
         .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -96,11 +104,14 @@ try {
             margin-left: 15px;
         }
 
-        .navbar-brand, .navbar-nav .nav-link, .dropdown-item {
+        .navbar-brand,
+        .navbar-nav .nav-link,
+        .dropdown-item {
             color: #fff !important;
         }
 
-        .navbar-nav .nav-link:hover, .dropdown-item:hover {
+        .navbar-nav .nav-link:hover,
+        .dropdown-item:hover {
             color: var(--accent-color) !important;
         }
 
@@ -117,6 +128,15 @@ try {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
 
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* --- Hero Section --- */
         .hero {
             min-height: 100vh;
             background: linear-gradient(rgba(0, 30, 100, 0.5), rgba(0, 30, 100, 0.5)), url('../bg-gedung.jpg') no-repeat center center/cover;
@@ -143,38 +163,7 @@ try {
             margin-bottom: 1.5rem;
         }
 
-        .project-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            height: 100%;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .profile-img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .footer-custom {
-            background-color: #00003C;
-            color: whitesmoke;
-            padding: 20px 0;
-            margin-top: 80px;
-        }
-
+        /* --- Components --- */
         .view-tabs {
             margin: 2rem 0;
             border-bottom: 2px solid #e0e0e0;
@@ -198,6 +187,23 @@ try {
         .view-tabs .nav-link.active {
             color: var(--primary-color);
             border-bottom: 3px solid var(--primary-color);
+        }
+
+        .project-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
         }
 
         .search-filter-section {
@@ -250,6 +256,31 @@ try {
             outline: none;
         }
 
+        .grade-comment {
+            background-color: #f8f9fa;
+            border-left: 4px solid #198754;
+            padding: 0.75rem;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: 80px;
+        }
+
+        /* --- Avatar Info Styles --- */
         .mahasiswa-info {
             display: flex;
             align-items: center;
@@ -294,34 +325,7 @@ try {
             margin: 0;
         }
 
-        .no-results {
-            text-align: center;
-            padding: 3rem;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .grade-badge {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .grade-comment {
-            background-color: #f8f9fa;
-            border-left: 4px solid #198754;
-            padding: 0.75rem;
-            border-radius: 4px;
-            line-height: 1.5;
-        }
-
-        .no-results i {
-            font-size: 4rem;
-            color: #ddd;
-            margin-bottom: 1rem;
-        }
-
-        /* Responsive Styles */
+        /* --- Responsive Styles --- */
         @media (max-width: 991.98px) {
             .navbar-nav {
                 margin-top: 1rem;
@@ -526,7 +530,7 @@ try {
         <div class="container">
             <a class="navbar-brand" href="home_mhs.php">WorkPiece</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -534,19 +538,27 @@ try {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                            <!-- Profil Image -->
                             <?php if (!empty($mahasiswa['foto_profil'])): ?>
                                 <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>?t=<?= time() ?>"
                                     class="profile-img" alt="Profile">
                             <?php else: ?>
                                 <i class="bi bi-person-circle fs-4 me-1"></i>
                             <?php endif; ?>
+
                             <span class="d-none d-md-inline"><?= htmlspecialchars($mahasiswa['nama_lengkap']) ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
-                            <li><a class="dropdown-item" href="upload_project.php"><i class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil
+                                    Saya</a></li>
+                            <li><a class="dropdown-item" href="upload_project.php"><i
+                                        class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="../logout.php"><i
+                                        class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -575,8 +587,10 @@ try {
             </div>
         </div>
     <?php endif; ?>
+
     <!-- Main Content -->
     <section class="container my-5">
+
         <!-- Tab Navigation -->
         <ul class="nav nav-pills view-tabs" id="viewTabs" role="tablist">
             <li class="nav-item" role="presentation">
@@ -595,14 +609,15 @@ try {
 
         <!-- Tab Content -->
         <div class="tab-content" id="viewTabContent">
-            <!-- Proyek Saya Tab -->
+
+            <!-- Tab 1: Proyek Saya -->
             <div class="tab-pane fade show active" id="projects-section" role="tabpanel">
                 <h2 class="mb-4">Proyek Saya</h2>
                 <div class="row">
                     <?php if (empty($projects)): ?>
                         <div class="col-12">
                             <div class="alert alert-info text-center" role="alert">
-                                <i class="bi bi-info-circle"></i> Anda belum memiliki proyek. 
+                                <i class="bi bi-info-circle"></i> Anda belum memiliki proyek.
                                 <a href="upload_project.php">Tambahkan proyek pertama Anda!</a>
                             </div>
                         </div>
@@ -616,14 +631,22 @@ try {
                                         $project_image = '../uploads/' . $project['gambar'];
                                     }
                                     ?>
-                                    <img src="<?= htmlspecialchars($project_image) ?>?t=<?= time() ?>" class="card-img-top" alt="Project Image">
+                                    <img src="<?= htmlspecialchars($project_image) ?>?t=<?= time() ?>" class="card-img-top"
+                                        alt="Project Image">
+
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title"><?= htmlspecialchars($project['judul']); ?></h5>
-                                        <p class="card-text"><small class="text-muted">Kategori: <?= htmlspecialchars($project['nama_kategori'] ?? 'Tidak ada kategori'); ?></small></p>
-                                        <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
+                                        <p class="card-text">
+                                            <small class="text-muted">Kategori:
+                                                <?= htmlspecialchars($project['nama_kategori'] ?? 'Tidak ada kategori'); ?></small>
+                                        </p>
+                                        <p class="card-text">
+                                            <?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?>
+                                        </p>
 
                                         <?php if (!empty($project['link_demo'])): ?>
-                                            <a href="<?= htmlspecialchars($project['link_demo']) ?>" target="_blank" class="btn btn-sm btn-danger mb-2">
+                                            <a href="<?= htmlspecialchars($project['link_demo']) ?>" target="_blank"
+                                                class="btn btn-sm btn-danger mb-2">
                                                 <i class="bi bi-youtube"></i> Lihat Video
                                             </a>
                                         <?php endif; ?>
@@ -632,36 +655,45 @@ try {
                                         <?php if (!empty($project['nilai'])): ?>
                                             <div class="alert alert-success p-2 mt-2 mb-2">
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <strong class="text-success"><i class="bi bi-check-circle me-1"></i>Sudah Dinilai</strong>
-                                                    <span class="badge bg-success">Nilai: <?= htmlspecialchars($project['nilai']) ?></span>
+                                                    <strong class="text-success"><i class="bi bi-check-circle me-1"></i>Sudah
+                                                        Dinilai</strong>
+                                                    <span class="badge bg-success">Nilai:
+                                                        <?= htmlspecialchars($project['nilai']) ?></span>
                                                 </div>
                                                 <?php if (!empty($project['komentar'])): ?>
                                                     <div class="mt-2 border-top pt-2">
                                                         <small><strong>Komentar Dosen:</strong></small>
-                                                        <p class="mb-0" style="font-size: 0.9rem; line-height: 1.4;"><?= nl2br(htmlspecialchars($project['komentar'])); ?></p>
+                                                        <p class="mb-0" style="font-size: 0.9rem; line-height: 1.4;">
+                                                            <?= nl2br(htmlspecialchars($project['komentar'])); ?>
+                                                        </p>
                                                     </div>
                                                 <?php endif; ?>
                                                 <small class="text-muted d-block mt-1">
-                                                    <i class="bi bi-calendar me-1"></i><?= date('d M Y H:i', strtotime($project['tanggal_dinilai'])); ?>
+                                                    <i
+                                                        class="bi bi-calendar me-1"></i><?= date('d M Y H:i', strtotime($project['tanggal_dinilai'])); ?>
                                                 </small>
                                             </div>
 
-                                            <!-- Tombol Edit tetap aktif, Hapus dinonaktifkan jika sudah dinilai -->
+                                            <!-- Tombol Edit aktif, Hapus nonaktif -->
                                             <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
-                                                <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                <a href="edit_project.php?id=<?= $project['id']; ?>"
+                                                    class="btn btn-sm btn-outline-primary">
                                                     <i class="bi bi-pencil"></i> Edit
                                                 </a>
-                                                <button class="btn btn-sm btn-outline-danger" disabled title="Tidak dapat dihapus karena sudah dinilai">
+                                                <button class="btn btn-sm btn-outline-danger" disabled
+                                                    title="Tidak dapat dihapus karena sudah dinilai">
                                                     <i class="bi bi-trash"></i> Hapus
                                                 </button>
                                             </div>
                                         <?php else: ?>
-                                            <!-- Tombol Edit dan Hapus aktif jika belum dinilai -->
+                                            <!-- Tombol Edit dan Hapus aktif -->
                                             <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
-                                                <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                <a href="edit_project.php?id=<?= $project['id']; ?>"
+                                                    class="btn btn-sm btn-outline-primary">
                                                     <i class="bi bi-pencil"></i> Edit
                                                 </a>
-                                                <a href="proses_hapus_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-danger"
+                                                <a href="proses_hapus_project.php?id=<?= $project['id']; ?>"
+                                                    class="btn btn-sm btn-outline-danger"
                                                     onclick="return confirm('Apakah Anda yakin ingin menghapus proyek ini?');">
                                                     <i class="bi bi-trash"></i> Hapus
                                                 </a>
@@ -675,7 +707,7 @@ try {
                 </div>
             </div>
 
-            <!-- Jelajah Proyek Mahasiswa Lain Tab -->
+            <!-- Tab 2: Jelajah Proyek Mahasiswa Lain -->
             <div class="tab-pane fade" id="explore-section" role="tabpanel">
                 <h2 class="mb-4">Jelajah Proyek Mahasiswa Lain</h2>
 
@@ -685,7 +717,8 @@ try {
                         <div class="col-12 col-md-6 mb-3">
                             <div class="search-box">
                                 <i class="bi bi-search"></i>
-                                <input type="text" id="searchInput" class="form-control" placeholder="Cari proyek, nama mahasiswa, atau deskripsi...">
+                                <input type="text" id="searchInput" class="form-control"
+                                    placeholder="Cari proyek, nama mahasiswa, atau deskripsi...">
                             </div>
                         </div>
                         <div class="col-12 col-md-3 mb-3">
@@ -711,7 +744,7 @@ try {
                     </div>
                 </div>
 
-                <!-- Projects Container -->
+                <!-- Projects Container (Dynamic) -->
                 <div id="exploreProjectsContainer" class="row">
                     <div class="col-12 text-center py-5">
                         <div class="spinner-border text-primary" role="status">
@@ -737,20 +770,26 @@ try {
             <p class="text-center mb-0">&copy; 2025 Politeknik Negeri Batam - Projek PBL IFPagi 1A-5</p>
         </div>
     </footer>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Data Mahasiswa Login untuk pembanding di JS
         const currentUserId = <?= $mahasiswa['id'] ?>;
 
-        document.getElementById('tab-explore').addEventListener('click', function() {
+        // Event Listener Tab Jelajah
+        document.getElementById('tab-explore').addEventListener('click', function () {
             loadProjects();
         });
 
+        // Debounce untuk Search
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function () {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => loadProjects(), 500);
         });
 
+        // Filter Changes
         document.getElementById('categoryFilter').addEventListener('change', function () {
             loadProjects();
         });
@@ -759,6 +798,7 @@ try {
             loadProjects();
         });
 
+        // Fungsi Memuat Proyek (Fetch API)
         function loadProjects() {
             const search = document.getElementById('searchInput').value.trim();
             const kategori = document.getElementById('categoryFilter').value;
@@ -766,11 +806,13 @@ try {
             const container = document.getElementById('exploreProjectsContainer');
             const noResults = document.getElementById('noResults');
 
+            // Bangun URL API
             const apiUrl = '../api/search_projects.php?' +
                 (search ? 'search=' + encodeURIComponent(search) + '&' : '') +
                 (kategori && kategori !== 'all' ? 'kategori=' + encodeURIComponent(kategori) + '&' : '') +
                 (jurusan && jurusan !== 'all' ? 'jurusan=' + encodeURIComponent(jurusan) : '');
 
+            // Tampilkan Loading
             container.innerHTML = `
                 <div class="col-12 text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -785,8 +827,9 @@ try {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data.length > 0) {
+                        // Filter proyek sendiri
                         const otherProjects = data.data.filter(project => project.id_mahasiswa != currentUserId);
-                        
+
                         if (otherProjects.length > 0) {
                             renderProjects(otherProjects);
                         } else {
@@ -811,6 +854,7 @@ try {
                 });
         }
 
+        // Fungsi Render Proyek ke HTML
         function renderProjects(projects) {
             const container = document.getElementById('exploreProjectsContainer');
             container.innerHTML = '';
@@ -818,10 +862,10 @@ try {
             projects.forEach(project => {
                 const projectCard = document.createElement('div');
                 projectCard.className = 'col-12 col-sm-6 col-lg-4 mb-4';
-                
+
                 projectCard.innerHTML = `
                     <div class="card project-card">
-                        <img src="../uploads/${project.gambar || 'default-project.png'}?t=${Date.now()}" 
+                        <img src="../uploads/${project.gambar || 'default-project.png'}?t=${Date.now()}"
                              class="card-img-top" alt="Project Image"
                              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23eee%22 width=%22400%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3ETidak Ada Gambar%3C/text%3E%3C/svg%3E'">
                         <div class="card-body d-flex flex-column">
@@ -830,39 +874,42 @@ try {
                             <p class="card-text">${escapeHtml(project.deskripsi || '').substring(0, 80)}...</p>
 
                             <div class="mahasiswa-info" onclick="window.location.href='view_profile.php?id=${project.id_mahasiswa}'">
-                                ${project.mahasiswa_foto 
-                                    ? `<img src="../uploads/${project.mahasiswa_foto}?t=${Date.now()}" class="mahasiswa-avatar" alt="Avatar" onerror="this.outerHTML='<div class=\\'mahasiswa-avatar\\'>${getInitials(project.nama_lengkap)}</div>';">`
-                                    : `<div class="mahasiswa-avatar">${getInitials(project.nama_lengkap)}</div>`
-                                }
+                                ${project.mahasiswa_foto
+                        ? `<img src="../uploads/${project.mahasiswa_foto}?t=${Date.now()}" class="mahasiswa-avatar" alt="Avatar" onerror="this.outerHTML='<div class=\\'mahasiswa-avatar\\'>${getInitials(project.nama_lengkap)}</div>';">`
+                        : `<div class="mahasiswa-avatar">${getInitials(project.nama_lengkap)}</div>`
+                    }
                                 <div class="flex-grow-1">
                                     <p class="mahasiswa-name">${escapeHtml(project.nama_lengkap)}</p>
                                     <p class="mahasiswa-details">${escapeHtml(project.nim || '')} • ${escapeHtml(project.jurusan || '')}</p>
                                 </div>
                             </div>
 
-                            ${project.link_demo 
-                                ? `<a href="${escapeHtml(project.link_demo)}" target="_blank" class="btn btn-sm btn-danger mt-2">
+                            ${project.link_demo
+                        ? `<a href="${escapeHtml(project.link_demo)}" target="_blank" class="btn btn-sm btn-danger mt-2">
                                        <i class="bi bi-youtube"></i> Lihat Video
                                    </a>`
-                                : ''
-                            }
+                        : ''
+                    }
                         </div>
                     </div>
                 `;
-                
+
                 container.appendChild(projectCard);
             });
         }
 
+        // Helper: Escape HTML untuk keamanan XSS
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
+        // Helper: Ambil Inisial Nama
         function getInitials(name) {
             return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
     </script>
 </body>
+
 </html>
