@@ -20,54 +20,48 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
-$id_project = $_GET['id'] ?? null;
+ $id_project = $_GET['id'] ?? null;
 
 if (!$id_project) {
     header("Location: home_mhs.php");
     exit();
 }
 
-$stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
-$stmt->execute([$id_project]);
-$project = $stmt->fetch(PDO::FETCH_ASSOC);
+ $stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
+ $stmt->execute([$id_project]);
+ $project = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$project) {
     header("Location: home_mhs.php");
     exit();
 }
 
-$stmt_mahasiswa = $pdo->prepare("SELECT m.id, m.jurusan FROM users u JOIN mahasiswa m ON u.id_mahasiswa = m.id WHERE u.id = ?");
-$stmt_mahasiswa->execute([$_SESSION['user_id']]);
-$mahasiswa_data = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
+ $stmt_mahasiswa = $pdo->prepare("SELECT m.id, m.jurusan FROM users u JOIN mahasiswa m ON u.id_mahasiswa = m.id WHERE u.id = ?");
+ $stmt_mahasiswa->execute([$_SESSION['user_id']]);
+ $mahasiswa_data = $stmt_mahasiswa->fetch(PDO::FETCH_ASSOC);
 
 if (!$mahasiswa_data) {
     header("Location: home_mhs.php");
     exit();
 }
 
-$id_mahasiswa = $mahasiswa_data['id'];
-$jurusan_mahasiswa = $mahasiswa_data['jurusan'];
+ $id_mahasiswa = $mahasiswa_data['id'];
+ $jurusan_mahasiswa = $mahasiswa_data['jurusan'];
 
 if ($project['id_mahasiswa'] != $id_mahasiswa) {
     header("Location: home_mhs.php");
     exit();
 }
 
-// Cek apakah proyek sudah dinilai
-$stmt_penilaian = $pdo->prepare("SELECT id FROM penilaian WHERE id_project = ?");
-$stmt_penilaian->execute([$id_project]);
-$penilaian = $stmt_penilaian->fetch(PDO::FETCH_ASSOC);
-
-if ($penilaian) {
-    // Jika sudah dinilai, redirect ke home dengan pesan
-    header("Location: home_mhs.php?error=sudah_dinilai");
-    exit();
-}
-
 // Ambil kategori sesuai jurusan mahasiswa
-$stmt_kategori = $pdo->prepare("SELECT id, nama_kategori FROM kategori_proyek WHERE jurusan = ? ORDER BY nama_kategori");
-$stmt_kategori->execute([$jurusan_mahasiswa]);
-$kategori_list = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
+ $stmt_kategori = $pdo->prepare("SELECT id, nama_kategori FROM kategori_proyek WHERE jurusan = ? ORDER BY nama_kategori");
+ $stmt_kategori->execute([$jurusan_mahasiswa]);
+ $kategori_list = $stmt_kategori->fetchAll(PDO::FETCH_ASSOC);
+
+// Cek apakah proyek sudah dinilai (hanya untuk menampilkan informasi, bukan untuk membatasi edit)
+ $stmt_penilaian = $pdo->prepare("SELECT * FROM penilaian WHERE id_project = ?");
+ $stmt_penilaian->execute([$id_project]);
+ $penilaian = $stmt_penilaian->fetch(PDO::FETCH_ASSOC);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $judul = $_POST['judul'];
@@ -216,6 +210,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
         }
 
+        .grade-info {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 5px;
+        }
+
         .footer-custom {
             background-color: #00003C;
             color: whitesmoke;
@@ -344,6 +346,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <strong>Info Jurusan:</strong> <?= htmlspecialchars($jurusan_mahasiswa) ?><br>
                 <small class="text-muted">Kategori proyek yang tersedia disesuaikan dengan jurusan Anda</small>
             </div>
+
+            <?php if ($penilaian): ?>
+                <div class="grade-info">
+                    <h5 class="text-success"><i class="bi bi-check-circle me-2"></i>Informasi Penilaian</h5>
+                    <div class="mt-2">
+                        <strong>Nilai:</strong> <?= htmlspecialchars($penilaian['nilai']) ?><br>
+                        <strong>Komentar Dosen:</strong> <?= nl2br(htmlspecialchars($penilaian['komentar'])) ?><br>
+                        <small class="text-muted"><i class="bi bi-calendar me-1"></i><?= date('d M Y H:i', strtotime($penilaian['tanggal_dinilai'])) ?></small>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-info"><i class="bi bi-info-circle me-1"></i>Anda masih dapat mengedit proyek ini, tetapi tidak dapat menghapusnya.</small>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <form action="edit_project.php?id=<?= $project['id'] ?>" method="post" enctype="multipart/form-data">
                 <div class="mb-3">

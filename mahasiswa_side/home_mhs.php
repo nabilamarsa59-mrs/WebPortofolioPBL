@@ -566,16 +566,6 @@ try {
     </section>
 
     <!-- Alert Messages -->
-    <?php if (isset($_GET['error']) && $_GET['error'] === 'sudah_dinilai'): ?>
-        <div class="container mt-3">
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                <strong>Pemberitahuan:</strong> Proyek ini sudah dinilai oleh dosen dan tidak dapat diedit lagi.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-    <?php endif; ?>
-
     <?php if (isset($_GET['error']) && $_GET['error'] === 'sudah_dinilai_hapus'): ?>
         <div class="container mt-3">
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -643,7 +633,7 @@ try {
                                             <div class="alert alert-success p-2 mt-2 mb-2">
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                                     <strong class="text-success"><i class="bi bi-check-circle me-1"></i>Sudah Dinilai</strong>
-                                                    <span class="badge bg-success">Nilai: <?= htmlspecialchars($project['nilai']) ?>/100</span>
+                                                    <span class="badge bg-success">Nilai: <?= htmlspecialchars($project['nilai']) ?></span>
                                                 </div>
                                                 <?php if (!empty($project['komentar'])): ?>
                                                     <div class="mt-2 border-top pt-2">
@@ -656,11 +646,11 @@ try {
                                                 </small>
                                             </div>
 
-                                            <!-- Tombol Edit dan Hapus dinonaktifkan jika sudah dinilai -->
+                                            <!-- Tombol Edit tetap aktif, Hapus dinonaktifkan jika sudah dinilai -->
                                             <div class="mt-auto d-flex flex-column flex-sm-row justify-content-between gap-2">
-                                                <button class="btn btn-sm btn-outline-primary" disabled title="Tidak dapat diedit karena sudah dinilai">
+                                                <a href="edit_project.php?id=<?= $project['id']; ?>" class="btn btn-sm btn-outline-primary">
                                                     <i class="bi bi-pencil"></i> Edit
-                                                </button>
+                                                </a>
                                                 <button class="btn btn-sm btn-outline-danger" disabled title="Tidak dapat dihapus karena sudah dinilai">
                                                     <i class="bi bi-trash"></i> Hapus
                                                 </button>
