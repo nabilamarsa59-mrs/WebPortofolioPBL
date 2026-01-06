@@ -2,6 +2,7 @@
 session_start();
 require_once '../koneksi.php';
 
+// validasi input
 if (!isset($_GET['id'])) {
     echo json_encode(['success' => false, 'message' => 'ID proyek tidak ditemukan']);
     exit();
@@ -9,6 +10,7 @@ if (!isset($_GET['id'])) {
 
 $project_id = $_GET['id'];
 
+// query detail proyek
 $sql = "SELECT p.*, m.nama_lengkap, m.nim, m.jurusan 
         FROM projects p 
         JOIN mahasiswa m ON p.id_mahasiswa = m.id 

@@ -1,28 +1,45 @@
 <?php
 session_start();
+
 require_once '../koneksi.php';
 
+// Menentukan response berupa JSON
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
-    echo json_encode(['success' => false, 'message' => 'Anda belum login']);
+if (!isset($_SESSION['status']) || 
+    $_SESSION['status'] != "login" || 
+    $_SESSION['level'] != "dosen") {
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Anda belum login'
+    ]);
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_profil'])) {
+
     $user_id = $_SESSION['user_id'];
     $file = $_FILES['foto_profil'];
-    
+
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
     $file_type = mime_content_type($file['tmp_name']);
     
+    // Validasi tipe file
     if (!in_array($file_type, $allowed_types)) {
-        echo json_encode(['success' => false, 'message' => 'Hanya file gambar yang diizinkan']);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Hanya file gambar yang diizinkan'
+        ]);
         exit();
     }
     
+    // Validasi ukuran file (maksimal 5MB)
     if ($file['size'] > 5 * 1024 * 1024) {
-        echo json_encode(['success' => false, 'message' => 'Ukuran file maksimal 5MB']);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ukuran file maksimal 5MB'
+        ]);
         exit();
     }
     
@@ -35,14 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_profil'])) {
         $stmt_dosen->execute([$user_id]);
         $dosen = $stmt_dosen->fetch(PDO::FETCH_ASSOC);
         
+        // Validasi data dosen
         if (!$dosen) {
-            echo json_encode(['success' => false, 'message' => 'Data dosen tidak ditemukan']);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data dosen tidak ditemukan'
+            ]);
             exit();
         }
         
+        // Membuat nama file unik berdasarkan NIDN
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'profil_dosen_' . $dosen['nidn'] . '_' . uniqid() . '.' . $ext;
         
+        // Menentukan folder upload
         $upload_dir = '../uploads/';
         $upload_path = $upload_dir . $filename;
         
@@ -51,12 +74,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_profil'])) {
         }
         
         if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+
+            // Menghapus foto lama jika bukan default avatar
             if (!empty($dosen['foto_profil']) && 
                 $dosen['foto_profil'] !== 'default-avatar.jpg' && 
                 file_exists($upload_dir . $dosen['foto_profil'])) {
+
                 unlink($upload_dir . $dosen['foto_profil']);
             }
             
+            // Update nama file foto profil di database
             $sql_update = "UPDATE dosen SET foto_profil = ? WHERE id = ?";
             $stmt_update = $pdo->prepare($sql_update);
             $stmt_update->execute([$filename, $dosen['id']]);
@@ -66,13 +93,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_profil'])) {
                 'message' => 'Foto profil berhasil diperbarui',
                 'path' => $upload_path
             ]);
+
         } else {
-            echo json_encode(['success' => false, 'message' => 'Gagal mengupload file. Periksa permission folder uploads/']);
+            // Gagal upload file
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal mengupload file. Periksa permission folder uploads/'
+            ]);
         }
+
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Error database: ' . $e->getMessage()]);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error database: ' . $e->getMessage()
+        ]);
     }
+
 } else {
-    echo json_encode(['success' => false, 'message' => 'Tidak ada file yang diupload']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Tidak ada file yang diupload'
+    ]);
 }
 ?>

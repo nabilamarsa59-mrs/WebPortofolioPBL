@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+// Cek apakah user sudah login sebagai dosen, jika tidak redirect ke login
 if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['level'] != "dosen") {
     header("location:../login.php");
     exit();
@@ -174,29 +176,29 @@ $projects = $stmt->fetchAll();
         }
 
         .filter-section {
-    background-color: rgba(0, 30, 100, 0.05);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
+            background-color: rgba(0, 30, 100, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
 
-.filter-section label.form-label {
-    color: #00003c;
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-}
+        .filter-section label.form-label {
+            color: #00003c;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
 
-.filter-section .form-select {
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
+        .filter-section .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
 
-.filter-section .form-select:focus {
-    border-color: #00003c;
-    box-shadow: 0 0 0 0.2rem rgba(0, 0, 60, 0.15);
-}
+        .filter-section .form-select:focus {
+            border-color: #00003c;
+            box-shadow: 0 0 0 0.2rem rgba(0, 0, 60, 0.15);
+        }
 
         .project-card {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -314,51 +316,51 @@ $projects = $stmt->fetchAll();
         }
 
         @media (max-width: 767.98px) {
-    .filter-section {
-        padding: 15px;
-    }
-    
-    .filter-section label.form-label {
-        font-size: 0.9rem;
-    }
-    
-    .filter-section .form-select-sm {
-        font-size: 0.875rem;
-        padding: 0.5rem 0.75rem;
-        height: auto;
-    }
-    
-    .filter-section .btn-sm {
-        font-size: 0.875rem;
-        padding: 0.5rem 1rem;
-        height: auto;
-    }
-    
-    .filter-section .row.g-2 {
-        row-gap: 0.75rem !important;
-    }
-}
+            .filter-section {
+                padding: 15px;
+            }
 
-@media (max-width: 575.98px) {
-    .filter-section {
-        padding: 12px;
-    }
-    
-    .filter-section label.form-label {
-        font-size: 0.85rem;
-        margin-bottom: 0.4rem;
-    }
-    
-    .filter-section .form-select-sm {
-        font-size: 0.813rem;
-        padding: 0.45rem 0.65rem;
-    }
-    
-    .filter-section .btn-sm {
-        font-size: 0.813rem;
-        padding: 0.45rem 0.85rem;
-    }
-}
+            .filter-section label.form-label {
+                font-size: 0.9rem;
+            }
+
+            .filter-section .form-select-sm {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+                height: auto;
+            }
+
+            .filter-section .btn-sm {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+                height: auto;
+            }
+
+            .filter-section .row.g-2 {
+                row-gap: 0.75rem !important;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .filter-section {
+                padding: 12px;
+            }
+
+            .filter-section label.form-label {
+                font-size: 0.85rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .filter-section .form-select-sm {
+                font-size: 0.813rem;
+                padding: 0.45rem 0.65rem;
+            }
+
+            .filter-section .btn-sm {
+                font-size: 0.813rem;
+                padding: 0.45rem 0.85rem;
+            }
+        }
     </style>
 </head>
 
@@ -366,12 +368,12 @@ $projects = $stmt->fetchAll();
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
-
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">WorkPiece</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -395,7 +397,7 @@ $projects = $stmt->fetchAll();
             </div>
         </div>
     </nav>
-    
+
     <div class="container mt-4">
         <h2 class="mt-4 mb-3 text-navy">Dashboard Penilaian Proyek Mahasiswa</h2>
 
@@ -404,7 +406,7 @@ $projects = $stmt->fetchAll();
                 <div class="col-12">
                     <label class="form-label mb-2 fw-semibold">Filter:</label>
                 </div>
-                
+
                 <!-- Status Filter -->
                 <div class="col-12 col-md-6 col-lg-3">
                     <select class="form-select form-select-sm" id="statusFilter">
@@ -413,7 +415,7 @@ $projects = $stmt->fetchAll();
                         <option value="sudah-dinilai">Sudah Dinilai</option>
                     </select>
                 </div>
-                
+
                 <!-- Jurusan Filter -->
                 <div class="col-12 col-md-6 col-lg-3">
                     <select class="form-select form-select-sm" id="jurusanFilter">
@@ -424,7 +426,7 @@ $projects = $stmt->fetchAll();
                         <option value="Manajemen dan Bisnis">Manajemen dan Bisnis</option>
                     </select>
                 </div>
-                
+
                 <!-- Kategori Filter -->
                 <div class="col-12 col-md-8 col-lg-4">
                     <select class="form-select form-select-sm" id="kategoriFilter">
@@ -443,14 +445,14 @@ $projects = $stmt->fetchAll();
                         <option value="Logistik & Supply Chain">Logistik & Supply Chain</option>
                     </select>
                 </div>
-                
+
                 <!-- Reset Button -->
                 <div class="col-12 col-md-4 col-lg-2">
                     <button class="btn btn-sm btn-primary w-100" id="resetFilters">
                         <i class="bi bi-arrow-clockwise"></i> Reset
                     </button>
                 </div>
-                
+
                 <!-- Project Count -->
                 <div class="col-12 mt-2">
                     <span class="text-muted small">
@@ -485,7 +487,8 @@ $projects = $stmt->fetchAll();
                                     <i class="bi bi-building me-1"></i><?= htmlspecialchars($project['jurusan']) ?>
                                 </p>
                                 <p class="card-text small text-secondary mb-2">
-                                    <i class="bi bi-tag me-1"></i><?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>
+                                    <i
+                                        class="bi bi-tag me-1"></i><?= htmlspecialchars($project['nama_kategori'] ?? 'Lainnya') ?>
                                 </p>
                                 <p class="card-text"><?= substr(htmlspecialchars($project['deskripsi']), 0, 80) . '...'; ?></p>
                                 <div class="mt-auto">
@@ -616,7 +619,7 @@ $projects = $stmt->fetchAll();
     </div>
 
     <div class="toast-container position-fixed top-0 end-0 p-3"></div>
-    
+
     <!-- Footer -->
     <footer class="footer-custom">
         <div class="container">
