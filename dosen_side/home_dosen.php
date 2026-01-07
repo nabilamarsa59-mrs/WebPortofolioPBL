@@ -8,7 +8,7 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] != "login" || $_SESSION['
 }
 
 require_once '../koneksi.php';
-
+$id_dosen = $_SESSION['id_dosen'];
 $sql = "SELECT
            p.id,
            p.judul,

@@ -17,10 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Mengambil data dari form (POST)
     $id_project = $_POST['id_project'] ?? null;
-    $nilai      = $_POST['nilai'] ?? null;
-    $komentar   = $_POST['komentar'] ?? '';
-    $id_dosen   = $_SESSION['id_dosen']; 
-    
+    $nilai = $_POST['nilai'] ?? null;
+    $komentar = $_POST['komentar'] ?? '';
+    $id_dosen = $_SESSION['id_dosen'];
+
     // Validasi data wajib
     if (!$id_project || !$nilai) {
         echo json_encode([
@@ -29,14 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit();
     }
-    
+
     try {
-        // Mengecek apakah project sudah pernah dinilai
-        $sql_check = "SELECT id FROM penilaian WHERE id_project = ?";
+        // Mengecek apakah project sudah pernah dinilai OLEH DOSEN INI
+        $sql_check = "SELECT id, nilai, komentar FROM penilaian 
+              WHERE id_project = ? AND id_dosen = ?";
         $stmt_check = $pdo->prepare($sql_check);
-        $stmt_check->execute([$id_project]);
+        $stmt_check->execute([$id_project, $id_dosen]);  // tambah $id_dosen di execute
         $existing = $stmt_check->fetch();
-        
+
         // Jika sudah ada penilaian
         if ($existing) {
             $sql = "UPDATE penilaian 
@@ -54,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$id_project, $id_dosen, $nilai, $komentar]);
             $message = 'Penilaian berhasil disimpan';
         }
-        
+
         // Response berhasil
         echo json_encode([
             'success' => true,
