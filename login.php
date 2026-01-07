@@ -1,22 +1,90 @@
+<?php
+session_start();
+
+/* Memanggil file koneksi database*/
+require_once 'koneksi.php';
+/*Variabel untuk menyimpan pesan error login*/
+$error_message = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $user_type = $_POST['user_type'];
+    $identifier = $_POST['identifier'];
+    $password = $_POST['password'];
+
+    /*Validasi jika ada field yang belum diisi*/ 
+    if (empty($user_type) || empty($identifier) || empty($password)) {
+        $error_message = "Semua field harus diisi.";
+    } else {
+        try {
+            $user = null;
+
+            if ($user_type == 'mahasiswa') {
+                $sql = "SELECT u.id as user_id, u.password, u.role, m.id as id_mahasiswa, m.nim
+                        FROM users u
+                        JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                        WHERE m.nim = ? AND u.role = 'mahasiswa'";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$identifier]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            } elseif ($user_type == 'dosen') {
+                $sql = "SELECT u.id as user_id, u.password, u.role, u.id_dosen, d.id as dosen_id
+                        FROM users u
+                        LEFT JOIN dosen d ON u.id_dosen = d.id
+                        WHERE u.username = ? AND u.role = 'dosen'";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$identifier]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+
+            if ($user && $password === $user['password']) {
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['status'] = "login";
+                $_SESSION['level'] = $user['role'];
+
+                if ($user['role'] == 'dosen') {
+                    $_SESSION['id_dosen'] = $user['id_dosen'] ?? $user['dosen_id'];
+                } else {
+                    $_SESSION['id_mahasiswa'] = $user['id_mahasiswa'];
+                    $_SESSION['nim'] = $user['nim'];
+                }
+
+                if ($user['role'] == 'dosen') {
+                    header("Location: dosen_side/home_dosen.php");
+                } else {
+                    header("Location: mahasiswa_side/home_mhs.php");
+                }
+                exit(); 
+
+            } else {
+                $error_message = "NIM/Username atau Kata Sandi salah.";
+            }
+
+        // Menangani error jika terjadi kesalahan database
+        } catch (PDOException $e) {
+            $error_message = "Terjadi kesalahan. Silakan coba lagi.";
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
-<!-- Halaman login WorkPiece -->
 
 <head>
-    <!-- Pengaturan karakter dan responsivitas -->
+    <!-- ===== Form Login WorkPiece ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - WorkPiece</title>
 
-    <!-- Import font, Bootstrap, dan icon -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <!-- Styling halaman login -->
     <style>
-        /* Variabel warna global */
         :root {
             --primary-color: #003366;
             --secondary-color: #001F3F;
@@ -27,7 +95,7 @@
             --font-family: 'Poppins', sans-serif;
         }
 
-        /* Styling body dengan background dan overlay */
+        /* ===== Layout Halaman Login ===== */
         body {
             font-family: var(--font-family);
             margin: 0;
@@ -52,7 +120,6 @@
             z-index: 1;
         }
 
-        /* Wrapper utama login */
         .login-wrapper {
             position: relative;
             z-index: 2;
@@ -61,7 +128,7 @@
             padding: 20px;
         }
 
-        /* Card login */
+        /* ===== Card Login ===== */
         .login-container {
             background-color: var(--light-color);
             padding: 40px;
@@ -70,7 +137,6 @@
             text-align: center;
         }
 
-        /* Logo dan judul */
         .logo {
             font-size: 2.2rem;
             font-weight: 700;
@@ -83,32 +149,127 @@
             font-weight: 600;
             margin-bottom: 30px;
         }
+
+        .user-type-selector {
+            display: flex;
+            background-color: #f0f0f0;
+            border-radius: 50px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .user-type-option {
+            flex: 1;
+            padding: 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #777;
+        }
+
+        .user-type-option.active {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            box-shadow: 0 4px 10px rgba(0, 51, 102, 0.3);
+        }
+
+        .user-type-option i {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+            outline: none;
+        }
+
+        .alert-danger-custom {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 30px 25px;
+            }
+
+            .logo {
+                font-size: 1.9rem;
+            }
+
+            .user-type-option i {
+                font-size: 1rem;
+            }
+
+            .user-type-option span {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Container login -->
     <div class="login-wrapper">
         <div class="login-container">
-
-            <!-- Logo -->
             <div class="logo">WorkPiece</div>
             <h2 class="login-title">Selamat Datang</h2>
 
-            <!-- Menampilkan pesan error jika ada -->
             <?php if (!empty($error_message)): ?>
                 <div class="alert-danger-custom">
                     <i class="bi bi-exclamation-triangle-fill"></i> <?php echo htmlspecialchars($error_message); ?>
                 </div>
             <?php endif; ?>
 
-            <!-- Form login -->
             <form action="login.php" method="post" id="loginForm">
-                <!-- Input hidden untuk menyimpan tipe user -->
                 <input type="hidden" name="user_type" id="user_type_input" value="mahasiswa">
 
-                <!-- Pilihan tipe user -->
                 <div class="user-type-selector">
                     <div class="user-type-option active" data-type="mahasiswa">
                         <i class="bi bi-mortarboard-fill"></i>
@@ -120,30 +281,25 @@
                     </div>
                 </div>
 
-                <!-- Input NIM / Username -->
                 <div class="form-group">
                     <label for="identifier" id="identifierLabel">NIM</label>
                     <input type="text" class="form-control" id="identifier" name="identifier"
                         placeholder="Masukkan NIM Anda" required>
                 </div>
 
-                <!-- Input password -->
                 <div class="form-group">
                     <label for="password">Kata Sandi</label>
                     <input type="password" class="form-control" id="password" name="password"
                         placeholder="Masukkan kata sandi" required>
                 </div>
 
-                <!-- Tombol login -->
                 <button type="submit" class="btn-login">Masuk</button>
             </form>
         </div>
     </div>
 
-    <!-- Script Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script untuk mengganti tipe user -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const userTypeOptions = document.querySelectorAll('.user-type-option');
@@ -151,7 +307,7 @@
             const identifierLabel = document.getElementById('identifierLabel');
             const identifierInput = document.getElementById('identifier');
 
-            // Fungsi untuk mengatur tampilan form berdasarkan tipe user
+            // Mengatur tampilan form berdasarkan tipe user (mahasiswa / dosen)
             function updateFormState(userType) {
                 userTypeOptions.forEach(opt => opt.classList.remove('active'));
                 document.querySelector(`[data-type="${userType}"]`).classList.add('active');
@@ -167,7 +323,7 @@
                 }
             }
 
-            // Event klik untuk pilihan user
+            // Event ketika user memilih tipe login
             userTypeOptions.forEach(option => {
                 option.addEventListener('click', function () {
                     const selectedType = this.getAttribute('data-type');
@@ -175,7 +331,6 @@
                 });
             });
 
-            // Default user adalah mahasiswa
             updateFormState('mahasiswa');
         });
     </script>

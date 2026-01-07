@@ -2,16 +2,18 @@
 session_start();
 require_once '../koneksi.php';
 
+// Cek apakah user login dan rolenya mahasiswa
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     header("Location: ../login.php");
     exit();
 }
 
+// Ambil data mahasiswa saat ini
 try {
     $sql_mahasiswa = "SELECT m.id, m.nama_lengkap, m.email, m.nim, m.jurusan, m.foto_profil
-                          FROM users u
-                          JOIN mahasiswa m ON u.id_mahasiswa = m.id
-                          WHERE u.id = ?";
+                      FROM users u
+                      JOIN mahasiswa m ON u.id_mahasiswa = m.id
+                      WHERE u.id = ?";
     $stmt = $pdo->prepare($sql_mahasiswa);
     $stmt->execute([$_SESSION['user_id']]);
     $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -23,17 +25,21 @@ try {
     die("Error saat mengambil data: " . $e->getMessage());
 }
 
+// Variabel untuk notifikasi
 $update_message = '';
 $update_error = '';
 
+// Logika Handle Update Profil (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = $_POST['nama'];
     $email = $_POST['email'];
     $nim = $_POST['nim'];
     $jurusan = $_POST['jurusan'];
 
+    // Default pakai foto lama jika tidak upload baru
     $nama_foto = $mahasiswa['foto_profil'];
 
+    // Handle Upload Foto Baru
     if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === UPLOAD_ERR_OK) {
         $file_tmp = $_FILES['foto_profil']['tmp_name'];
         $file_name = $_FILES['foto_profil']['name'];
@@ -42,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $upload_path = '../uploads/' . $new_file_name;
 
         if (move_uploaded_file($file_tmp, $upload_path)) {
+            // Hapus foto lama jika ada (kecuali foto default)
             if (!empty($mahasiswa['foto_profil']) && $mahasiswa['foto_profil'] !== 'default-avatar.jpg' && file_exists('../uploads/' . $mahasiswa['foto_profil'])) {
                 unlink('../uploads/' . $mahasiswa['foto_profil']);
             }
@@ -51,13 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Update ke Database jika tidak ada error upload
     if (empty($update_error)) {
         try {
-            $sql_update = "UPDATE mahasiswa SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ? WHERE id = ?";
+            $sql_update = "UPDATE mahasiswa
+                           SET nama_lengkap = ?, email = ?, nim = ?, jurusan = ?, foto_profil = ?
+                           WHERE id = ?";
             $stmt_update = $pdo->prepare($sql_update);
             $stmt_update->execute([$nama, $email, $nim, $jurusan, $nama_foto, $mahasiswa['id']]);
+
             $update_message = "Profil berhasil diperbarui!";
 
+            // Refresh data mahasiswa agar tampilan diupdate
             $stmt->execute([$_SESSION['user_id']]);
             $mahasiswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -67,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -74,11 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Mahasiswa - WorkPiece</title>
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
     <style>
+        /* --- Global Styles --- */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: whitesmoke;
@@ -89,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 0;
         }
 
+        /* --- Navbar --- */
         .navbar {
             background: #00003c !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -143,6 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-right: 8px;
         }
 
+        /* --- Components --- */
         .profile-card {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-radius: 15px;
@@ -187,14 +205,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #0056b3;
         }
 
-        .footer-custom {
-            background-color: #00003C;
-            color: whitesmoke;
-            padding: 20px 0;
-            margin-top: auto;
-            width: 100%;
-        }
-
         .avatar-placeholder {
             width: 100%;
             height: 100%;
@@ -210,7 +220,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Responsive Styles */
+        /* --- Footer --- */
+        .footer-custom {
+            background-color: #00003C;
+            color: whitesmoke;
+            padding: 20px 0;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        /* --- Responsive --- */
         @media (max-width: 991.98px) {
             .navbar-nav {
                 margin-top: 1rem;
@@ -284,7 +303,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 padding: 1rem;
             }
 
-            h4, h5 {
+            h4,
+            h5 {
                 font-size: 1.1rem;
             }
 
@@ -309,7 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <a class="navbar-brand" href="home_mhs.php">WorkPiece</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -317,20 +337,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                            <!-- Profil Image -->
                             <?php if (!empty($mahasiswa['foto_profil'])): ?>
                                 <img src="../uploads/<?= htmlspecialchars($mahasiswa['foto_profil']) ?>?t=<?= time() ?>"
                                     class="profile-img" alt="Profile">
                             <?php else: ?>
                                 <i class="bi bi-person-circle fs-4 me-1"></i>
                             <?php endif; ?>
+
                             <span class="d-none d-md-inline"><?= htmlspecialchars($mahasiswa['nama_lengkap']) ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
-                            <li><a class="dropdown-item" href="upload_project.php"><i class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
-                            <li><a class="dropdown-item" href="home_mhs.php"><i class="bi bi-arrow-left me-1"></i>Beranda</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="profil_page.php"><i class="bi bi-person me-2"></i>Profil
+                                    Saya</a></li>
+                            <li><a class="dropdown-item" href="upload_project.php"><i
+                                        class="bi bi-plus-circle me-2"></i>Tambah Proyek Baru</a></li>
+                            <li><a class="dropdown-item" href="home_mhs.php"><i
+                                        class="bi bi-arrow-left me-1"></i>Beranda</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="../logout.php"><i
+                                        class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -340,6 +369,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Main Container -->
     <main class="container my-5">
+
+        <!-- Notifikasi Sukses -->
         <?php if ($update_message): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle-fill"></i> <?= $update_message ?>
@@ -347,6 +378,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
+        <!-- Notifikasi Error -->
         <?php if ($update_error): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle-fill"></i> <?= $update_error ?>
@@ -355,21 +387,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="row g-4 align-items-md-center">
+            <!-- Kolom Kiri: Foto Profil -->
             <section class="col-12 col-md-4 text-center">
                 <div class="profile-card card shadow-sm p-4">
                     <h5 class="mb-4">Foto Profil</h5>
                     <div class="profile-img-container">
                         <?php
+                        // Logika Menampilkan Foto atau Inisial
                         $foto_path = '';
                         $show_placeholder = true;
-                        
+
                         if (!empty($mahasiswa['foto_profil'])) {
                             $foto_path = '../uploads/' . $mahasiswa['foto_profil'];
                             if (file_exists($foto_path)) {
                                 $show_placeholder = false;
                             }
                         }
-                        
+
                         if ($show_placeholder) {
                             $initials = strtoupper(substr($mahasiswa['nama_lengkap'], 0, 2));
                             echo '<div class="avatar-placeholder" id="previewFoto">' . $initials . '</div>';
@@ -377,7 +411,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo '<img id="previewFoto" src="' . htmlspecialchars($foto_path) . '?t=' . time() . '" alt="Foto Profil">';
                         }
                         ?>
-                        <label for="uploadFoto" class="change-photo-btn">
+
+                        <!-- Tombol Upload Tersembunyi (Ditrigger Label) -->
+                        <label for="uploadFoto" class="change-photo-btn" title="Ganti Foto">
                             <i class="bi bi-camera-fill"></i>
                         </label>
                     </div>
@@ -385,6 +421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </section>
 
+            <!-- Kolom Kanan: Form Edit -->
             <section class="col-12 col-md-8">
                 <div class="profile-card card shadow-sm p-4">
                     <h4 class="text-primary border-bottom pb-3 mb-4">Informasi Profil</h4>
@@ -415,6 +452,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
                         </div>
+
+                        <!-- Input File Tersembunyi -->
                         <input type="file" id="uploadFoto" name="foto_profil" accept="image/*" hidden>
 
                         <div class="d-grid mt-4">
@@ -427,7 +466,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </section>
         </div>
     </main>
-    
+
     <!-- Footer -->
     <footer class="footer-custom">
         <div class="container">
@@ -437,13 +476,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Logic Preview Foto saat dipilih
         document.getElementById('uploadFoto').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const previewContainer = document.querySelector('.profile-img-container');
-                    previewContainer.querySelector('#previewFoto').outerHTML = 
+                    // Ganti elemen preview (bisa img atau div placeholder) menjadi img baru
+                    previewContainer.querySelector('#previewFoto').outerHTML =
                         `<img id="previewFoto" src="${e.target.result}" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 5px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">`;
                 }
                 reader.readAsDataURL(file);
